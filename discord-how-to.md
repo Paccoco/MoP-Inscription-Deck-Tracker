@@ -20,12 +20,14 @@ Welcome to the Mist of Pandaria Card Tracker! This guide will help new users get
 - **View Deck Progress:**
   - See which decks are close to completion and who owns which cards.
   - Hover over trinket icons for Wowhead tooltips.
+  - **Deck Completion Progress Bar:** Visual progress bar for each deck showing collected/total cards and percentage.
 
 - **Completed Decks:**
   - View all completed decks, their sale status, payout splits, and estimated values.
 
 - **Notifications:**
   - Get in-app notifications for approvals, deck completions, payouts, and requests.
+  - **Contributor Deck Completion Alerts:** Receive alerts when a deck you contributed to is completed.
 
 - **Deck Requests:**
   - Request specific decks you need. Track fulfillment status and get notified when your request is completed.
@@ -40,12 +42,12 @@ Welcome to the Mist of Pandaria Card Tracker! This guide will help new users get
 - **Profile:**
   - View your cards, completed decks, payouts, and recent activity.
 
-
 - **Theme Customization:**
   - Choose your preferred MoP-themed background and color scheme.
 
 - **Analytics:**
   - View charts for deck completion rates, contributor stats, and payout trends.
+  - **Advanced Analytics Charts:** Contributor leaderboard, deck fulfillment speed, card acquisition trends.
 
 - **Email Notifications:**
   - Opt-in for email alerts when a requested deck is completed or sold.
@@ -58,13 +60,14 @@ Welcome to the Mist of Pandaria Card Tracker! This guide will help new users get
   - Post screenshots or CSV exports in your guild's Discord channel to keep everyone updated.
   - Use Discord threads for deck requests or card trades.
 
-- **Coordinate Deck Completion:**
-  - Discuss which cards are needed and who can contribute.
-  - Use the app's Deck Request feature and tag relevant users in Discord.
+## Discord Integration Setup
+- Admins can configure the Discord webhook in the Admin Panel.
+- Automated notifications for deck completions, sales, requests, and admin approvals will be sent to your Discord channel.
 
-- **Celebrate Achievements:**
-  - Announce completed decks, payouts, and big sales in Discord.
-  - Use the app's analytics and activity log for highlights.
+## Gotify Integration
+- Admins can configure Gotify server and token in the Admin Panel for mobile push notifications.
+
+For more details, see the main README.md.
 
 ## Tips for New Users
 - Keep your card list up to date for accurate tracking.

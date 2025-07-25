@@ -32,8 +32,10 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Card/Deck History:** Timeline/history for each card and deck, including ownership changes and sales
 - **Onboarding Modal:** New users see a quick-start guide after registration
 - **Deck Value History:** View historical price trends for decks/trinkets
-- **Discord Integration:** Automated notifications for deck completions, sales, requests, and card additions (with missing card summary)
-- **Gotify Integration:** Admins receive push notifications via Gotify when a new user registers and needs approval. Gotify setup is available in the admin panel.
+- **Discord Integration:** Automated notifications for deck completions, sales, and requests
+- **Deck Completion Progress Bar:** Visual progress bar for each deck showing collected/total cards and percentage
+- **Contributor Deck Completion Alerts:** In-app notifications for contributors when a deck is completed
+- **Advanced Analytics Charts:** Contributor leaderboard, deck fulfillment speed, card acquisition trends
 
 ## Tech Stack
 - Node.js + Express.js (backend)
@@ -59,13 +61,23 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
    npm run build
    cd ..
    ```
-4. **Start the server:**
+4. **Start the backend server:**
    ```bash
-   node server-auth.js
+   nohup node server-auth.js > server.log 2>&1 &
    ```
-   Or use the provided `start-card-tracker.sh` script for auto-start on reboot.
 5. **Access the app:**
    Open your browser and go to `http://localhost:5000` (or your server's IP/domain).
+
+## Discord & Gotify Integration
+- Configure Discord webhook and Gotify server/token in the Admin Panel.
+- Automated notifications for deck completions, sales, requests, and admin approvals.
+
+## Advanced Analytics
+- View contributor leaderboard, deck fulfillment speed, and card acquisition trends in the Admin Panel.
+
+## Progress Bar & Alerts
+- See deck completion progress bars in Completed Decks and Admin Panel.
+- Contributors receive alerts when a deck they contributed to is completed.
 
 ## How To Use
 ### For All Users
@@ -104,7 +116,6 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Guild Bank:** Manage guild-owned cards and decks
 - **Analytics:** View deck completion rates, contributor stats, and payout history
 - **Discord Integration:** Configure Discord webhook for automated notifications
-- **Gotify Integration:** Set up Gotify for push notifications to admins
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards
