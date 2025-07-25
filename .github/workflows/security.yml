@@ -11,6 +11,8 @@ on:
 jobs:
   audit:
     runs-on: ubuntu-latest
+    env:
+      GITGUARDIAN_API_KEY: ${{ secrets.GITGUARDIAN_API_KEY }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
