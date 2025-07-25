@@ -386,7 +386,8 @@ function App() {
           fetchDeckRequests();
           alert('Deck request submitted!');
         } catch (err) {
-          alert('Error submitting request');
+          const msg = err.response?.data?.error || 'Error submitting request';
+          alert(msg);
         }
       }}>
         <select

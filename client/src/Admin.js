@@ -51,7 +51,10 @@ function Admin({ setShowPage }) {
     const token = localStorage.getItem('token');
     try {
       await axios.post('/api/admin/approve', { userId }, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
       setPending(pending.filter(u => u.id !== userId));
     } catch (err) {
