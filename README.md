@@ -1,28 +1,28 @@
 # Mist of Pandaria Card Tracker
 
-A self-hosted web app to help World of Warcraft Classic guilds track who has which Mist of Pandaria Inscription Cards and complete decks. Built for easy guild management and sharing.
+A self-hosted web app for World of Warcraft Classic guilds to track Inscription Cards, complete decks, and manage deck sales and payouts. Built for easy guild management, sharing, and transparency.
 
 ## Features
-- Track all MoP Inscription Cards and deck completion
+- Track all Mist of Pandaria Inscription Cards
 - Grid and summary views for cards and decks
 - Wowhead tooltips for trinkets in Deck Status
-- Mobile-friendly responsive design
+- Mobile-friendly, responsive design
 - Dark mode and MoP-themed visuals
 - Add/remove cards and owners
 - SQLite database for persistent storage
 - React frontend, Express backend
 - Easy deployment and auto-start script
-- **Admin panel:** Approve users, allocate completed decks (choose from completed/unallocated decks, fulfill or sell, set sale price and recipient, see payout split)
-- **Completed Decks page:** View all completed decks, their disposition (fulfilled/sold), sale price, and payout split
-- **Backend endpoint:** `/api/admin/completed-unallocated-decks` returns completed decks not yet allocated
-- **Improved navigation:** Quick access to Card Tracker, Admin, and Completed Decks pages
+- Admin panel for user approval and deck allocation
+- Completed Decks page: view disposition (fulfilled/sold), sale price, and payout split
+- Backend endpoint for unallocated completed decks
+- Improved navigation: Card Tracker, Admin, Completed Decks
 
 ## Tech Stack
 - Node.js + Express.js (backend)
 - React (frontend)
 - SQLite (database)
 
-## Setup & Usage
+## Setup & Installation
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/Paccoco/project-card-tracker.git
@@ -44,12 +44,32 @@ A self-hosted web app to help World of Warcraft Classic guilds track who has whi
    ```bash
    node server-auth.js
    ```
-   Or use the provided `start-card-tracker.sh` script for auto-start.
+   Or use the provided `start-card-tracker.sh` script for auto-start on reboot.
 
 5. **Access the app:**
    Open your browser and go to `http://localhost:5000` (or your server's IP/domain).
-   - Use the **Admin** page to approve users and allocate completed decks.
-   - Use the **Completed Decks** page to view all completed decks, what they were used for, sale price (if sold), and payout split among contributors.
+
+## How To Use
+### For All Users
+- **Register:** Create an account and wait for admin approval.
+- **Login:** Access your account once approved.
+- **Track Cards:** Add/remove cards you own on the Card Tracker page.
+- **View Deck Progress:** See grid/summary views and Wowhead trinket tooltips. Completed decks are highlighted.
+- **Completed Decks:** View all completed decks, their disposition, sale price, and payout split.
+
+### For Admins/Officers
+- **Approve Users:** Review and approve new registrations.
+- **Allocate Completed Decks:**
+  - Select from completed/unallocated decks
+  - Fulfill a deck request or sell a deck
+  - Set sale price and recipient
+  - View payout split for contributors
+
+## API Endpoints
+- `/api/cards` - Get/add/delete cards
+- `/api/completed-decks` - Get/add completed decks
+- `/api/admin/completed-unallocated-decks` - Get completed decks not yet allocated
+- `/api/admin/approve` - Approve users
 
 ## Contributing
 Pull requests and suggestions are welcome! Please open an issue or PR for improvements.
@@ -58,5 +78,4 @@ Pull requests and suggestions are welcome! Please open an issue or PR for improv
 MIT
 
 ---
-
 *Created by Paccoco for Mist of Pandaria Classic guilds.*
