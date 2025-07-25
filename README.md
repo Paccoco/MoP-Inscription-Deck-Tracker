@@ -2,7 +2,7 @@
 
 **Version: 0.2.2a**
 
-A self-hosted web app for World of Warcraft Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
+A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
 - All error and failure messages in the UI are now displayed in red text for better visibility.
