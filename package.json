@@ -17,7 +17,7 @@
     "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "node-fetch": "^2.7.0",
-    "path-to-regexp": "^6.2.1",
+    "path-to-regexp": "^8.2.0",
     "sqlite3": "^5.1.7"
   }
 }

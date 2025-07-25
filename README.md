@@ -1,29 +1,16 @@
 # Mist of Pandaria Card Tracker
 
-**Version: 0.5.0**
+**Version: 0.5.5**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
-- Global UI/UX cleanup: all major sections (dashboard, tables, forms, admin, profile, completed decks, activity log) now use card-style backgrounds for improved readability and visual consistency. Tables and forms have better spacing, alignment, and button placement. Section headers are visually distinct.
-- Notifications page UI improved: notifications now display on a solid background for better readability, and delete buttons are aligned for a cleaner look.
-- Added ability to delete individual notifications and mass delete all notifications from the Notifications page (in-app).
-- Codebase streamlined: redundant logic and UI patterns refactored into shared React components (`NavBar`, `CardTable`, `DeckTable`) and custom hooks (`useFetchCards`, `useFetchDecks`, `useFetchNotifications`).
-- Large components split into smaller, focused ones; domain logic moved to utility functions.
-- Backend notification delivery and activity logging consolidated into helper functions; endpoints merged where possible.
-- Conditional rendering and state management optimized and centralized.
-- All new/refactored code bug checked and validated.
-- README.md and tasks.md are now updated after every completed task for accuracy and transparency.
-- All error and failure messages in the UI are now displayed in red text for better visibility.
-- Removed all email notification options and code. Notifications are now handled via in-app, Discord, or Gotify only.
-- Per-user Gotify notification configuration: Each user can set their own Gotify server, token, and notification types in their profile.
-- Admins receive notifications for new user registrations needing approval.
-- Unified notification logic for deck completions, requests, payouts, approvals, and new user registrations.
-- Improved debug logging for notification delivery and authentication (frontend and backend).
-- Updated UI: Profile page, GotifyConfig, and notification settings reflect new notification system.
-- Updated backend endpoints for notification configuration and delivery.
-- Updated README to reflect all changes and removed references to email notifications.
-- Linux/systemd setup: App runs as a service and sends Gotify notification if it stops. Gotify credentials are stored in a .env file in the project folder for security.
+- Security: All high severity vulnerabilities in dependencies have been fixed (body-parser, cookie, path-to-regexp, send). Project dependencies are now secure and up to date.
+- Frontend rebuilt and backend restarted for full bug check and validation after dependency updates.
+- `.gitignore` updated to ignore `server.log` and all log files; `server.log` removed from repository.
+- Confirmed no secrets or sensitive information in codebase via GitGuardian CLI scan.
+- All previous features and UI/UX improvements remain in place.
+- Version bumped to 0.5.5 for security and maintenance release.
 
 ## Features
 - Track all Mist of Pandaria Inscription Cards
