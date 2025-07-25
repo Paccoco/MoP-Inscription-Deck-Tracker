@@ -122,6 +122,21 @@ function Admin({ setShowPage }) {
     }
   };
 
+  // Remove user access (admin only)
+  const handleRemoveUser = async (username) => {
+    const token = localStorage.getItem('token');
+    if (!window.confirm(`Are you sure you want to remove access for ${username}?`)) return;
+    try {
+      await axios.post('/api/admin/remove-user', { username }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUsers(users.filter(u => u.username !== username));
+      alert(`User ${username} removed.`);
+    } catch (err) {
+      alert('Failed to remove user.');
+    }
+  };
+
   // Navigation handlers
   const goHome = () => {
     if (setShowPage) setShowPage('dashboard');
@@ -171,6 +186,7 @@ function Admin({ setShowPage }) {
               <th>ID</th>
               <th>Username</th>
               <th>Admin</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -179,6 +195,9 @@ function Admin({ setShowPage }) {
                 <td>{u.id}</td>
                 <td>{u.username}</td>
                 <td>{u.is_admin ? 'Yes' : 'No'}</td>
+                <td>
+                  <button onClick={() => handleRemoveUser(u.username)} style={{ color: 'red' }}>Remove</button>
+                </td>
               </tr>
             ))}
           </tbody>
