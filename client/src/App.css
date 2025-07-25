@@ -249,4 +249,30 @@ body.classic { background: #2c2c2c; color: #fff; }
   .deck-status-heading, .card-summary-heading {
     font-size: 1.1em;
   }
+
+/* Responsive styles for notifications and profile */
+  .notifications-container {
+    padding: 8px;
+    font-size: 1em;
+  }
+  .notifications-container ul {
+    padding-left: 0;
+  }
+  .notifications-container li {
+    font-size: 0.95em;
+    margin-bottom: 10px;
+    word-break: break-word;
+  }
+  .notifications-container input[type="text"],
+  .notifications-container select,
+  .notifications-container button {
+    font-size: 1em;
+    margin-bottom: 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .profile-container {
+    padding: 8px;
+    font-size: 1em;
+  }
 }

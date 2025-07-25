@@ -28,7 +28,7 @@ function DiscordWebhookConfig() {
 
   return (
     <div style={{ marginBottom: '2em', background: '#23272f', padding: '1em', borderRadius: '8px' }}>
-      <h4>Configure Discord Webhook</h4>
+      <h4>Configure Discord Webhook <span title="Paste your Discord webhook URL here to receive automated notifications in your guild's Discord channel.">🛈</span></h4>
       <form onSubmit={handleSave}>
         <input
           type="url"
@@ -40,9 +40,10 @@ function DiscordWebhookConfig() {
         />
         <button type="submit" style={{ marginLeft: '1em' }}>Save</button>
       </form>
-      {status && <div style={{ marginTop: '0.5em', color: '#f5ba42' }}>{status}</div>}
+      {status && <div style={{ marginTop: '0.5em', color: status.includes('Failed') ? 'red' : '#f5ba42' }}>{status}</div>}
       <div style={{ fontSize: '0.95em', marginTop: '0.5em', color: '#c9e7c9' }}>
         <strong>Tip:</strong> Create a webhook in your Discord channel settings, then paste the URL here. The app will send notifications for deck completions, sales, and requests.
+        <span title="Discord webhooks allow automated messages to be sent to your channel. Learn more at https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks">🛈</span>
       </div>
     </div>
   );

@@ -15,6 +15,10 @@ function Admin({ setShowPage }) {
   const [payouts, setPayouts] = useState(null);
   const [guildCut, setGuildCut] = useState(null);
 
+  // Summary stats
+  const [notificationStats, setNotificationStats] = useState({ total: 0, unread: 0 });
+  const [recentActivity, setRecentActivity] = useState([]);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const fetchUsers = async () => {
@@ -43,9 +47,27 @@ function Admin({ setShowPage }) {
         setCompletedDecks(res.data);
       } catch {}
     };
+    const fetchNotificationStats = async () => {
+      try {
+        const res = await axios.get('/api/admin/notification-stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setNotificationStats(res.data);
+      } catch {}
+    };
+    const fetchRecentActivity = async () => {
+      try {
+        const res = await axios.get('/api/activity/all', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setRecentActivity(res.data.slice(0, 5)); // Show last 5 activities
+      } catch {}
+    };
     fetchUsers();
     fetchPending();
     fetchCompletedDecks();
+    fetchNotificationStats();
+    fetchRecentActivity();
   }, []);
 
   const approveUser = async (userId) => {
@@ -92,9 +114,28 @@ function Admin({ setShowPage }) {
 
   return (
     <div className="admin-container">
-      <h2>Admin Panel</h2>
-      <div style={{ marginBottom: '1em' }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1em', gap: '1em' }}>
         <button onClick={goHome}>Home</button>
+        <h2 style={{ margin: 0 }}>Admin Panel</h2>
+      </div>
+      <div style={{ display: 'flex', gap: '2em', marginBottom: '1em' }}>
+        <div>
+          <strong>Pending Approvals:</strong> {pending.length}
+        </div>
+        <div>
+          <strong>Total Users:</strong> {users.length}
+        </div>
+        <div>
+          <strong>Notifications:</strong> {notificationStats.total} total, {notificationStats.unread} unread
+        </div>
+        <div>
+          <strong>Recent Activity:</strong>
+          <ul style={{ margin: 0, paddingLeft: 16 }}>
+            {recentActivity.length === 0 ? <li>No recent activity.</li> : recentActivity.map((a, i) => (
+              <li key={i}>{a.message} <span style={{ fontSize: '0.9em', color: '#666' }}>({new Date(a.created_at).toLocaleString()})</span></li>
+            ))}
+          </ul>
+        </div>
       </div>
       {error && <div className="error">{error}</div>}
       <h3>Pending Users</h3>

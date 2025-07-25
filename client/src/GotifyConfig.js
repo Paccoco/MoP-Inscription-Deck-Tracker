@@ -48,7 +48,7 @@ export default function GotifyConfig() {
 
   return (
     <div style={{ margin: '20px 0' }}>
-      <h3>Gotify Notifications</h3>
+      <h3>Gotify Notifications <span title="Configure your personal Gotify server and select which notification types you want to receive. Gotify is a self-hosted push notification service.">🛈</span></h3>
       <div style={{ marginBottom: 8 }}>
         <label>Gotify Server URL: <input value={server} onChange={e => setServer(e.target.value)} placeholder="https://gotify.example.com" style={{ width: 260 }} /></label>
       </div>
@@ -64,13 +64,15 @@ export default function GotifyConfig() {
                 type="checkbox"
                 checked={types.includes(nt.key)}
                 onChange={() => handleTypeChange(nt.key)}
-              /> {nt.label}
+              />
+              {nt.label}
+              <span title={`Enable/disable notifications for ${nt.label}`}> 🛈</span>
             </label>
           ))}
         </div>
       </div>
       <button onClick={saveConfig}>Save Gotify Settings</button>
-      {message && <div style={{ color: '#145c2c', marginTop: 8 }}>{message}</div>}
+      {message && <div style={{ color: message.includes('Failed') ? 'red' : 'green', marginTop: 8 }}>{message}</div>}
     </div>
   );
 }

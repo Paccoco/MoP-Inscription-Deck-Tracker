@@ -614,6 +614,13 @@ function App() {
       {showPage === 'profile' && <Profile />}
       {showPage === 'notifications' && <Notifications />}
       {showPage === 'activity' && <ActivityLog isAdmin={auth.isAdmin} />}
+      {/* Analytics dashboard placeholder */}
+      {/* Add more detailed charts and export options here */}
+      {/* Example: notification delivery rates, user engagement */}
+
+      {/* Integrations placeholder: Add support for Telegram, Slack, and per-platform notification preferences here. */}
+
+      {/* Performance: Pagination for activity logs and optimized notification delivery queries can be added here. */}
     </div>
   );
 }

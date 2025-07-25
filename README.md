@@ -140,6 +140,14 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 ## Discord How-To
 See `discord-how-to.md` for a user guide on sharing progress, coordinating deck completions, and using the app with Discord.
 
+## Screenshots & GIFs
+- Add screenshots and GIFs here to demonstrate setup, notification configuration, and admin dashboard features.
+
+## Troubleshooting
+- If notifications are not received, check your Gotify/Discord config and ensure your server is running.
+- For mobile issues, ensure your browser is up to date and try resizing the window.
+- For export/import problems, verify CSV format and file encoding.
+
 ## Contributing
 Pull requests and suggestions are welcome! Please open an issue or PR for improvements.
 
