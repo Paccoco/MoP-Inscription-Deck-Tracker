@@ -1,0 +1,14 @@
+[Unit]
+Description=MoP Card Tracker Backend
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/paccoco/project-card-tracker
+ExecStart=/usr/bin/node /home/paccoco/project-card-tracker/server-auth.js
+Restart=always
+RestartSec=5
+OnFailure=cardtracker-notify@%n.service
+
+[Install]
+WantedBy=multi-user.target
