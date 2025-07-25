@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import GotifyConfig from './GotifyConfig';
 
 const themes = [
   { name: 'MoP Green', value: 'mop-green' },
@@ -50,6 +51,7 @@ function Profile() {
           ))}
         </select>
       </div>
+      <GotifyConfig />
       <h3>Your Cards</h3>
       {profile.cards && profile.cards.length > 0 ? (
         <ul>
@@ -82,26 +84,6 @@ function Profile() {
           ))}
         </ul>
       ) : <div>No recent activity.</div>}
-      {/* Email Opt-In */}
-      <div className="email-opt-in" style={{ margin: '20px 0' }}>
-        <label htmlFor="emailOptIn">
-          <strong>Email Notifications:</strong>
-        </label>
-        <input
-          type="checkbox"
-          id="emailOptIn"
-          checked={profile.emailOptIn || false}
-          onChange={e => {
-            const token = localStorage.getItem('token');
-            axios.post('/api/profile/email-opt-in', { optIn: e.target.checked }, { headers: { Authorization: `Bearer ${token}` } })
-              .then(() => setProfile({ ...profile, emailOptIn: e.target.checked }))
-              .catch(() => alert('Failed to update email opt-in status.'));
-          }}
-        />
-        <span style={{ marginLeft: 8 }}>
-          Opt-in for email alerts when a requested deck is completed or sold
-        </span>
-      </div>
     </div>
   );
 }

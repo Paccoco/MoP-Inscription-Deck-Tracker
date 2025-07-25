@@ -159,19 +159,11 @@ nav button:hover {
   background: #1e7a3c;
 }
 
-/* New styles for theme selector, email opt-in, card/deck history, analytics dashboard, deck value */
+/* New styles for theme selector, card/deck history, analytics dashboard, deck value */
 .theme-selector select {
   background: #1a2c1a;
   color: #c9e7c9;
   border-radius: 4px;
-  margin-left: 8px;
-}
-
-.email-opt-in {
-  margin: 12px 0;
-}
-
-.email-opt-in input[type="checkbox"] {
   margin-left: 8px;
 }
 

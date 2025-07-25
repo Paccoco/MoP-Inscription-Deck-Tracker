@@ -1,0 +1,76 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const NOTIFICATION_TYPES = [
+  { key: 'deck_complete', label: 'Deck Completed' },
+  { key: 'approval', label: 'Account Approved' },
+  { key: 'payout', label: 'Payout Received' },
+  { key: 'deck_request', label: 'Deck Request Updates' }
+];
+
+export default function GotifyConfig() {
+  const [server, setServer] = useState('');
+  const [token, setToken] = useState('');
+  const [types, setTypes] = useState([]);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    axios.get('/api/gotify/config', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => {
+        setServer(res.data.server || '');
+        setToken(res.data.token || '');
+        setTypes(res.data.types || []);
+      });
+  }, []);
+
+  const saveConfig = async () => {
+    const jwt = localStorage.getItem('token');
+    console.log('GotifyConfig: JWT token being sent:', jwt);
+    try {
+      const res = await axios.post('/api/gotify/config', { server, token, types }, { headers: { Authorization: jwt ? `Bearer ${jwt}` : '' } });
+      setMessage('Gotify settings saved!');
+      console.log('Gotify save response:', res.data);
+    } catch (err) {
+      setMessage('Failed to save Gotify settings.');
+      console.error('Gotify save error:', err);
+      if (err.response) {
+        setMessage('Failed to save Gotify settings: ' + (err.response.data?.error || err.response.status));
+      }
+    }
+  };
+
+  const handleTypeChange = (typeKey) => {
+    setTypes(types.includes(typeKey)
+      ? types.filter(t => t !== typeKey)
+      : [...types, typeKey]);
+  };
+
+  return (
+    <div style={{ margin: '20px 0' }}>
+      <h3>Gotify Notifications</h3>
+      <div style={{ marginBottom: 8 }}>
+        <label>Gotify Server URL: <input value={server} onChange={e => setServer(e.target.value)} placeholder="https://gotify.example.com" style={{ width: 260 }} /></label>
+      </div>
+      <div style={{ marginBottom: 8 }}>
+        <label>Gotify Token: <input value={token} onChange={e => setToken(e.target.value)} placeholder="Your Gotify token" style={{ width: 260 }} /></label>
+      </div>
+      <div style={{ marginBottom: 8 }}>
+        <strong>Notification Types:</strong>
+        <div>
+          {NOTIFICATION_TYPES.map(nt => (
+            <label key={nt.key} style={{ marginRight: 16 }}>
+              <input
+                type="checkbox"
+                checked={types.includes(nt.key)}
+                onChange={() => handleTypeChange(nt.key)}
+              /> {nt.label}
+            </label>
+          ))}
+        </div>
+      </div>
+      <button onClick={saveConfig}>Save Gotify Settings</button>
+      {message && <div style={{ color: '#145c2c', marginTop: 8 }}>{message}</div>}
+    </div>
+  );
+}
