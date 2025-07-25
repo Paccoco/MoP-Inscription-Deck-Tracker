@@ -1,0 +1,37 @@
+name: Security & Dependency Audit
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    - cron: '0 4 * * 0' # Weekly Sunday 4am UTC
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          npm install
+          cd client && npm install
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+      - name: Install pipx & ggshield
+        run: |
+          sudo apt update
+          sudo apt install -y pipx
+          pipx install ggshield
+      - name: Run ggshield secret scan
+        run: pipx run ggshield secret scan path . --recursive
+      - name: Security vulnerability notification (Gotify)
+        if: failure()
+        run: |
+          node scripts/gotify_notify.js "High" "Security vulnerability detected by npm audit or ggshield." "Check CI logs for details. Repo: ${{ github.repository }} Commit: ${{ github.sha }}"

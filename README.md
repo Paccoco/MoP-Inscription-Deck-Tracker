@@ -141,7 +141,30 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 See `discord-how-to.md` for a user guide on sharing progress, coordinating deck completions, and using the app with Discord.
 
 ## Screenshots & GIFs
-- Add screenshots and GIFs here to demonstrate setup, notification configuration, and admin dashboard features.
+
+Below are example screenshots and GIFs demonstrating key features and UI sections. Add your own images to `docs/screenshots/` and update the links as needed.
+
+### Dashboard/Main UI
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Notification Configuration (Gotify/Discord)
+![Notification Config](docs/screenshots/notification-config.png)
+
+### Admin Panel (User Approval, Deck Allocation)
+![Admin Panel](docs/screenshots/admin-panel.png)
+
+### Mobile View (Responsive Design)
+![Mobile View](docs/screenshots/mobile-view.png)
+
+### Completed Decks & Analytics
+![Completed Decks](docs/screenshots/completed-decks.png)
+![Analytics](docs/screenshots/analytics.png)
+
+### Example GIF: Deck Completion Flow
+![Deck Completion Flow](docs/screenshots/deck-completion.gif)
+
+---
+*Replace these placeholders with your own screenshots and GIFs for a more visual onboarding experience.*
 
 ## Troubleshooting
 - If notifications are not received, check your Gotify/Discord config and ensure your server is running.
