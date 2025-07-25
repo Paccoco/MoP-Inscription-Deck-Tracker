@@ -1,16 +1,17 @@
 # Mist of Pandaria Card Tracker
 
-**Version: 0.5.5**
+**Version: 0.5.6**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
-- Security: All high severity vulnerabilities in dependencies have been fixed (body-parser, cookie, path-to-regexp, send). Project dependencies are now secure and up to date.
+- Enhanced Gotify security notifications: Now include severity, risk description, and context in alerts. CI workflow passes these details automatically.
+- Security workflow: Automated security checks via GitHub Actions, with Gotify alerts for vulnerabilities detected by npm audit or ggshield.
 - Frontend rebuilt and backend restarted for full bug check and validation after dependency updates.
 - `.gitignore` updated to ignore `server.log` and all log files; `server.log` removed from repository.
 - Confirmed no secrets or sensitive information in codebase via GitGuardian CLI scan.
 - All previous features and UI/UX improvements remain in place.
-- Version bumped to 0.5.5 for security and maintenance release.
+- Version bumped to 0.5.6 for security and notification enhancements.
 
 ## Features
 - Track all Mist of Pandaria Inscription Cards
