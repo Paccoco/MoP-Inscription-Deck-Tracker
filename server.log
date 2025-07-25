@@ -1,200 +1,52 @@
 nohup: ignoring input
 Server is running on port 5000
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1NjEwMiwiZXhwIjoxNzUzNTQyNTAyfQ.x-1camxPUcUpawU21y7s22tA86CayilneIFuVoJ_nfs
+Using default Discord webhook URL: 
+Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
 Auth success: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753456102,
-  exp: 1753542502
+  iat: 1753459339,
+  exp: 1753545739
 }
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1NjEwMiwiZXhwIjoxNzUzNTQyNTAyfQ.x-1camxPUcUpawU21y7s22tA86CayilneIFuVoJ_nfs
+Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
 Auth success: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753456102,
-  exp: 1753542502
+  iat: 1753459339,
+  exp: 1753545739
 }
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJSaW9yc29uIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NDk4MDEsImV4cCI6MTc1MzUzNjIwMX0.K5OUP5f9twp5TqbRmEgZt5yFhqe661HBFInEEngmZK4
-Auth success: {
-  id: 3,
-  username: 'Riorson',
-  is_admin: false,
-  iat: 1753449801,
-  exp: 1753536201
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJSaW9yc29uIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NDk4MDEsImV4cCI6MTc1MzUzNjIwMX0.K5OUP5f9twp5TqbRmEgZt5yFhqe661HBFInEEngmZK4
-Auth success: {
-  id: 3,
-  username: 'Riorson',
-  is_admin: false,
-  iat: 1753449801,
-  exp: 1753536201
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1NjEwMiwiZXhwIjoxNzUzNTQyNTAyfQ.x-1camxPUcUpawU21y7s22tA86CayilneIFuVoJ_nfs
+Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
 Auth success: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753456102,
-  exp: 1753542502
+  iat: 1753459339,
+  exp: 1753545739
 }
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1NjEwMiwiZXhwIjoxNzUzNTQyNTAyfQ.x-1camxPUcUpawU21y7s22tA86CayilneIFuVoJ_nfs
+Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
 Auth success: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753456102,
-  exp: 1753542502
+  iat: 1753459339,
+  exp: 1753545739
 }
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJSaW9yc29uIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NDk4MDEsImV4cCI6MTc1MzUzNjIwMX0.K5OUP5f9twp5TqbRmEgZt5yFhqe661HBFInEEngmZK4
-Auth success: {
-  id: 3,
-  username: 'Riorson',
-  is_admin: false,
-  iat: 1753449801,
-  exp: 1753536201
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJSaW9yc29uIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NDk4MDEsImV4cCI6MTc1MzUzNjIwMX0.K5OUP5f9twp5TqbRmEgZt5yFhqe661HBFInEEngmZK4
-Auth success: {
-  id: 3,
-  username: 'Riorson',
-  is_admin: false,
-  iat: 1753449801,
-  exp: 1753536201
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJSaW9yc29uIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NDk4MDEsImV4cCI6MTc1MzUzNjIwMX0.K5OUP5f9twp5TqbRmEgZt5yFhqe661HBFInEEngmZK4
-Auth success: {
-  id: 3,
-  username: 'Riorson',
-  is_admin: false,
-  iat: 1753449801,
-  exp: 1753536201
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywidXNlcm5hbWUiOiJSaW9yc29uIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NDk4MDEsImV4cCI6MTc1MzUzNjIwMX0.K5OUP5f9twp5TqbRmEgZt5yFhqe661HBFInEEngmZK4
-Auth success: {
-  id: 3,
-  username: 'Riorson',
-  is_admin: false,
-  iat: 1753449801,
-  exp: 1753536201
-}
-notifyUser: {
-  username: 'Paccoco',
-  type: 'approval',
-  message: "New user 'test' registered and needs approval."
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
+Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
 Auth success: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Admin users endpoint: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
+  iat: 1753459339,
+  exp: 1753545739
 }
 Activity log request user: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Approve user req.body: { userId: 4 }
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTI5MCwiZXhwIjoxNzUzNTQ1NjkwfQ.DLjDac2jFC6CuqmJVfO1HRkVl4rOt8rfy9A8Il3q18w
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459290,
-  exp: 1753545690
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTkzMjksImV4cCI6MTc1MzU0NTcyOX0.QyAIYa6YZFAOpUu3wvItypL6IsOtvLtyeqxwylhKxPk
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459329,
-  exp: 1753545729
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTkzMjksImV4cCI6MTc1MzU0NTcyOX0.QyAIYa6YZFAOpUu3wvItypL6IsOtvLtyeqxwylhKxPk
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459329,
-  exp: 1753545729
+  iat: 1753459339,
+  exp: 1753545739
 }
 Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
 Auth success: {
@@ -212,192 +64,7 @@ Auth success: {
   iat: 1753459339,
   exp: 1753545739
 }
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTkzNjUsImV4cCI6MTc1MzU0NTc2NX0._ZmQPGZ9Ypbjgg_PU_EQOX-8s2BuI0nzNaLKsL4XwW8
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459365,
-  exp: 1753545765
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTkzNjUsImV4cCI6MTc1MzU0NTc2NX0._ZmQPGZ9Ypbjgg_PU_EQOX-8s2BuI0nzNaLKsL4XwW8
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459365,
-  exp: 1753545765
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTkzNjUsImV4cCI6MTc1MzU0NTc2NX0._ZmQPGZ9Ypbjgg_PU_EQOX-8s2BuI0nzNaLKsL4XwW8
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459365,
-  exp: 1753545765
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTkzNjUsImV4cCI6MTc1MzU0NTc2NX0._ZmQPGZ9Ypbjgg_PU_EQOX-8s2BuI0nzNaLKsL4XwW8
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459365,
-  exp: 1753545765
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459339,
-  exp: 1753545739
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459339,
-  exp: 1753545739
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTkzNjUsImV4cCI6MTc1MzU0NTc2NX0._ZmQPGZ9Ypbjgg_PU_EQOX-8s2BuI0nzNaLKsL4XwW8
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459365,
-  exp: 1753545765
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTkzNjUsImV4cCI6MTc1MzU0NTc2NX0._ZmQPGZ9Ypbjgg_PU_EQOX-8s2BuI0nzNaLKsL4XwW8
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459365,
-  exp: 1753545765
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQzMzYyNCwiZXhwIjoxNzUzNTIwMDI0fQ.366oehShYgoKvAWOpsT14lKTxmQJ5dytQHl2vmdSxmo
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753433624,
-  exp: 1753520024
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQzMzYyNCwiZXhwIjoxNzUzNTIwMDI0fQ.366oehShYgoKvAWOpsT14lKTxmQJ5dytQHl2vmdSxmo
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753433624,
-  exp: 1753520024
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459339,
-  exp: 1753545739
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459339,
-  exp: 1753545739
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJ0ZXN0IiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3NTM0NTk0ODUsImV4cCI6MTc1MzU0NTg4NX0.I3CFY1iEaneFNa0PB6jsV362n6VkU--PxBS6PXqLpsE
-Auth success: {
-  id: 4,
-  username: 'test',
-  is_admin: false,
-  iat: 1753459485,
-  exp: 1753545885
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
-Auth success: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753459339,
-  exp: 1753545739
-}
-Auth middleware: Incoming token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJQYWNjb2NvIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc1MzQ1OTMzOSwiZXhwIjoxNzUzNTQ1NzM5fQ.8X_LStQEUsY4ZpqHj91j4vNPEkn2p4lCHFwb4RJpwdg
-Auth success: {
+Admin users endpoint: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,

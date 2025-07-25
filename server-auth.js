@@ -111,6 +111,27 @@ function logActivity(username, action) {
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';
 let discordWebhookUrl = DISCORD_WEBHOOK_URL;
 
+// Ensure discord_webhook table exists
+// Only one row: {id: 1, url: webhookUrl}
+db.run(`CREATE TABLE IF NOT EXISTS discord_webhook (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  url TEXT
+)`);
+
+// Load webhook from DB on startup
+function loadDiscordWebhookUrl() {
+  db.get('SELECT url FROM discord_webhook WHERE id = 1', [], (err, row) => {
+    if (!err && row && row.url) {
+      discordWebhookUrl = row.url;
+      console.log('Loaded Discord webhook URL from DB:', discordWebhookUrl);
+    } else {
+      discordWebhookUrl = DISCORD_WEBHOOK_URL;
+      console.log('Using default Discord webhook URL:', discordWebhookUrl);
+    }
+  });
+}
+loadDiscordWebhookUrl();
+
 // Discord webhook config endpoints
 app.get('/api/discord/webhook', auth, (req, res) => {
   res.json({ webhookUrl: discordWebhookUrl });
@@ -121,7 +142,13 @@ app.post('/api/discord/webhook', express.json(), auth, (req, res) => {
     return res.status(400).json({ error: 'Invalid Discord webhook URL.' });
   }
   discordWebhookUrl = webhookUrl;
-  res.json({ success: true });
+  db.run('INSERT OR REPLACE INTO discord_webhook (id, url) VALUES (1, ?)', [webhookUrl], function (err) {
+    if (err) {
+      console.error('Failed to save Discord webhook URL:', err.message);
+      return res.status(500).json({ error: 'Failed to save Discord webhook URL.' });
+    }
+    res.json({ success: true });
+  });
 });
 
 // Update sendDiscordNotification to use the latest webhook
@@ -176,6 +203,7 @@ app.post('/api/cards', express.json(), auth, (req, res) => {
         return res.status(500).json({ error: err.message });
       }
       logActivity(owner, `Added card '${card_name}' to deck '${deck}'`);
+      sendDiscordNotification(`Card added: '${card_name}' to deck '${deck}' by ${owner}`);
       res.json({ id: this.lastID, card_name, owner, deck });
     }
   );
@@ -196,6 +224,7 @@ app.delete('/api/cards/:id', auth, (req, res) => {
         return res.status(500).json({ error: err.message });
       }
       logActivity(card.owner, `Removed card '${card.card_name}' from deck '${card.deck}'`);
+      sendDiscordNotification(`Card removed: '${card.card_name}' from deck '${card.deck}' by ${card.owner}`);
       res.json({ deleted: this.changes });
     });
   });
@@ -534,7 +563,9 @@ app.get('/api/activity/all', auth, (req, res) => {
   if (!req.user.is_admin) return res.status(403).json([]); // Always return array on error
   db.all('SELECT * FROM activity ORDER BY timestamp DESC LIMIT 50', [], (err, rows) => {
     if (err || !Array.isArray(rows)) return res.json([]); // Always return array on error
-    res.json(rows);
+    // Map to expected format for Admin.js
+    const mapped = rows.map(a => ({ message: a.action, created_at: a.timestamp }));
+    res.json(mapped);
   });
 });
 
