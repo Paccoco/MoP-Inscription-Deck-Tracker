@@ -1,17 +1,38 @@
 nohup: ignoring input
-Server running on port 5000
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::5000
+    at Server.setupListeAdmin users endpoint: {
+  id: 2,
+  username: 'Paccoco',
+  is_admin: true,
+  iat: 1753454002,
+  exp: 1753540402
+}
 Admin users endpoint: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753449248,
-  exp: 1753535648
+  iat: 1753454002,
+  exp: 1753540402
 }
-Approve user req.body: { userId: 3 }
-Admin users endpoint: {
-  id: 2,
-  username: 'Paccoco',
-  is_admin: true,
-  iat: 1753449248,
-  exp: 1753535648
+4)
+    at Object.<anonymous> (/home/paccoco/project-card-tracker/server-auth.js:516:5)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1976:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '::',
+  port: 5000
 }
+
+Node.js v22.17.1

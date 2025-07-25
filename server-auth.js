@@ -27,9 +27,7 @@ db.serialize(() => {
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     is_admin INTEGER DEFAULT 0,
-    approved INTEGER DEFAULT 0,
-    email TEXT,
-    email_opt_in INTEGER DEFAULT 0
+    approved INTEGER DEFAULT 0
   )`);
   // Create completed_decks table
   db.run(`CREATE TABLE IF NOT EXISTS completed_decks (
@@ -91,7 +89,15 @@ db.serialize(() => {
 
 // Log activity helper
 function logActivity(username, action) {
-  db.run('INSERT INTO activity (username, action, timestamp) VALUES (?, ?, ?)', [username, action, new Date().toISOString()]);
+  db.run(
+    'INSERT INTO activity (username, action, timestamp) VALUES (?, ?, ?)',
+    [username, action, new Date().toISOString()],
+    function (err) {
+      if (err) {
+        console.error('Activity log DB error:', err.message);
+      }
+    }
+  );
 }
 
 // Discord webhook integration
@@ -260,7 +266,7 @@ app.get('/api/admin/users', auth, (req, res) => {
     console.log('Not admin:', req.user);
     return res.status(403).json({ error: 'Admin only' });
   }
-  db.all('SELECT id, username, is_admin FROM users', [], (err, rows) => {
+  db.all('SELECT * FROM users', [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
@@ -465,15 +471,6 @@ app.get('/api/export/decks', auth, (req, res) => {
   });
 });
 
-// Email opt-in endpoint
-app.post('/api/profile/email-opt-in', auth, (req, res) => {
-  const { email, optIn } = req.body;
-  db.run('UPDATE users SET email = ?, email_opt_in = ? WHERE username = ?', [email, optIn ? 1 : 0, req.user.username], function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true });
-  });
-});
-
 // Get card history
 app.get('/api/cards/:id/history', auth, (req, res) => {
   db.all('SELECT * FROM card_history WHERE card_id = ?', [req.params.id], (err, rows) => {
@@ -490,16 +487,20 @@ app.get('/api/decks/:id/history', auth, (req, res) => {
   });
 });
 
-// Analytics endpoints
-app.get('/api/analytics/deck-completion', auth, (req, res) => {
-  db.all('SELECT deck, COUNT(*) as completed FROM completed_decks GROUP BY deck', [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+// Admin: Get global activity log
+app.get('/api/activity/all', auth, (req, res) => {
+  console.log('Activity log request user:', req.user); // Debug log
+  if (!req.user.is_admin) return res.status(403).json([]); // Always return array on error
+  db.all('SELECT * FROM activity ORDER BY timestamp DESC LIMIT 50', [], (err, rows) => {
+    if (err || !Array.isArray(rows)) return res.json([]); // Always return array on error
     res.json(rows);
   });
 });
-app.get('/api/analytics/contributors', auth, (req, res) => {
-  db.all('SELECT owner, COUNT(*) as cards FROM cards GROUP BY owner', [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+
+// User: Get own activity log
+app.get('/api/activity', auth, (req, res) => {
+  db.all('SELECT * FROM activity WHERE username = ? ORDER BY timestamp DESC LIMIT 10', [req.user.username], (err, rows) => {
+    if (err || !Array.isArray(rows)) return res.json([]);
     res.json(rows);
   });
 });
@@ -507,29 +508,11 @@ app.get('/api/analytics/contributors', auth, (req, res) => {
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, 'client', 'build')));
 
-// Catch-all: send React index.html for non-API routes
+// Catch-all route to serve React index.html for non-API routes
 app.get('*', (req, res) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-  }
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-// API: Delete deck request (admin can delete any, user can delete own)
-app.delete('/api/deck-requests/:id', auth, (req, res) => {
-  const requestId = req.params.id;
-  db.get('SELECT username FROM deck_requests WHERE id = ?', [requestId], (err, row) => {
-    if (err || !row) return res.status(404).json({ error: 'Deck request not found' });
-    if (req.user.is_admin || req.user.username === row.username) {
-      db.run('DELETE FROM deck_requests WHERE id = ?', [requestId], function (err2) {
-        if (err2) return res.status(500).json({ error: err2.message });
-        res.json({ success: true, deleted: this.changes });
-      });
-    } else {
-      res.status(403).json({ error: 'Not authorized to delete this deck request' });
-    }
-  });
+  console.log(`Server is running on port ${PORT}`);
 });
