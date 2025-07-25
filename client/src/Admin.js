@@ -284,7 +284,7 @@ function Admin({ setShowPage }) {
               <div><strong>npm audit:</strong> {securityScan.npm_audit.summary} <span style={{ color: '#888' }}>({new Date(securityScan.npm_audit.date).toLocaleString()})</span></div>
               <div><strong>ggshield:</strong> {securityScan.ggshield.summary} <span style={{ color: '#888' }}>({new Date(securityScan.ggshield.date).toLocaleString()})</span></div>
               <button onClick={() => window.open('/security-scan.json', '_blank')}>Export Security Scan JSON</button>
-              <a href="/github/workflows/security.yml" target="_blank" rel="noopener noreferrer" style={{ marginLeft: 16 }}>View CI Logs</a>
+              <a href="https://github.com/Paccoco/project-card-tracker/actions?query=workflow%3A%22Security+%26+Dependency+Audit%22" target="_blank" rel="noopener noreferrer" style={{ marginLeft: 16 }}>View CI Logs</a>
             </div>
           ) : <div>Loading security scan...</div>}
         </div>
