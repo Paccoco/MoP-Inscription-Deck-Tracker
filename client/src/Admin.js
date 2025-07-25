@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import DiscordWebhookConfig from './DiscordWebhookConfig';
-import GotifyConfig from './GotifyConfig';
 
 function Admin({ setShowPage }) {
   const [users, setUsers] = useState([]);
@@ -158,10 +157,48 @@ function Admin({ setShowPage }) {
           <div>Guild Cut: {guildCut} gold</div>
         </div>
       )}
+      <h3>Completed Decks Progress</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Deck</th>
+            <th>Contributors</th>
+            <th>Progress</th>
+            <th>Completed At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {completedDecks.map(deck => (
+            <tr key={deck.id}>
+              <td>{deck.name}</td>
+              <td>{deck.contributors.map(c => c.owner).join(', ')}</td>
+              <td>
+                {typeof deck.collectedCards === 'number' && typeof deck.totalCards === 'number' ? (
+                  <div style={{ minWidth: 180 }}>
+                    <div style={{ background: '#eee', borderRadius: '4px', height: '16px', width: '100%' }}>
+                      <div
+                        style={{
+                          width: `${Math.round((deck.collectedCards / deck.totalCards) * 100)}%`,
+                          background: '#4caf50',
+                          height: '100%',
+                          borderRadius: '4px',
+                          transition: 'width 0.5s',
+                        }}
+                      />
+                    </div>
+                    <span style={{ fontSize: '12px' }}>
+                      {deck.collectedCards} / {deck.totalCards} cards ({Math.round((deck.collectedCards / deck.totalCards) * 100)}%)
+                    </span>
+                  </div>
+                ) : 'N/A'}
+              </td>
+              <td>{deck.completed_at ? new Date(deck.completed_at).toLocaleString() : 'N/A'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <h3>Discord Integration</h3>
       <DiscordWebhookConfig />
-      <h3>Gotify Integration</h3>
-      <GotifyConfig />
     </div>
   );
 }
