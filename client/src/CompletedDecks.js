@@ -32,28 +32,7 @@ function CompletedDecks() {
         <tbody>
           {decks.map(deck => (
             <tr key={deck.id}>
-              <td>
-                {deck.deck}
-                {/* Deck Completion Progress Bar */}
-                {typeof deck.collectedCards === 'number' && typeof deck.totalCards === 'number' ? (
-                  <div style={{ marginTop: '8px' }}>
-                    <div style={{ background: '#eee', borderRadius: '4px', height: '16px', width: '100%' }}>
-                      <div
-                        style={{
-                          width: `${Math.round((deck.collectedCards / deck.totalCards) * 100)}%`,
-                          background: '#4caf50',
-                          height: '100%',
-                          borderRadius: '4px',
-                          transition: 'width 0.5s',
-                        }}
-                      />
-                    </div>
-                    <span style={{ fontSize: '12px' }}>
-                      {deck.collectedCards} / {deck.totalCards} cards ({Math.round((deck.collectedCards / deck.totalCards) * 100)}%)
-                    </span>
-                  </div>
-                ) : null}
-              </td>
+              <td>{deck.deck}</td>
               <td>{deck.contributors.map(c => c.owner).join(', ')}</td>
               <td>{new Date(deck.completed_at).toLocaleString()}</td>
               <td>{deck.disposition === 'sold' ? 'Sold' : deck.disposition === 'fulfilled' ? 'Fulfilled' : 'Unallocated'}</td>

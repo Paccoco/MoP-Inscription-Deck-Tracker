@@ -7,9 +7,6 @@ const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-
 const PORT = process.env.PORT || 5000;
 const SECRET = process.env.JWT_SECRET || 'mop_secret';
 
@@ -90,11 +87,6 @@ db.serialize(() => {
     value INTEGER NOT NULL,
     timestamp TEXT NOT NULL
   )`);
-  // Create config table
-  db.run(`CREATE TABLE IF NOT EXISTS config (
-    key TEXT PRIMARY KEY,
-    value TEXT
-  )`);
 });
 
 // Log activity helper
@@ -106,69 +98,28 @@ function logActivity(username, action) {
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';
 let discordWebhookUrl = DISCORD_WEBHOOK_URL;
 
-// Discord webhook config endpoints (persistent)
-function getDiscordWebhookUrl(cb) {
-  db.get('SELECT value FROM config WHERE key = "discord_webhook_url"', [], (err, row) => {
-    cb(row ? row.value : '');
-  });
-}
-function setDiscordWebhookUrl(url, cb) {
-  db.run('INSERT OR REPLACE INTO config (key, value) VALUES ("discord_webhook_url", ?)', [url], cb);
-}
+// Discord webhook config endpoints
 app.get('/api/discord/webhook', auth, (req, res) => {
-  getDiscordWebhookUrl(url => res.json({ webhookUrl: url }));
+  res.json({ webhookUrl: discordWebhookUrl });
 });
 app.post('/api/discord/webhook', express.json(), auth, (req, res) => {
   const { webhookUrl } = req.body;
   if (!webhookUrl || !/^https:\/\/discord(app)?\.com\/api\/webhooks\//.test(webhookUrl)) {
     return res.status(400).json({ error: 'Invalid Discord webhook URL.' });
   }
-  setDiscordWebhookUrl(webhookUrl, err => {
-    if (err) return res.status(500).json({ error: 'Failed to save webhook URL.' });
-    res.json({ success: true });
-  });
+  discordWebhookUrl = webhookUrl;
+  res.json({ success: true });
 });
-function sendDiscordNotification(message) {
-  getDiscordWebhookUrl(url => {
-    if (!url) return;
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content: message })
-    });
-  });
-}
 
-// Gotify notification integration
-function getGotifyConfig(cb) {
-  db.get('SELECT value FROM config WHERE key = "gotify_config"', [], (err, row) => {
-    cb(row ? JSON.parse(row.value) : null);
+// Update sendDiscordNotification to use the latest webhook
+function sendDiscordNotification(message) {
+  if (!discordWebhookUrl) return;
+  fetch(discordWebhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: message })
   });
 }
-function setGotifyConfig(config, cb) {
-  db.run('INSERT OR REPLACE INTO config (key, value) VALUES ("gotify_config", ?)', [JSON.stringify(config)], cb);
-}
-function sendGotifyNotification(title, message) {
-  getGotifyConfig(cfg => {
-    if (!cfg || !cfg.url || !cfg.token) return;
-    fetch(`${cfg.url}/message?token=${cfg.token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, message, priority: 5 })
-    });
-  });
-}
-app.get('/api/gotify/config', auth, (req, res) => {
-  getGotifyConfig(cfg => res.json({ gotify: cfg }));
-});
-app.post('/api/gotify/config', express.json(), auth, (req, res) => {
-  const { url, token } = req.body;
-  if (!url || !token) return res.status(400).json({ error: 'Missing Gotify URL or token.' });
-  setGotifyConfig({ url, token }, err => {
-    if (err) return res.status(500).json({ error: 'Failed to save Gotify config.' });
-    res.json({ success: true });
-  });
-});
 
 // API route: Get all cards
 app.get('/api/cards', (req, res) => {
@@ -197,22 +148,6 @@ app.post('/api/cards', express.json(), auth, (req, res) => {
         return res.status(500).json({ error: err.message });
       }
       logActivity(owner, `Added card '${card_name}' to deck '${deck}'`);
-      // Discord notification for card add
-      // Define deck card lists (example, replace with actual deck lists)
-      const deckCards = {
-        'Ox Deck': ['Ox Card 1', 'Ox Card 2', 'Ox Card 3', 'Ox Card 4', 'Ox Card 5', 'Ox Card 6', 'Ox Card 7', 'Ox Card 8'],
-        'Crane Deck': ['Crane Card 1', 'Crane Card 2', 'Crane Card 3', 'Crane Card 4', 'Crane Card 5', 'Crane Card 6', 'Crane Card 7', 'Crane Card 8'],
-        // Add all deck types here
-      };
-      const allCards = deckCards[deck] || [];
-      db.all('SELECT card_name FROM cards WHERE deck = ?', [deck], (err2, rows) => {
-        if (!err2 && allCards.length) {
-          const present = rows.map(r => r.card_name);
-          const missing = allCards.filter(c => !present.includes(c));
-          let msg = `${owner} added '${card_name}' to '${deck}'.\nMissing cards for this deck: ${missing.length ? missing.join(', ') : 'None! Deck complete.'}`;
-          sendDiscordNotification(msg);
-        }
-      });
       res.json({ id: this.lastID, card_name, owner, deck });
     }
   );
@@ -240,22 +175,17 @@ app.delete('/api/cards/:id', auth, (req, res) => {
 
 // Registration sets approved=0
 app.post('/api/register', express.json(), (req, res) => {
-  const { username, password, email } = req.body;
+  const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Missing username or password' });
   }
-  db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
-    if (user) {
-      return res.status(409).json({ error: 'Username already exists' });
-    }
-    bcrypt.hash(password, 10, (err, hash) => {
-      if (err) return res.status(500).json({ error: 'Hashing error' });
-      db.run('INSERT INTO users (username, password, email, approved) VALUES (?, ?, ?, 0)', [username, hash, email || null], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        // Send Gotify notification to admins
-        sendGotifyNotification('New User Registration', `User '${username}' registered and is pending approval. Login to the admin panel to approve or deny.`);
-        res.json({ success: true });
-      });
+  bcrypt.hash(password, 10, (err, hash) => {
+    if (err) return res.status(500).json({ error: err.message });
+    db.run('INSERT INTO users (username, password, approved) VALUES (?, ?, 0)', [username, hash], function (err) {
+      if (err) {
+        return res.status(400).json({ error: 'Username already exists' });
+      }
+      res.json({ success: true });
     });
   });
 });
@@ -571,15 +501,6 @@ app.get('/api/analytics/contributors', auth, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
-});
-
-// Serve static files from React build
-app.use(express.static(path.join(__dirname, 'client/build')));
-
-// Catch-all: serve index.html for any non-API route
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'API route not found' });
-  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
 app.listen(PORT, () => {
