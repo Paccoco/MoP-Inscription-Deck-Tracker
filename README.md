@@ -1,5 +1,10 @@
 # Mist of Pandaria Card Tracker
 
+## Screenshots
+
+### Homepage
+![Homepage](docs/screenshots/homepage.png)
+
 **Version: 0.5.7b**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
