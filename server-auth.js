@@ -85,6 +85,13 @@ db.serialize(() => {
     value INTEGER NOT NULL,
     timestamp TEXT NOT NULL
   )`);
+  // Gotify config table
+  db.run(`CREATE TABLE IF NOT EXISTS gotify_config (
+    username TEXT PRIMARY KEY,
+    server TEXT,
+    token TEXT,
+    types TEXT -- JSON array of enabled notification types
+  )`);
 });
 
 // Log activity helper
@@ -124,6 +131,21 @@ function sendDiscordNotification(message) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ content: message })
+  });
+}
+
+// Send Gotify notification
+function sendGotifyNotification(username, type, message) {
+  db.get('SELECT * FROM gotify_config WHERE username = ?', [username], (err, config) => {
+    if (err || !config || !config.server || !config.token) return;
+    let enabled = [];
+    try { enabled = JSON.parse(config.types || '[]'); } catch {}
+    if (!enabled.includes(type)) return;
+    fetch(`${config.server}/message?token=${config.token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'MoP Card Tracker', message })
+    });
   });
 }
 
@@ -185,13 +207,24 @@ app.post('/api/register', express.json(), (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ error: 'Missing username or password' });
   }
-  bcrypt.hash(password, 10, (err, hash) => {
-    if (err) return res.status(500).json({ error: err.message });
-    db.run('INSERT INTO users (username, password, approved) VALUES (?, ?, 0)', [username, hash], function (err) {
-      if (err) {
-        return res.status(400).json({ error: 'Username already exists' });
-      }
-      res.json({ success: true });
+  db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
+    if (user) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+    bcrypt.hash(password, 10, (err, hash) => {
+      if (err) return res.status(500).json({ error: 'Hashing error' });
+      db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, hash], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        // Notify all admins
+        db.all('SELECT username FROM users WHERE is_admin = 1', [], (err2, admins) => {
+          if (!err2 && admins) {
+            admins.forEach(a => {
+              notifyUser(a.username, 'approval', `New user '${username}' registered and needs approval.`);
+            });
+          }
+        });
+        res.json({ success: true });
+      });
     });
   });
 });
@@ -222,12 +255,20 @@ app.post('/api/login', express.json(), (req, res) => {
 
 // Auth middleware
 function auth(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: 'No token' });
-  const token = authHeader.split(' ')[1];
+  const header = req.headers['authorization'];
+  if (!header) {
+    console.error('Auth failed: No Authorization header');
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+  const token = header.split(' ')[1];
+  console.log('Auth middleware: Incoming token:', token);
   jwt.verify(token, SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Invalid token' });
+    if (err) {
+      console.error('Auth failed: JWT error', err.message);
+      return res.status(401).json({ error: 'Invalid token' });
+    }
     req.user = user;
+    console.log('Auth success:', user);
     next();
   });
 }
@@ -504,6 +545,38 @@ app.get('/api/activity', auth, (req, res) => {
     res.json(rows);
   });
 });
+
+// Gotify config endpoints
+app.get('/api/gotify/config', auth, (req, res) => {
+  db.get('SELECT * FROM gotify_config WHERE username = ?', [req.user.username], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(row || { server: '', token: '', types: [] });
+  });
+});
+
+app.post('/api/gotify/config', express.json(), auth, (req, res) => {
+  const { server, token, types } = req.body;
+  console.log('Gotify config POST:', { user: req.user.username, server, token, types });
+  db.run('INSERT OR REPLACE INTO gotify_config (username, server, token, types) VALUES (?, ?, ?, ?)',
+    [req.user.username, server, token, JSON.stringify(types || [])],
+    function (err) {
+      if (err) {
+        console.error('Gotify config DB error:', err.message);
+        return res.status(500).json({ error: err.message });
+      }
+      console.log('Gotify config saved for', req.user.username);
+      res.json({ success: true });
+    });
+});
+
+// Notify user function (Discord + Gotify)
+function notifyUser(username, type, message) {
+  console.log('notifyUser:', { username, type, message });
+  db.run('INSERT INTO notifications (username, message, read, created_at) VALUES (?, ?, 0, ?)', [username, message, new Date().toISOString()], function (err) {
+    if (err) console.error('Notification DB error:', err.message);
+  });
+  sendGotifyNotification(username, type, message);
+}
 
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, 'client', 'build')));
