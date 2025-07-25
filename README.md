@@ -35,6 +35,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Deck Completion Progress Bar:** Visual progress bar for each deck showing collected/total cards and percentage
 - **Contributor Deck Completion Alerts:** In-app notifications for contributors when a deck is completed
 - **Advanced Analytics Charts:** Contributor leaderboard, deck fulfillment speed, card acquisition trends
+- **Gotify Notifications:** Each user can configure their own Gotify server and token in their profile, and select which notification types they want to receive (e.g. deck completion, approval, payout, requests).
 
 ## Tech Stack
 - Node.js + Express.js (backend)
@@ -69,6 +70,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 
 ## Discord & Gotify Integration
 - Configure Discord webhook and Gotify server/token in the Admin Panel.
+- **Each user can configure their own Gotify server and token in their profile, and select which notification types they want to receive.**
 - Automated notifications for deck completions, sales, requests, and admin approvals.
 
 ## Advanced Analytics
@@ -95,7 +97,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Card/Deck History:** View timeline/history for each card and deck
 - **Onboarding Modal:** See a quick-start guide after registration
 - **Deck Value History:** View historical price trends for decks/trinkets
-- **Discord Integration:** Get automated notifications in your guild's Discord channel
+- **Discord & Gotify Integration:** Get automated notifications in your guild's Discord channel and/or your own Gotify server
 
 ### For Admins/Officers
 - **Approve Users:** Review and approve new registrations
@@ -112,7 +114,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Role Management:** Assign roles (Admin, Officer, User)
 - **Guild Bank:** Manage guild-owned cards and decks
 - **Analytics:** View deck completion rates, contributor stats, and payout history
-- **Discord Integration:** Configure Discord webhook for automated notifications
+- **Discord & Gotify Integration:** Configure Discord webhook for automated notifications, and set up Gotify for guild-wide or personal notifications
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards
@@ -136,6 +138,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - `/api/cards/:id/history` - Get card history
 - `/api/decks/:id/history` - Get deck history
 - `/api/discord/webhook` - Configure Discord webhook for notifications
+- `/api/gotify/config` - Configure Gotify server/token for notifications (per user)
 
 ## Discord How-To
 See `discord-how-to.md` for a user guide on sharing progress, coordinating deck completions, and using the app with Discord.
