@@ -20,6 +20,15 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Deck Request Workflow:** Users can request specific decks and track fulfillment status
 - **Export/Import Data:** Export card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update
 - **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency
+- **User Profile Page:** View your cards, completed decks, payouts, and recent activity
+- **Role-Based Permissions:** Admin, Officer, and User roles with different access levels
+- **Admin Panel:** Approve users, allocate decks, fulfill requests, view contributor breakdown, manage payouts
+- **Guild Bank:** Track and manage guild-owned cards and decks
+- **API Documentation:** Built-in API docs for endpoints
+- **Analytics Dashboard:** View deck completion rates, contributor stats, and payout history
+- **Error Handling:** Improved UI for empty states (profile, notifications, activity log)
+- **Modern UI:** Navigation as buttons, MoP visuals, color fixes, mobile-friendly
+- **Auto-Proceed:** App rebuilds and restarts after changes
 
 ## Tech Stack
 - Node.js + Express.js (backend)
@@ -64,6 +73,8 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Deck Requests:** Request specific decks and track their fulfillment status.
 - **Export/Import:** Export your card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update.
 - **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency.
+- **Profile:** View your cards, completed decks, payouts, and recent activity.
+- **Guild Bank:** View and manage guild-owned cards and decks.
 
 ### For Admins/Officers
 - **Approve Users:** Review and approve new registrations.
@@ -76,6 +87,9 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
   - **Deck Requests:** View and fulfill deck requests from users.
   - **Export/Import:** Export all card/deck data to CSV, and import CSV to restore or bulk update.
   - **Activity Log:** View recent actions for all users for transparency.
+  - **Role Management:** Assign roles (Admin, Officer, User)
+  - **Guild Bank:** Manage guild-owned cards and decks
+  - **Analytics:** View deck completion rates, contributor stats, and payout history
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards
@@ -90,6 +104,9 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - `/api/import/cards` - Import cards from CSV
 - `/api/import/decks` - Import completed decks from CSV
 - `/api/activity` - Get recent activity log
+- `/api/profile` - Get user profile info
+- `/api/guild-bank` - Get/manage guild bank cards and decks
+- `/api/analytics` - Get analytics dashboard data
 
 ## Contributing
 Pull requests and suggestions are welcome! Please open an issue or PR for improvements.
