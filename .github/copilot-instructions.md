@@ -58,5 +58,11 @@
 - `client/src/App.css`: Responsive/mobile styles.
 - `README.md`: Setup, features, API reference, troubleshooting.
 
+## Copilot Agent Policy
+- Every time you make a code or feature change, you MUST update the README.md to reflect the change. This includes bug fixes, UI/UX changes, new features, workflow updates, or any modification that affects usage, setup, or functionality.
+- README.md must always be kept in sync with the current state of the codebase and user-facing features.
+- You MUST always ask the user for confirmation before committing or pushing any changes to GitHub.
+- You MUST always bug check (validate and test) code before reporting a task as completed.
+
 ---
 For new features, follow the established notification and config patterns. Always update the activity log and ensure notification delivery is consistent across in-app, Discord, and Gotify.
