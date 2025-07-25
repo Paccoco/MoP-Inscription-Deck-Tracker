@@ -390,11 +390,16 @@ function App() {
       <form onSubmit={async e => {
         e.preventDefault();
         if (!requestForm.deck) return;
+        // If Tiger Deck, include trinket in request
         try {
-          await axios.post('/api/deck-requests', { deck: requestForm.deck }, {
+          const payload = { deck: requestForm.deck };
+          if (requestForm.deck === 'Tiger Deck' && requestForm.trinket) {
+            payload.trinket = requestForm.trinket;
+          }
+          await axios.post('/api/deck-requests', payload, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
-          setRequestForm({ deck: '' });
+          setRequestForm({ deck: '', trinket: '' });
           fetchDeckRequests();
           setErrorMsg('');
           alert('Deck request submitted!');
@@ -406,7 +411,7 @@ function App() {
         <select
           name="deck"
           value={requestForm.deck}
-          onChange={e => setRequestForm({ deck: e.target.value })}
+          onChange={e => setRequestForm({ deck: e.target.value, trinket: '' })}
           required
         >
           <option value="">Select Deck</option>
@@ -414,8 +419,31 @@ function App() {
             <option key={name} value={name}>{name}</option>
           ))}
         </select>
-        <button type="submit">Request Deck</button>
+        {/* Tiger Deck trinket selection */}
+        {requestForm.deck === 'Tiger Deck' && (
+          <div style={{ marginTop: 12 }}>
+            <label htmlFor="trinket">Select Trinket:</label>
+            <select
+              name="trinket"
+              value={requestForm.trinket || ''}
+              onChange={e => setRequestForm({ ...requestForm, trinket: e.target.value })}
+              required
+              style={{ marginLeft: 8 }}
+            >
+              <option value="">Choose...</option>
+              <option value="Relic of Xuen (79328)">Relic of Xuen (79328) - Agility</option>
+              <option value="Relic of Xuen (79327)">Relic of Xuen (79327) - Strength</option>
+            </select>
+          </div>
+        )}
+        <button type="submit" style={{ marginTop: 16 }}>Request Deck</button>
       </form>
+      {errorMsg && (
+        <div className="error" style={{ marginTop: 12, fontWeight: 'bold', fontSize: '1.1em' }}>
+          <span role="img" aria-label="error" style={{ marginRight: 6 }}>❌</span>
+          {errorMsg}
+        </div>
+      )}
     </div>
   );
 
@@ -455,17 +483,30 @@ function App() {
                   )}
                 </td>
                 <td>
-                  {req.deck === 'Tiger Deck' ? (
-                    <span>
+                  {req.deck === 'Tiger Deck' && req.trinket ? (
+                    req.trinket === 'Relic of Xuen (79328)' ? (
                       <a
-                        href={`https://www.wowhead.com/mop-classic/item=${deckTrinketClassicMap['Tiger Deck'].id}`}
-                        data-wowhead={`item=${deckTrinketClassicMap['Tiger Deck'].id}`}
+                        href="https://www.wowhead.com/mop-classic/item=79328"
+                        data-wowhead="item=79328"
                         target="_blank"
                         rel="noopener noreferrer"
                         style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer', marginRight: 8 }}
-                      >Relic of Xuen (79328)</a>
-                      {req.deck}
-                    </span>
+                        title="Relic of Xuen (79328) - Agility"
+                      >Relic of Xuen (79328) - Agility</a>
+                    ) : req.trinket === 'Relic of Xuen (79327)' ? (
+                      <a
+                        href="https://www.wowhead.com/mop-classic/item=79327"
+                        data-wowhead="item=79327"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer', marginRight: 8 }}
+                        title="Relic of Xuen (79327) - Strength"
+                      >Relic of Xuen (79327) - Strength</a>
+                    ) : (
+                      <span>{req.trinket}</span>
+                    )
+                  ) : req.deck === 'Tiger Deck' ? (
+                    <span>{req.deck}</span>
                   ) : (
                     <a
                       href={`https://www.wowhead.com/mop-classic/item=${trinket.id}`}
