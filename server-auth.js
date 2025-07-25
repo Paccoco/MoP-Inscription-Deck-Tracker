@@ -42,9 +42,31 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL,
     deck TEXT NOT NULL,
-    requested_at TEXT NOT NULL
+    requested_at TEXT NOT NULL,
+    fulfilled INTEGER DEFAULT 0,
+    fulfilled_at TEXT
+  )`);
+  // Create activity table
+  db.run(`CREATE TABLE IF NOT EXISTS activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    action TEXT NOT NULL,
+    timestamp TEXT NOT NULL
+  )`);
+  // Create notifications table
+  db.run(`CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    message TEXT NOT NULL,
+    read INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL
   )`);
 });
+
+// Log activity helper
+function logActivity(username, action) {
+  db.run('INSERT INTO activity (username, action, timestamp) VALUES (?, ?, ?)', [username, action, new Date().toISOString()]);
+}
 
 // API route: Get all cards
 app.get('/api/cards', (req, res) => {
@@ -72,6 +94,7 @@ app.post('/api/cards', express.json(), auth, (req, res) => {
         console.error('Add card DB error:', err.message);
         return res.status(500).json({ error: err.message });
       }
+      logActivity(owner, `Added card '${card_name}' to deck '${deck}'`);
       res.json({ id: this.lastID, card_name, owner, deck });
     }
   );
@@ -80,7 +103,7 @@ app.post('/api/cards', express.json(), auth, (req, res) => {
 // API route: Delete a card
 app.delete('/api/cards/:id', auth, (req, res) => {
   const { id } = req.params;
-  db.get('SELECT owner FROM cards WHERE id = ?', [id], (err, card) => {
+  db.get('SELECT owner, card_name, deck FROM cards WHERE id = ?', [id], (err, card) => {
     if (err || !card) {
       return res.status(404).json({ error: 'Card not found' });
     }
@@ -91,6 +114,7 @@ app.delete('/api/cards/:id', auth, (req, res) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
+      logActivity(card.owner, `Removed card '${card.card_name}' from deck '${card.deck}'`);
       res.json({ deleted: this.changes });
     });
   });
@@ -155,6 +179,13 @@ app.post('/api/admin/approve', auth, (req, res) => {
   const { userId } = req.body;
   db.run('UPDATE users SET approved = 1 WHERE id = ?', [userId], function (err) {
     if (err) return res.status(500).json({ error: err.message });
+    // Send notification to user
+    db.get('SELECT username FROM users WHERE id = ?', [userId], (err2, user) => {
+      if (user) {
+        // Approve user notification
+        db.run('INSERT INTO notifications (username, message, read, created_at) VALUES (?, ?, 0, ?)', [user.username, 'Your account has been approved by an admin.', new Date().toISOString()]);
+      }
+    });
     res.json({ success: true });
   });
 });
@@ -192,6 +223,7 @@ app.post('/api/completed-decks', express.json(), auth, (req, res) => {
     [deck, JSON.stringify(contributors), new Date().toISOString(), disposition, recipient || null],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
+      contributors.forEach(c => logActivity(c.owner, `Contributed to completed deck '${deck}' (${disposition})`));
       res.json({ id: this.lastID });
     }
   );
@@ -213,7 +245,7 @@ app.post('/api/deck-requests', express.json(), auth, (req, res) => {
   const username = req.user.username;
   if (!deck) return res.status(400).json({ error: 'Missing deck' });
   db.run(
-    'INSERT INTO deck_requests (username, deck, requested_at) VALUES (?, ?, ?)',
+    'INSERT INTO deck_requests (username, deck, requested_at, fulfilled) VALUES (?, ?, ?, 0)',
     [username, deck, new Date().toISOString()],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
@@ -230,7 +262,7 @@ app.get('/api/deck-requests', auth, (req, res) => {
     LEFT JOIN (
       SELECT owner, COUNT(*) as count FROM cards GROUP BY owner
     ) c ON r.username = c.owner
-    ORDER BY contribution DESC, r.requested_at ASC
+    ORDER BY r.fulfilled ASC, contribution DESC, r.requested_at ASC
   `, [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
@@ -276,6 +308,20 @@ app.post('/api/admin/complete-deck', express.json(), auth, (req, res) => {
     [deck, JSON.stringify(contributors), new Date().toISOString(), disposition, recipient || null],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
+      contributors.forEach(c => logActivity(c.owner, `Contributed to completed deck '${deck}' (${disposition})`));
+      logActivity(req.user.username, `Completed deck '${deck}' (${disposition})`);
+      // Send notifications to contributors
+      contributors.forEach(c => {
+        let msg = disposition === 'sold'
+          ? `Deck '${deck}' was sold. You received a payout.`
+          : `Deck '${deck}' was fulfilled.`;
+        db.run('INSERT INTO notifications (username, message, read, created_at) VALUES (?, ?, 0, ?)', [c.owner, msg, new Date().toISOString()]);
+      });
+      if (disposition === 'sold' && payouts) {
+        payouts.forEach(p => {
+          db.run('INSERT INTO notifications (username, message, read, created_at) VALUES (?, ?, 0, ?)', [p.owner, `You received ${p.payout} gold for deck '${deck}'.`, new Date().toISOString()]);
+        });
+      }
       res.json({ id: this.lastID, payouts, guildCut: disposition === 'sold' ? parseFloat((salePrice * 0.05).toFixed(2)) : null });
     }
   );
@@ -291,16 +337,115 @@ app.get('/api/admin/completed-unallocated-decks', auth, (req, res) => {
   });
 });
 
-// Serve React static files
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+// User profile endpoint
+app.get('/api/profile', auth, (req, res) => {
+  const username = req.user.username;
+  db.all('SELECT * FROM cards WHERE owner = ?', [username], (err, cards) => {
+    if (err) return res.status(500).json({ error: err.message });
+    db.all('SELECT * FROM completed_decks WHERE contributors LIKE ?', [`%${username}%`], (err2, completedDecks) => {
+      if (err2) return res.status(500).json({ error: err2.message });
+      // Payouts: find decks where disposition is 'sold' and user is a contributor
+      const payouts = completedDecks.filter(d => d.disposition === 'sold').map(d => {
+        let contribs = JSON.parse(d.contributors);
+        let count = contribs.filter(c => c.owner === username).length;
+        let total = contribs.length;
+        let salePrice = d.salePrice || 0;
+        let guildCut = salePrice * 0.05;
+        let net = salePrice - guildCut;
+        let amount = total ? ((count/total) * net).toFixed(2) : 0;
+        return { deck: d.deck, amount };
+      });
+      // Activity log: last 10 actions (card add/remove, deck complete)
+      db.all('SELECT * FROM activity WHERE username = ? ORDER BY timestamp DESC LIMIT 10', [username], (err3, activityRows) => {
+        let activity = activityRows ? activityRows.map(a => a.action) : [];
+        res.json({ username, cards, completedDecks, payouts, activity });
+      });
+    });
+  });
+});
 
-// Fallback to React for any non-API route
-app.use((req, res, next) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-  } else {
-    next();
+// API: Get notifications for user
+app.get('/api/notifications', auth, (req, res) => {
+  db.all('SELECT * FROM notifications WHERE username = ? ORDER BY created_at DESC', [req.user.username], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// API: Mark notification as read
+app.post('/api/notifications/read', express.json(), auth, (req, res) => {
+  const { id } = req.body;
+  db.run('UPDATE notifications SET read = 1 WHERE id = ?', [id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// CSV export/import endpoints
+const csvStringify = (rows, columns) => {
+  const header = columns.join(',');
+  const data = rows.map(row => columns.map(col => JSON.stringify(row[col] ?? '')).join(',')).join('\n');
+  return header + '\n' + data;
+};
+
+// Export all cards as CSV
+app.get('/api/export/cards', auth, (req, res) => {
+  db.all('SELECT * FROM cards', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="cards.csv"');
+    res.send(csvStringify(rows, ['id','card_name','owner','deck']));
+  });
+});
+
+// Export all completed decks as CSV
+app.get('/api/export/decks', auth, (req, res) => {
+  db.all('SELECT * FROM completed_decks', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="completed_decks.csv"');
+    res.send(csvStringify(rows, ['id','deck','contributors','completed_at','disposition','recipient']));
+  });
+});
+
+// Import cards from CSV
+app.post('/api/import/cards', express.text({ type: 'text/csv' }), auth, (req, res) => {
+  if (!req.user.is_admin) return res.status(403).json({ error: 'Admin only' });
+  const lines = req.body.split(/\r?\n/);
+  const columns = lines[0].split(',');
+  let imported = 0;
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => JSON.parse(v));
+    if (vals.length < 4 || !vals[1] || !vals[2] || !vals[3]) continue;
+    db.run('INSERT INTO cards (card_name, owner, deck) VALUES (?, ?, ?)', [vals[1], vals[2], vals[3]], err => {
+      if (!err) imported++;
+    });
   }
+  res.json({ imported });
+});
+
+// Import completed decks from CSV
+app.post('/api/import/decks', express.text({ type: 'text/csv' }), auth, (req, res) => {
+  if (!req.user.is_admin) return res.status(403).json({ error: 'Admin only' });
+  const lines = req.body.split(/\r?\n/);
+  const columns = lines[0].split(',');
+  let imported = 0;
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => JSON.parse(v));
+    if (vals.length < 6 || !vals[1] || !vals[2] || !vals[3]) continue;
+    db.run('INSERT INTO completed_decks (deck, contributors, completed_at, disposition, recipient) VALUES (?, ?, ?, ?, ?)', [vals[1], vals[2], vals[3], vals[4], vals[5]], err => {
+      if (!err) imported++;
+    });
+  }
+  res.json({ imported });
+});
+
+// API: Get global activity log (last 50 actions)
+app.get('/api/activity', auth, (req, res) => {
+  db.all('SELECT * FROM activity ORDER BY timestamp DESC LIMIT 50', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
 });
 
 app.listen(PORT, () => {

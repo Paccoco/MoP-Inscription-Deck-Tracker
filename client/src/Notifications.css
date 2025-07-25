@@ -1,0 +1,36 @@
+.notifications-container {
+  max-width: 600px;
+  margin: 32px auto;
+  padding: 24px;
+  background: rgba(20, 92, 44, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(20, 92, 44, 0.08);
+}
+.notifications-container h2 {
+  color: #145c2c;
+  margin-bottom: 18px;
+}
+.notifications-container ul {
+  list-style: none;
+  padding: 0;
+}
+.notifications-container li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+.notifications-container button {
+  background: #145c2c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.95em;
+}
+.notifications-container button:hover {
+  background: #1e7a3c;
+}
+.error {
+  color: #c00;
+  margin: 16px 0;
+}

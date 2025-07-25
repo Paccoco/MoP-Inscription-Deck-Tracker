@@ -5,6 +5,10 @@ import Register from './Register';
 import Login from './Login';
 import Admin from './Admin';
 import CompletedDecks from './CompletedDecks';
+import Profile from './Profile';
+import Notifications from './Notifications';
+import ExportImport from './ExportImport';
+import './Notifications.css';
 
 // Mist of Pandaria Inscription Card Names
 const CARD_NAMES = [
@@ -24,6 +28,52 @@ const deckTrinketClassicMap = {
   'Serpent Deck': { name: "Relic of Yu'lon", id: 79331 },
   'Tiger Deck': { name: "Relic of Xuen", id: 79328 }
 };
+
+function ActivityLog() {
+  const [log, setLog] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    axios.get('/api/activity', { headers: { Authorization: localStorage.getItem('token') } })
+      .then(res => {
+        setLog(res.data);
+        setLoading(false);
+        setError(null);
+      })
+      .catch(() => {
+        setError('Failed to load activity log from server.');
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <div>Loading activity log...</div>;
+  if (error && log.length === 0) return <div>No activity to display.</div>;
+  if (log.length === 0) return <div>No activity to display.</div>;
+  return (
+    <div className="activity-log">
+      <h2>Activity Log</h2>
+      <table className="activity-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Action</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {log.map((entry, i) => (
+            <tr key={i}>
+              <td>{entry.username}</td>
+              <td>{entry.action}</td>
+              <td>{new Date(entry.timestamp).toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 function App() {
   const [cards, setCards] = useState([]);
@@ -198,7 +248,6 @@ function App() {
         <button onClick={() => setShowPage('main')}>Home</button>
         <button onClick={() => setShowPage('allcards')}>All Cards</button>
         <button onClick={handleLogout}>Logout</button>
-        {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
       </nav>
       <table>
         <thead>
@@ -229,7 +278,6 @@ function App() {
         <button onClick={() => setShowPage('main')}>Home</button>
         <button onClick={() => setShowPage('mycards')}>My Cards</button>
         <button onClick={handleLogout}>Logout</button>
-        {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
       </nav>
       <table>
         <thead>
@@ -259,7 +307,6 @@ function App() {
         <button onClick={() => setShowPage('mycards')}>My Cards</button>
         <button onClick={() => setShowPage('allcards')}>All Cards</button>
         <button onClick={handleLogout}>Logout</button>
-        {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
       </nav>
       {completedDecks.length === 0 ? <p>No completed decks yet.</p> : (
         <table>
@@ -308,7 +355,6 @@ function App() {
         <button onClick={() => setShowPage('main')}>Home</button>
         <button onClick={() => setShowPage('deckrequests')}>Deck Requests</button>
         <button onClick={handleLogout}>Logout</button>
-        {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
       </nav>
       <form onSubmit={async e => {
         e.preventDefault();
@@ -348,7 +394,6 @@ function App() {
         <button onClick={() => setShowPage('main')}>Home</button>
         <button onClick={() => setShowPage('requestdeck')}>Request Deck</button>
         <button onClick={handleLogout}>Logout</button>
-        {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
       </nav>
       <table>
         <thead>
@@ -357,13 +402,15 @@ function App() {
             <th>Deck</th>
             <th>Cards Contributed</th>
             <th>Requested At</th>
+            <th>Status</th>
+            {auth.isAdmin && <th>Action</th>}
           </tr>
         </thead>
         <tbody>
           {deckRequests.map(req => {
             const trinket = deckTrinketClassicMap[req.deck];
             return (
-              <tr key={req.id}>
+              <tr key={req.id} style={{ background: req.fulfilled ? '#e0ffe0' : undefined }}>
                 <td>{req.username}</td>
                 <td>
                   <a
@@ -378,6 +425,15 @@ function App() {
                 </td>
                 <td>{req.contribution}</td>
                 <td>{new Date(req.requested_at).toLocaleString()}</td>
+                <td>{req.fulfilled ? `Fulfilled${req.fulfilled_at ? ' (' + new Date(req.fulfilled_at).toLocaleString() + ')' : ''}` : 'Pending'}</td>
+                {auth.isAdmin && <td>
+                  {!req.fulfilled && <button onClick={async () => {
+                    await axios.post('/api/deck-requests/fulfill', { requestId: req.id }, {
+                      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                    });
+                    fetchDeckRequests();
+                  }}>Mark Fulfilled</button>}
+                </td>}
               </tr>
             );
           })}
@@ -401,8 +457,11 @@ function App() {
     <div className="App">
       <nav>
         <button onClick={() => setShowPage('main')}>Card Tracker</button>
-        <button onClick={() => setShowPage('admin')}>Admin</button>
+        {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
         <button onClick={() => setShowPage('completedDecks')}>Completed Decks</button>
+        <button onClick={() => setShowPage('notifications')}>Notifications</button>
+        <button onClick={() => setShowPage('exportimport')}>Export/Import</button>
+        <button onClick={() => setShowPage('activity')}>Activity Log</button>
         {/* Add other navigation buttons as needed */}
       </nav>
       {showPage === 'main' && (
@@ -419,6 +478,7 @@ function App() {
               <button onClick={() => setShowPage('completeddecks')}>Completed Decks</button>
               <button onClick={() => setShowPage('requestdeck')}>Request Deck</button>
               <button onClick={() => setShowPage('deckrequests')}>Deck Requests</button>
+              <button onClick={() => setShowPage('profile')}>Profile</button>
               <button onClick={handleLogout}>Logout</button>
               {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
             </>}
@@ -514,6 +574,10 @@ function App() {
       )}
       {showPage === 'admin' && <Admin />}
       {showPage === 'completedDecks' && <CompletedDecks />}
+      {showPage === 'profile' && <Profile />}
+      {showPage === 'notifications' && <Notifications />}
+      {showPage === 'exportimport' && <ExportImport isAdmin={auth.isAdmin} />}
+      {showPage === 'activity' && <ActivityLog />}
     </div>
   );
 }

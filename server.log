@@ -1,16 +1,31 @@
 nohup: ignoring input
 Server running on port 5000
+Error: ENOENT: no such file or directory, stat '/home/paccoco/project-card-tracker/client/build/index.html'
 Admin users endpoint: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753428650,
-  exp: 1753515050
+  iat: 1753433624,
+  exp: 1753520024
 }
 Admin users endpoint: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753428650,
-  exp: 1753515050
+  iat: 1753433624,
+  exp: 1753520024
+}
+Admin users endpoint: {
+  id: 2,
+  username: 'Paccoco',
+  is_admin: true,
+  iat: 1753433624,
+  exp: 1753520024
+}
+Admin users endpoint: {
+  id: 2,
+  username: 'Paccoco',
+  is_admin: true,
+  iat: 1753433624,
+  exp: 1753520024
 }

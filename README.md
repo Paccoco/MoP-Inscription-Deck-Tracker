@@ -16,6 +16,10 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - Completed Decks page: view disposition (fulfilled/sold), sale price, and payout split
 - Backend endpoint for unallocated completed decks
 - Improved navigation: Card Tracker, Admin, Completed Decks
+- **Notifications:** In-app notifications for admin approvals, deck completions, and payouts
+- **Deck Request Workflow:** Users can request specific decks and track fulfillment status
+- **Export/Import Data:** Export card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update
+- **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency
 
 ## Tech Stack
 - Node.js + Express.js (backend)
@@ -56,6 +60,10 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Track Cards:** Add/remove cards you own on the Card Tracker page.
 - **View Deck Progress:** See grid/summary views and Wowhead trinket tooltips. Completed decks are highlighted.
 - **Completed Decks:** View all completed decks, their disposition, sale price, and payout split.
+- **Notifications:** View in-app notifications for approvals, deck completions, and payouts.
+- **Deck Requests:** Request specific decks and track their fulfillment status.
+- **Export/Import:** Export your card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update.
+- **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency.
 
 ### For Admins/Officers
 - **Approve Users:** Review and approve new registrations.
@@ -64,12 +72,24 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
   - Fulfill a deck request or sell a deck
   - Set sale price and recipient
   - View payout split for contributors
+  - **Notifications:** Users are notified automatically for approvals, deck completions, and payouts.
+  - **Deck Requests:** View and fulfill deck requests from users.
+  - **Export/Import:** Export all card/deck data to CSV, and import CSV to restore or bulk update.
+  - **Activity Log:** View recent actions for all users for transparency.
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards
 - `/api/completed-decks` - Get/add completed decks
 - `/api/admin/completed-unallocated-decks` - Get completed decks not yet allocated
 - `/api/admin/approve` - Approve users
+- `/api/notifications` - Get notifications for logged-in user
+- `/api/notifications/read` - Mark notification as read
+- `/api/deck-requests` - Get/add deck requests
+- `/api/export/cards` - Export all cards as CSV
+- `/api/export/decks` - Export all completed decks as CSV
+- `/api/import/cards` - Import cards from CSV
+- `/api/import/decks` - Import completed decks from CSV
+- `/api/activity` - Get recent activity log
 
 ## Contributing
 Pull requests and suggestions are welcome! Please open an issue or PR for improvements.
