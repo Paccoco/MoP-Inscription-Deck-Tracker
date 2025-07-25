@@ -1,6 +1,6 @@
 # Mist of Pandaria Card Tracker
 
-**Version: 0.1b**
+**Version: 0.2a**
 
 A self-hosted web app for World of Warcraft Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -20,7 +20,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - Improved navigation: Card Tracker, Admin, Completed Decks, Profile, Notifications, Analytics
 - **Notifications:** In-app notifications for admin approvals, deck completions, payouts, and requests
 - **Deck Request Workflow:** Users can request specific decks and track fulfillment status
-- **Export/Import Data:** Export card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update
+- **Export/Import Data:** Export card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update (**admin panel only**)
 - **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency
 - **User Profile:** View your cards, completed decks, payouts, and recent activity
 - **Role-Based Permissions:** Admin, Officer, and User roles
@@ -28,7 +28,6 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Analytics Dashboard:** Charts for deck completion rates, contributor stats, payout trends
 - **Theme Customization:** Choose between several MoP-themed backgrounds and color schemes
 - **Deck Value Estimator:** See estimated deck/trinket values in real time
-- **Email Notifications:** Opt-in for email alerts when a requested deck is completed or sold
 - **Card/Deck History:** Timeline/history for each card and deck, including ownership changes and sales
 - **Onboarding Modal:** New users see a quick-start guide after registration
 - **Deck Value History:** View historical price trends for decks/trinkets
@@ -88,13 +87,11 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Completed Decks:** View all completed decks, their disposition, sale price, payout split, and estimated value
 - **Notifications:** View in-app notifications for approvals, deck completions, payouts, and requests
 - **Deck Requests:** Request specific decks and track their fulfillment status
-- **Export/Import:** Export your card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update
 - **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency
 - **Profile:** View your cards, completed decks, payouts, and recent activity
 - **Guild Bank:** View and manage guild-owned cards and decks
 - **Theme Customization:** Choose your preferred MoP-themed background and color scheme
 - **Analytics:** View charts for deck completion rates, contributor stats, and payout trends
-- **Email Notifications:** Opt-in for email alerts when a requested deck is completed or sold
 - **Card/Deck History:** View timeline/history for each card and deck
 - **Onboarding Modal:** See a quick-start guide after registration
 - **Deck Value History:** View historical price trends for decks/trinkets
@@ -110,7 +107,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
   - View estimated deck value
 - **Notifications:** Users are notified automatically for approvals, deck completions, payouts, and requests
 - **Deck Requests:** View and fulfill deck requests from users
-- **Export/Import:** Export all card/deck data to CSV, and import CSV to restore or bulk update
+- **Export/Import:** Export/import all card/deck data to CSV (**admin panel only**)
 - **Activity Log:** View recent actions for all users for transparency
 - **Role Management:** Assign roles (Admin, Officer, User)
 - **Guild Bank:** Manage guild-owned cards and decks
@@ -125,11 +122,12 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - `/api/notifications` - Get notifications for logged-in user
 - `/api/notifications/read` - Mark notification as read
 - `/api/deck-requests` - Get/add deck requests
-- `/api/export/cards` - Export all cards as CSV
-- `/api/export/decks` - Export all completed decks as CSV
-- `/api/import/cards` - Import cards from CSV
-- `/api/import/decks` - Import completed decks from CSV
+- `/api/export/cards` - Export all cards as CSV (**admin only**)
+- `/api/export/decks` - Export all completed decks as CSV (**admin only**)
+- `/api/import/cards` - Import cards from CSV (**admin only**)
+- `/api/import/decks` - Import completed decks from CSV (**admin only**)
 - `/api/activity` - Get recent activity log
+- `/api/activity/all` - Get recent activity log for all users (**admin only**)
 - `/api/profile` - Get user profile info
 - `/api/guild-bank` - Get/manage guild bank cards and decks
 - `/api/analytics` - Get analytics dashboard data

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import DiscordWebhookConfig from './DiscordWebhookConfig';
+import ExportImport from './ExportImport';
 
 function Admin({ setShowPage }) {
   const [users, setUsers] = useState([]);
@@ -88,16 +89,11 @@ function Admin({ setShowPage }) {
     if (setShowPage) setShowPage('dashboard');
     else window.location.href = '/';
   };
-  const goBack = () => {
-    if (setShowPage) setShowPage('dashboard');
-    else window.history.back();
-  };
 
   return (
     <div className="admin-container">
       <h2>Admin Panel</h2>
       <div style={{ marginBottom: '1em' }}>
-        <button onClick={goBack} style={{ marginRight: '0.5em' }}>Back</button>
         <button onClick={goHome}>Home</button>
       </div>
       {error && <div className="error">{error}</div>}
@@ -202,6 +198,8 @@ function Admin({ setShowPage }) {
       </table>
       <h3>Discord Integration</h3>
       <DiscordWebhookConfig />
+      <h3>Export / Import Data</h3>
+      <ExportImport isAdmin={true} />
     </div>
   );
 }

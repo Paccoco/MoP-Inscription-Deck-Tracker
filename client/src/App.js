@@ -7,7 +7,6 @@ import Admin from './Admin';
 import CompletedDecks from './CompletedDecks';
 import Profile from './Profile';
 import Notifications from './Notifications';
-import ExportImport from './ExportImport';
 import './Notifications.css';
 
 function OnboardingModal({ show, onClose }) {
@@ -21,7 +20,6 @@ function OnboardingModal({ show, onClose }) {
           <li>Request decks and get notified</li>
           <li>Export/import your collection</li>
           <li>Customize your theme</li>
-          <li>Opt-in for email alerts</li>
           <li>Check analytics and history</li>
         </ul>
         <button onClick={onClose} style={{ marginTop: 16 }}>Got it!</button>
@@ -43,36 +41,42 @@ const DECK_NAMES = ['Crane Deck', 'Ox Deck', 'Serpent Deck', 'Tiger Deck'];
 
 // MoP Classic trinket IDs
 const deckTrinketClassicMap = {
-  'Crane Deck': { name: "Relic of Chi Ji", id: 79327 },
+  'Crane Deck': { name: "Relic of Chi Ji", id: 79330 },
   'Ox Deck': { name: "Relic of Niuzao", id: 79329 },
   'Serpent Deck': { name: "Relic of Yu'lon", id: 79331 },
   'Tiger Deck': { name: "Relic of Xuen", id: 79328 }
 };
 
-function ActivityLog() {
+function ActivityLog({ isAdmin }) {
   const [log, setLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/activity', { headers: { Authorization: localStorage.getItem('token') } })
+    const endpoint = isAdmin ? '/api/activity/all' : '/api/activity';
+    const token = localStorage.getItem('token');
+    axios.get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => {
-        setLog(res.data);
+        // Defensive: only set log if response is an array
+        if (Array.isArray(res.data)) {
+          setLog(res.data);
+        } else {
+          setLog([]);
+          setError('No activity data received.');
+        }
         setLoading(false);
-        setError(null);
       })
       .catch(() => {
         setError('Failed to load activity log from server.');
         setLoading(false);
       });
-  }, []);
+  }, [isAdmin]);
 
   if (loading) return <div>Loading activity log...</div>;
-  if (error && log.length === 0) return <div>No activity to display.</div>;
-  if (log.length === 0) return <div>No activity to display.</div>;
+  if (!Array.isArray(log) || log.length === 0) return <div>No activity to display.</div>;
   return (
     <div className="activity-log">
-      <h2>Activity Log</h2>
+      <h2>Activity Log {isAdmin ? '(All Users)' : ''}</h2>
       <table className="activity-table">
         <thead>
           <tr>
@@ -433,15 +437,28 @@ function App() {
               <tr key={req.id} style={{ background: req.fulfilled ? '#e0ffe0' : undefined }}>
                 <td>{req.username}</td>
                 <td>
-                  <a
-                    href={`https://www.wowhead.com/mop-classic/item=${trinket.id}`}
-                    data-wowhead={`item=${trinket.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer' }}
-                  >
-                    {req.deck}
-                  </a>
+                  {req.deck === 'Tiger Deck' ? (
+                    <span>
+                      <a
+                        href={`https://www.wowhead.com/mop-classic/item=${deckTrinketClassicMap['Tiger Deck'].id}`}
+                        data-wowhead={`item=${deckTrinketClassicMap['Tiger Deck'].id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer', marginRight: 8 }}
+                      >Relic of Xuen (79328)</a>
+                      {req.deck}
+                    </span>
+                  ) : (
+                    <a
+                      href={`https://www.wowhead.com/mop-classic/item=${trinket.id}`}
+                      data-wowhead={`item=${trinket.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer' }}
+                    >
+                      {req.deck}
+                    </a>
+                  )}
                 </td>
                 <td>{req.contribution}</td>
                 <td>{new Date(req.requested_at).toLocaleString()}</td>
@@ -481,7 +498,6 @@ function App() {
         {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
         <button onClick={() => setShowPage('completedDecks')}>Completed Decks</button>
         <button onClick={() => setShowPage('notifications')}>Notifications</button>
-        <button onClick={() => setShowPage('exportimport')}>Export/Import</button>
         <button onClick={() => setShowPage('activity')}>Activity Log</button>
         {/* Add other navigation buttons as needed */}
       </nav>
@@ -597,8 +613,7 @@ function App() {
       {showPage === 'completedDecks' && <CompletedDecks />}
       {showPage === 'profile' && <Profile />}
       {showPage === 'notifications' && <Notifications />}
-      {showPage === 'exportimport' && <ExportImport isAdmin={auth.isAdmin} />}
-      {showPage === 'activity' && <ActivityLog />}
+      {showPage === 'activity' && <ActivityLog isAdmin={auth.isAdmin} />}
     </div>
   );
 }
