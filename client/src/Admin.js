@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import DiscordWebhookConfig from './DiscordWebhookConfig';
+import GotifyConfig from './GotifyConfig';
 
 function Admin({ setShowPage }) {
   const [users, setUsers] = useState([]);
@@ -156,6 +158,10 @@ function Admin({ setShowPage }) {
           <div>Guild Cut: {guildCut} gold</div>
         </div>
       )}
+      <h3>Discord Integration</h3>
+      <DiscordWebhookConfig />
+      <h3>Gotify Integration</h3>
+      <GotifyConfig />
     </div>
   );
 }

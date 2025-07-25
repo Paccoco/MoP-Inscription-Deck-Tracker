@@ -30,6 +30,9 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Deck Value Estimator:** See estimated deck/trinket values in real time
 - **Email Notifications:** Opt-in for email alerts when a requested deck is completed or sold
 - **Card/Deck History:** Timeline/history for each card and deck, including ownership changes and sales
+- **Onboarding Modal:** New users see a quick-start guide after registration
+- **Deck Value History:** View historical price trends for decks/trinkets
+- **Discord Integration:** Automated notifications for deck completions, sales, and requests
 
 ## Tech Stack
 - Node.js + Express.js (backend)
@@ -80,6 +83,9 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Analytics:** View charts for deck completion rates, contributor stats, and payout trends
 - **Email Notifications:** Opt-in for email alerts when a requested deck is completed or sold
 - **Card/Deck History:** View timeline/history for each card and deck
+- **Onboarding Modal:** See a quick-start guide after registration
+- **Deck Value History:** View historical price trends for decks/trinkets
+- **Discord Integration:** Get automated notifications in your guild's Discord channel
 
 ### For Admins/Officers
 - **Approve Users:** Review and approve new registrations
@@ -96,6 +102,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Role Management:** Assign roles (Admin, Officer, User)
 - **Guild Bank:** Manage guild-owned cards and decks
 - **Analytics:** View deck completion rates, contributor stats, and payout history
+- **Discord Integration:** Configure Discord webhook for automated notifications
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards
@@ -114,8 +121,13 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - `/api/guild-bank` - Get/manage guild bank cards and decks
 - `/api/analytics` - Get analytics dashboard data
 - `/api/decks/:id/value` - Get estimated deck value
+- `/api/decks/:deck/value-history` - Get historical value for a deck
 - `/api/cards/:id/history` - Get card history
 - `/api/decks/:id/history` - Get deck history
+- `/api/discord/webhook` - Configure Discord webhook for notifications
+
+## Discord How-To
+See `discord-how-to.md` for a user guide on sharing progress, coordinating deck completions, and using the app with Discord.
 
 ## Contributing
 Pull requests and suggestions are welcome! Please open an issue or PR for improvements.

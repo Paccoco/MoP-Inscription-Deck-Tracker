@@ -9,7 +9,26 @@ import Profile from './Profile';
 import Notifications from './Notifications';
 import ExportImport from './ExportImport';
 import './Notifications.css';
-import Chart from 'chart.js/auto';
+
+function OnboardingModal({ show, onClose }) {
+  if (!show) return null;
+  return (
+    <div className="onboarding-modal" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999 }}>
+      <div style={{ background: '#23272f', color: '#c9e7c9', maxWidth: 400, margin: '80px auto', padding: 32, borderRadius: 12, boxShadow: '0 2px 16px #0008' }}>
+        <h2>Welcome to MoP Card Tracker!</h2>
+        <ul>
+          <li>Track your cards and decks</li>
+          <li>Request decks and get notified</li>
+          <li>Export/import your collection</li>
+          <li>Customize your theme</li>
+          <li>Opt-in for email alerts</li>
+          <li>Check analytics and history</li>
+        </ul>
+        <button onClick={onClose} style={{ marginTop: 16 }}>Got it!</button>
+      </div>
+    </div>
+  );
+}
 
 // Mist of Pandaria Inscription Card Names
 const CARD_NAMES = [
@@ -79,12 +98,12 @@ function ActivityLog() {
 function App() {
   const [cards, setCards] = useState([]);
   const [form, setForm] = useState({ card_name: '', deck: '' });
-  const [loading, setLoading] = useState(false);
   const [auth, setAuth] = useState({ loggedIn: false, isAdmin: false });
   const [showPage, setShowPage] = useState('main');
   const [completedDecks, setCompletedDecks] = useState([]);
   const [deckRequests, setDeckRequests] = useState([]);
   const [requestForm, setRequestForm] = useState({ deck: '' });
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Fetch cards from backend
   useEffect(() => {
@@ -92,14 +111,12 @@ function App() {
   }, []);
 
   const fetchCards = async () => {
-    setLoading(true);
     try {
       const res = await axios.get('/api/cards');
       setCards(res.data);
     } catch (err) {
       alert('Error fetching cards');
     }
-    setLoading(false);
   };
 
   const fetchCompletedDecks = async () => {
@@ -167,14 +184,6 @@ function App() {
     }
   };
 
-  function getCardCounts(cards) {
-    const counts = {};
-    cards.forEach(card => {
-      counts[card.card_name] = (counts[card.card_name] || 0) + 1;
-    });
-    return counts;
-  }
-
   function getDeckStatus(cards) {
     const deckStatus = {};
     DECK_NAMES.forEach(deck => {
@@ -204,7 +213,6 @@ function App() {
     return result;
   }
 
-  const cardCounts = getCardCounts(cards);
   const deckStatus = getDeckStatus(cards);
   const deckCardCounts = getDeckCardCounts(cards);
 
@@ -238,6 +246,16 @@ function App() {
     }
   };
   const username = getUsername();
+
+  useEffect(() => {
+    if (localStorage.getItem('showOnboarding') !== 'false') {
+      setShowOnboarding(true);
+    }
+  }, []);
+  const handleCloseOnboarding = () => {
+    setShowOnboarding(false);
+    localStorage.setItem('showOnboarding', 'false');
+  };
 
   if (showPage === 'register') return <Register onRegister={() => setShowPage('login')} />;
   if (showPage === 'login') return <Login onLogin={() => { setShowPage('main'); window.location.reload(); }} />;
@@ -456,6 +474,7 @@ function App() {
 
   return (
     <div className="App">
+      <OnboardingModal show={showOnboarding} onClose={handleCloseOnboarding} />
       <nav>
         <button onClick={() => setShowPage('main')}>Card Tracker</button>
         {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
