@@ -642,6 +642,22 @@ app.delete('/api/deck-requests/:id', express.json(), auth, (req, res) => {
   });
 });
 
+// API: Delete a single notification
+app.delete('/api/notifications/:id', auth, (req, res) => {
+  db.run('DELETE FROM notifications WHERE id = ? AND username = ?', [req.params.id, req.user.username], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// API: Delete all notifications for user
+app.delete('/api/notifications', auth, (req, res) => {
+  db.run('DELETE FROM notifications WHERE username = ?', [req.user.username], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

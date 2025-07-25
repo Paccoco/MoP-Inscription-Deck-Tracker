@@ -5,6 +5,9 @@
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
+- Global UI/UX cleanup: all major sections (dashboard, tables, forms, admin, profile, completed decks, activity log) now use card-style backgrounds for improved readability and visual consistency. Tables and forms have better spacing, alignment, and button placement. Section headers are visually distinct.
+- Notifications page UI improved: notifications now display on a solid background for better readability, and delete buttons are aligned for a cleaner look.
+- Added ability to delete individual notifications and mass delete all notifications from the Notifications page (in-app).
 - Codebase streamlined: redundant logic and UI patterns refactored into shared React components (`NavBar`, `CardTable`, `DeckTable`) and custom hooks (`useFetchCards`, `useFetchDecks`, `useFetchNotifications`).
 - Large components split into smaller, focused ones; domain logic moved to utility functions.
 - Backend notification delivery and activity logging consolidated into helper functions; endpoints merged where possible.
@@ -29,6 +32,8 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - Mobile-friendly, responsive design
 - Dark mode and MoP-themed visuals
 - Add/remove cards and owners
+- Notifications page features improved readability with a solid background and aligned delete buttons
+- All major sections use card-style backgrounds and improved layout for a modern, clean look
 - SQLite database for persistent storage
 - React frontend, Express backend
 - Easy deployment and auto-start script
@@ -36,7 +41,7 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - Completed Decks page: view disposition (fulfilled/sold), sale price, payout split, and estimated deck value
 - Backend endpoint for unallocated completed decks
 - Improved navigation: Card Tracker, Admin, Completed Decks, Profile, Notifications, Analytics
-- **Notifications:** In-app notifications for admin approvals, deck completions, payouts, requests, and new user registrations
+- **Notifications:** In-app notifications for admin approvals, deck completions, payouts, requests, and new user registrations. You can now delete individual notifications or mass delete all notifications from the Notifications page.
 - **User Profile:** View your cards, completed decks, payouts, recent activity, and configure Gotify notifications
 - **Discord Integration:** Automated notifications for deck completions, sales, and requests
 - **Contributor Deck Completion Alerts:** In-app notifications for contributors when a deck is completed
