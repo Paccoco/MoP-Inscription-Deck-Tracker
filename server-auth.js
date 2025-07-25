@@ -5,6 +5,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -608,6 +609,29 @@ function notifyUser(username, type, message) {
   });
   sendGotifyNotification(username, type, message);
 }
+
+// Security Dashboard API endpoints
+app.get('/api/admin/security-scan', auth, (req, res) => {
+  fs.readFile(path.join(__dirname, 'security-scan.json'), 'utf8', (err, data) => {
+    if (err) return res.status(500).json({ error: 'Security scan data not available.' });
+    res.json(JSON.parse(data));
+  });
+});
+
+app.get('/api/admin/dependency-status', auth, (req, res) => {
+  fs.readFile(path.join(__dirname, 'security-scan.json'), 'utf8', (err, data) => {
+    if (err) return res.status(500).json({ error: 'Dependency status not available.' });
+    const scan = JSON.parse(data);
+    res.json(scan.dependencies || {});
+  });
+});
+
+app.get('/api/admin/notification-history', auth, (req, res) => {
+  db.all('SELECT * FROM notifications WHERE message LIKE "%security%" OR message LIKE "%system%" ORDER BY created_at DESC LIMIT 100', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'Notification history not available.' });
+    res.json(rows);
+  });
+});
 
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, 'client', 'build')));

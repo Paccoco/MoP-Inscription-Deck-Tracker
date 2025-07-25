@@ -19,6 +19,12 @@ function Admin({ setShowPage }) {
   const [notificationStats, setNotificationStats] = useState({ total: 0, unread: 0 });
   const [recentActivity, setRecentActivity] = useState([]);
 
+  // Security Dashboard State
+  const [securityScan, setSecurityScan] = useState(null);
+  const [dependencyStatus, setDependencyStatus] = useState(null);
+  const [notificationHistory, setNotificationHistory] = useState([]);
+  const [securityError, setSecurityError] = useState('');
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const fetchUsers = async () => {
@@ -63,6 +69,16 @@ function Admin({ setShowPage }) {
         setRecentActivity(res.data.slice(0, 5)); // Show last 5 activities
       } catch {}
     };
+    // Fetch security dashboard data
+    axios.get('/api/admin/security-scan', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setSecurityScan(res.data))
+      .catch(() => setSecurityError('Security scan data unavailable.'));
+    axios.get('/api/admin/dependency-status', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setDependencyStatus(res.data))
+      .catch(() => setSecurityError('Dependency status unavailable.'));
+    axios.get('/api/admin/notification-history', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => setNotificationHistory(res.data))
+      .catch(() => setSecurityError('Notification history unavailable.'));
     fetchUsers();
     fetchPending();
     fetchCompletedDecks();
@@ -238,6 +254,59 @@ function Admin({ setShowPage }) {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="security-dashboard" style={{ margin: '2em 0', padding: '1em', border: '1px solid #ccc', borderRadius: 8 }}>
+        <h2>Security Dashboard</h2>
+        {securityError && <div className="error">{securityError}</div>}
+        <div>
+          <h3>Security Scan Results</h3>
+          {securityScan ? (
+            <div>
+              <div><strong>npm audit:</strong> {securityScan.npm_audit.summary} <span style={{ color: '#888' }}>({new Date(securityScan.npm_audit.date).toLocaleString()})</span></div>
+              <div><strong>ggshield:</strong> {securityScan.ggshield.summary} <span style={{ color: '#888' }}>({new Date(securityScan.ggshield.date).toLocaleString()})</span></div>
+              <button onClick={() => window.open('/security-scan.json', '_blank')}>Export Security Scan JSON</button>
+              <a href="/github/workflows/security.yml" target="_blank" rel="noopener noreferrer" style={{ marginLeft: 16 }}>View CI Logs</a>
+            </div>
+          ) : <div>Loading security scan...</div>}
+        </div>
+        <div>
+          <h3>Dependency Status</h3>
+          {dependencyStatus ? (
+            <div>
+              <div><strong>Outdated:</strong> {dependencyStatus.outdated.length}</div>
+              <div><strong>Vulnerable:</strong> {dependencyStatus.vulnerable.length}</div>
+              {dependencyStatus.outdated.length > 0 && (
+                <ul>{dependencyStatus.outdated.map((dep, i) => <li key={i}>{dep}</li>)}</ul>
+              )}
+              {dependencyStatus.vulnerable.length > 0 && (
+                <ul>{dependencyStatus.vulnerable.map((dep, i) => <li key={i}>{dep}</li>)}</ul>
+              )}
+            </div>
+          ) : <div>Loading dependency status...</div>}
+        </div>
+        <div>
+          <h3>Security & System Notification History</h3>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th>Message</th>
+                <th>User</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {notificationHistory.length === 0 ? (
+                <tr><td colSpan={3}>No notifications found.</td></tr>
+              ) : notificationHistory.map((n, i) => (
+                <tr key={i}>
+                  <td>{n.message}</td>
+                  <td>{n.username}</td>
+                  <td>{new Date(n.created_at).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       <div className="action-buttons">
         <h3>Discord Integration</h3>

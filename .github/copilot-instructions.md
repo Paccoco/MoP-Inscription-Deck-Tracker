@@ -63,6 +63,7 @@
 - README.md must always be kept in sync with the current state of the codebase and user-facing features.
 - You MUST always ask the user for confirmation before committing or pushing any changes to GitHub.
 - You MUST always bug check (validate and test) code before reporting a task as completed.
+- When updating or tracking tasks in `tasks.md`, ONLY use ✅ to mark completed tasks. Incomplete or not started tasks should not be marked in any way.
 
 ---
 For new features, follow the established notification and config patterns. Always update the activity log and ensure notification delivery is consistent across in-app, Discord, and Gotify.

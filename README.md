@@ -1,6 +1,6 @@
 # Mist of Pandaria Card Tracker
 
-**Version: 0.5.6**
+**Version: 0.5.7b**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -12,6 +12,29 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - Confirmed no secrets or sensitive information in codebase via GitGuardian CLI scan.
 - All previous features and UI/UX improvements remain in place.
 - Version bumped to 0.5.6 for security and notification enhancements.
+
+## Release Notes: Version 0.5.7b (2025-07-25)
+
+### Major Features & Improvements
+- **Security Dashboard (Admin Panel):**
+  - View recent security scan results (npm audit, ggshield), dependency status, and notification history.
+  - Filterable tables, export options, and CI log links for transparency.
+- **Automated Dependency Updates:**
+  - Dependabot integration for weekly PRs on outdated/vulnerable dependencies.
+  - Documented workflow for safe, automated updates.
+- **Automated Test Coverage Reporting:**
+  - Jest coverage reporting for backend and frontend.
+  - Coverage instructions and CI integration documented.
+- **Documentation:**
+  - README updated for new features, workflows, and troubleshooting.
+  - All new endpoints and admin features described.
+- **Bug Checks & Validation:**
+  - Full bug check and validation for new features.
+
+### How to Upgrade
+- Pull the latest changes from `master`.
+- Rebuild frontend and restart backend for full feature access.
+- Review new admin dashboard and workflows in README.
 
 ## Features
 - Track all Mist of Pandaria Inscription Cards
@@ -138,6 +161,22 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - `/api/decks/:id/history` - Get deck history
 - `/api/discord/webhook` - Configure Discord webhook for notifications
 
+## Automated Dependency Updates
+
+This repository uses **Dependabot** (or Renovate) for automated dependency updates:
+- Dependabot is enabled in GitHub repository settings to check for outdated or vulnerable dependencies in `package.json` and `package-lock.json`.
+- Dependabot automatically creates pull requests for dependency updates on a weekly schedule (or on release).
+- Each PR includes details about the update, changelog, and security impact.
+- All dependency update PRs are reviewed and merged after passing CI and security checks.
+
+**Workflow:**
+1. Dependabot scans for outdated/vulnerable dependencies.
+2. Creates PRs for updates.
+3. CI runs security and test checks.
+4. Admin reviews and merges PRs.
+
+For more details, see `.github/dependabot.yml` or repository settings.
+
 ## Discord How-To
 See `discord-how-to.md` for a user guide on sharing progress, coordinating deck completions, and using the app with Discord.
 
@@ -158,7 +197,7 @@ Below are example screenshots and GIFs demonstrating key features and UI section
 ![Mobile View](docs/screenshots/mobile-view.png)
 
 ### Completed Decks & Analytics
-![Completed Decks](docs/screenshots/completed-decks.png)
+![Completed Decks](docs/screenshots/completed_decks.png)
 ![Analytics](docs/screenshots/analytics.png)
 
 ### Example GIF: Deck Completion Flow
@@ -177,6 +216,26 @@ Pull requests and suggestions are welcome! Please open an issue or PR for improv
 
 ## License
 MIT
+
+## Test Coverage Reporting
+
+This repository uses **Jest** for backend and frontend test coverage:
+- Run `npm test -- --coverage` to generate a coverage report for all tests.
+- Coverage results are displayed in the terminal and saved in the `coverage/` directory.
+- The admin dashboard displays coverage status and summary (coming soon).
+- A coverage badge will be added to the README once CI integration is complete.
+
+**How to run coverage locally:**
+```bash
+npm test -- --coverage
+```
+
+**How to interpret results:**
+- Coverage summary includes statements, branches, functions, and lines covered.
+- Review uncovered lines/functions for missing tests.
+
+**CI Integration:**
+- Coverage reporting will be integrated into CI workflows for automated status updates.
 
 ---
 *Created by Paccoco for Mist of Pandaria Classic guilds.*
