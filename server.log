@@ -1,2 +1,16 @@
 nohup: ignoring input
 Server running on port 5000
+Admin users endpoint: {
+  id: 2,
+  username: 'Paccoco',
+  is_admin: true,
+  iat: 1753428650,
+  exp: 1753515050
+}
+Admin users endpoint: {
+  id: 2,
+  username: 'Paccoco',
+  is_admin: true,
+  iat: 1753428650,
+  exp: 1753515050
+}
