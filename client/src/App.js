@@ -9,6 +9,14 @@ import Profile from './Profile';
 import Notifications from './Notifications';
 import ExportImport from './ExportImport';
 import './Notifications.css';
+import { useState } from 'react';
+import Chart from 'chart.js/auto';
+import ThemeSelector from './ThemeSelector';
+import EmailOptIn from './EmailOptIn';
+import CardHistory from './CardHistory';
+import DeckHistory from './DeckHistory';
+import AnalyticsDashboard from './AnalyticsDashboard';
+import DeckValue from './DeckValue';
 
 // Mist of Pandaria Inscription Card Names
 const CARD_NAMES = [
@@ -73,6 +81,114 @@ function ActivityLog() {
       </table>
     </div>
   );
+}
+
+function ThemeSelector({ onThemeChange }) {
+  const themes = [
+    { name: 'MoP Green', value: 'mop-green' },
+    { name: 'MoP Jade', value: 'mop-jade' },
+    { name: 'MoP Dark', value: 'mop-dark' },
+    { name: 'Classic', value: 'classic' }
+  ];
+  const [selected, setSelected] = useState(localStorage.getItem('theme') || 'mop-green');
+  function handleChange(e) {
+    setSelected(e.target.value);
+    localStorage.setItem('theme', e.target.value);
+    onThemeChange(e.target.value);
+  }
+  return (
+    <div className="theme-selector">
+      <label>Theme: </label>
+      <select value={selected} onChange={handleChange}>
+        {themes.map(t => <option key={t.value} value={t.value}>{t.name}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function EmailOptIn() {
+  const [email, setEmail] = useState('');
+  const [optIn, setOptIn] = useState(false);
+  function saveOptIn() {
+    axios.post('/api/profile/email-opt-in', { email, optIn }, { headers: { Authorization: localStorage.getItem('token') } });
+  }
+  return (
+    <div className="email-opt-in">
+      <label>Email for notifications: <input value={email} onChange={e => setEmail(e.target.value)} /></label>
+      <label><input type="checkbox" checked={optIn} onChange={e => setOptIn(e.target.checked)} /> Opt-in for deck completion emails</label>
+      <button onClick={saveOptIn}>Save</button>
+    </div>
+  );
+}
+
+function CardHistory({ cardId }) {
+  const [history, setHistory] = useState([]);
+  useEffect(() => {
+    axios.get(`/api/cards/${cardId}/history`, { headers: { Authorization: localStorage.getItem('token') } })
+      .then(res => setHistory(res.data));
+  }, [cardId]);
+  return (
+    <div className="card-history">
+      <h3>Card History</h3>
+      <ul>{history.map(h => <li key={h.id}>{h.action} by {h.owner} at {new Date(h.timestamp).toLocaleString()}</li>)}</ul>
+    </div>
+  );
+}
+
+function DeckHistory({ deckId }) {
+  const [history, setHistory] = useState([]);
+  useEffect(() => {
+    axios.get(`/api/decks/${deckId}/history`, { headers: { Authorization: localStorage.getItem('token') } })
+      .then(res => setHistory(res.data));
+  }, [deckId]);
+  return (
+    <div className="deck-history">
+      <h3>Deck History</h3>
+      <ul>{history.map(h => <li key={h.id}>{h.action} {h.details} at {new Date(h.timestamp).toLocaleString()}</li>)}</ul>
+    </div>
+  );
+}
+
+function AnalyticsDashboard() {
+  const [deckData, setDeckData] = useState([]);
+  const [contribData, setContribData] = useState([]);
+  const [payoutData, setPayoutData] = useState([]);
+  useEffect(() => {
+    axios.get('/api/analytics/deck-completion', { headers: { Authorization: localStorage.getItem('token') } }).then(res => setDeckData(res.data));
+    axios.get('/api/analytics/contributors', { headers: { Authorization: localStorage.getItem('token') } }).then(res => setContribData(res.data));
+    axios.get('/api/analytics/payouts', { headers: { Authorization: localStorage.getItem('token') } }).then(res => setPayoutData(res.data));
+  }, []);
+  useEffect(() => {
+    if (deckData.length) {
+      const ctx = document.getElementById('deckChart').getContext('2d');
+      new Chart(ctx, { type: 'bar', data: { labels: deckData.map(d => d.deck), datasets: [{ label: 'Completed', data: deckData.map(d => d.completed) }] } });
+    }
+    if (contribData.length) {
+      const ctx = document.getElementById('contribChart').getContext('2d');
+      new Chart(ctx, { type: 'pie', data: { labels: contribData.map(c => c.owner), datasets: [{ label: 'Cards', data: contribData.map(c => c.cards) }] } });
+    }
+    if (payoutData.length) {
+      const ctx = document.getElementById('payoutChart').getContext('2d');
+      new Chart(ctx, { type: 'doughnut', data: { labels: payoutData.map(p => p.recipient), datasets: [{ label: 'Payout', data: payoutData.map(p => p.total_payout) }] } });
+    }
+  }, [deckData, contribData, payoutData]);
+  return (
+    <div className="analytics-dashboard">
+      <h2>Analytics</h2>
+      <canvas id="deckChart" width="400" height="200"></canvas>
+      <canvas id="contribChart" width="400" height="200"></canvas>
+      <canvas id="payoutChart" width="400" height="200"></canvas>
+    </div>
+  );
+}
+
+function DeckValue({ deckId }) {
+  const [value, setValue] = useState(null);
+  useEffect(() => {
+    axios.get(`/api/decks/${deckId}/value`, { headers: { Authorization: localStorage.getItem('token') } })
+      .then(res => setValue(res.data.estimated_value));
+  }, [deckId]);
+  return <div className="deck-value">Estimated Value: {value ? value + 'g' : 'Loading...'}</div>;
 }
 
 function App() {

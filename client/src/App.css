@@ -159,6 +159,50 @@ nav button:hover {
   background: #1e7a3c;
 }
 
+/* New styles for theme selector, email opt-in, card/deck history, analytics dashboard, deck value */
+.theme-selector select {
+  background: #1a2c1a;
+  color: #c9e7c9;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.email-opt-in {
+  margin: 12px 0;
+}
+
+.email-opt-in input[type="checkbox"] {
+  margin-left: 8px;
+}
+
+.card-history, .deck-history {
+  background: #222;
+  color: #c9e7c9;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.analytics-dashboard {
+  background: #1a2c1a;
+  color: #c9e7c9;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.deck-value {
+  font-weight: bold;
+  color: #ffd700;
+  margin: 4px 0 8px 0;
+}
+
+/* Theme classes */
+body.mop-green { background: url('./mop-bg.jpg') #1a2c1a repeat; color: #c9e7c9; }
+body.mop-jade { background: #2e4e2e; color: #e0ffe0; }
+body.mop-dark { background: #111; color: #eee; }
+body.classic { background: #2c2c2c; color: #fff; }
+
 /* Responsive styles for mobile */
 @media (max-width: 600px) {
   body {

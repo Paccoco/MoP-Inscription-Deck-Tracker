@@ -26,7 +26,9 @@ db.serialize(() => {
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     is_admin INTEGER DEFAULT 0,
-    approved INTEGER DEFAULT 0
+    approved INTEGER DEFAULT 0,
+    email TEXT,
+    email_opt_in INTEGER DEFAULT 0
   )`);
   // Create completed_decks table
   db.run(`CREATE TABLE IF NOT EXISTS completed_decks (
@@ -60,6 +62,22 @@ db.serialize(() => {
     message TEXT NOT NULL,
     read INTEGER DEFAULT 0,
     created_at TEXT NOT NULL
+  )`);
+  // Card history table
+  db.run(`CREATE TABLE IF NOT EXISTS card_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_id INTEGER,
+    owner TEXT,
+    action TEXT,
+    timestamp TEXT
+  )`);
+  // Deck history table
+  db.run(`CREATE TABLE IF NOT EXISTS deck_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    deck_id INTEGER,
+    action TEXT,
+    details TEXT,
+    timestamp TEXT
   )`);
 });
 
@@ -403,49 +421,61 @@ app.get('/api/export/decks', auth, (req, res) => {
   db.all('SELECT * FROM completed_decks', [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="completed_decks.csv"');
+    res.setHeader('Content-Disposition', 'attachment; filename="decks.csv"');
     res.send(csvStringify(rows, ['id','deck','contributors','completed_at','disposition','recipient']));
   });
 });
 
-// Import cards from CSV
-app.post('/api/import/cards', express.text({ type: 'text/csv' }), auth, (req, res) => {
-  if (!req.user.is_admin) return res.status(403).json({ error: 'Admin only' });
-  const lines = req.body.split(/\r?\n/);
-  const columns = lines[0].split(',');
-  let imported = 0;
-  for (let i = 1; i < lines.length; i++) {
-    const vals = lines[i].split(',').map(v => JSON.parse(v));
-    if (vals.length < 4 || !vals[1] || !vals[2] || !vals[3]) continue;
-    db.run('INSERT INTO cards (card_name, owner, deck) VALUES (?, ?, ?)', [vals[1], vals[2], vals[3]], err => {
-      if (!err) imported++;
-    });
-  }
-  res.json({ imported });
+// Email opt-in endpoint
+app.post('/api/profile/email-opt-in', auth, (req, res) => {
+  const { email, optIn } = req.body;
+  db.run('UPDATE users SET email = ?, email_opt_in = ? WHERE username = ?', [email, optIn ? 1 : 0, req.user.username], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
 });
 
-// Import completed decks from CSV
-app.post('/api/import/decks', express.text({ type: 'text/csv' }), auth, (req, res) => {
-  if (!req.user.is_admin) return res.status(403).json({ error: 'Admin only' });
-  const lines = req.body.split(/\r?\n/);
-  const columns = lines[0].split(',');
-  let imported = 0;
-  for (let i = 1; i < lines.length; i++) {
-    const vals = lines[i].split(',').map(v => JSON.parse(v));
-    if (vals.length < 6 || !vals[1] || !vals[2] || !vals[3]) continue;
-    db.run('INSERT INTO completed_decks (deck, contributors, completed_at, disposition, recipient) VALUES (?, ?, ?, ?, ?)', [vals[1], vals[2], vals[3], vals[4], vals[5]], err => {
-      if (!err) imported++;
-    });
-  }
-  res.json({ imported });
-});
-
-// API: Get global activity log (last 50 actions)
-app.get('/api/activity', auth, (req, res) => {
-  db.all('SELECT * FROM activity ORDER BY timestamp DESC LIMIT 50', [], (err, rows) => {
+// Get card history
+app.get('/api/cards/:id/history', auth, (req, res) => {
+  db.all('SELECT * FROM card_history WHERE card_id = ?', [req.params.id], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
+});
+
+// Get deck history
+app.get('/api/decks/:id/history', auth, (req, res) => {
+  db.all('SELECT * FROM deck_history WHERE deck_id = ?', [req.params.id], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// Analytics endpoints
+app.get('/api/analytics/deck-completion', auth, (req, res) => {
+  db.all('SELECT deck, COUNT(*) as completed FROM completed_decks GROUP BY deck', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+app.get('/api/analytics/contributors', auth, (req, res) => {
+  db.all('SELECT owner, COUNT(*) as cards FROM cards GROUP BY owner', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+app.get('/api/analytics/payouts', auth, (req, res) => {
+  db.all('SELECT recipient, SUM(sale_price) as total_payout FROM completed_decks WHERE disposition = "sold" GROUP BY recipient', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// Deck value estimator endpoint (stub)
+app.get('/api/decks/:id/value', auth, async (req, res) => {
+  // TODO: Integrate Wowhead/auction API
+  // For now, return a mock value
+  res.json({ deck_id: req.params.id, estimated_value: 10000 });
 });
 
 app.listen(PORT, () => {
