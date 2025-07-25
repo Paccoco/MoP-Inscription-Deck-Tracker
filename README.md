@@ -1,6 +1,6 @@
 # Mist of Pandaria Card Tracker
 
-**Version: 0.1a**
+**Version: 0.1b**
 
 A self-hosted web app for World of Warcraft Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -32,7 +32,8 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Card/Deck History:** Timeline/history for each card and deck, including ownership changes and sales
 - **Onboarding Modal:** New users see a quick-start guide after registration
 - **Deck Value History:** View historical price trends for decks/trinkets
-- **Discord Integration:** Automated notifications for deck completions, sales, and requests
+- **Discord Integration:** Automated notifications for deck completions, sales, requests, and card additions (with missing card summary)
+- **Gotify Integration:** Admins receive push notifications via Gotify when a new user registers and needs approval. Gotify setup is available in the admin panel.
 
 ## Tech Stack
 - Node.js + Express.js (backend)
@@ -103,6 +104,7 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - **Guild Bank:** Manage guild-owned cards and decks
 - **Analytics:** View deck completion rates, contributor stats, and payout history
 - **Discord Integration:** Configure Discord webhook for automated notifications
+- **Gotify Integration:** Set up Gotify for push notifications to admins
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards
