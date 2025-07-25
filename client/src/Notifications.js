@@ -45,6 +45,26 @@ export default function Notifications() {
     fetchNotifications();
   };
 
+  // Delete a single notification
+  const deleteNotification = async (id) => {
+    const token = localStorage.getItem('token');
+    await axios.delete(`/api/notifications/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    fetchNotifications();
+  };
+
+  // Mass delete all notifications
+  const deleteAllNotifications = async () => {
+    if (!window.confirm('Are you sure you want to delete ALL notifications? This cannot be undone.')) return;
+    const token = localStorage.getItem('token');
+    await axios.delete('/api/notifications', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setSelected([]);
+    fetchNotifications();
+  };
+
   // Filtering and search
   const filtered = notifications.filter(n => {
     const matchesType = filterType === 'all' || (n.type && n.type === filterType);
@@ -61,7 +81,7 @@ export default function Notifications() {
   const types = Array.from(new Set(notifications.map(n => n.type).filter(Boolean)));
 
   return (
-    <div className="notifications-container">
+    <div className="notifications-card">
       <h2>Notifications</h2>
       <div style={{ marginBottom: 16 }}>
         <input
@@ -81,27 +101,34 @@ export default function Notifications() {
           <option value="unread">Unread</option>
         </select>
         <button disabled={selected.length === 0} onClick={bulkMarkRead}>Mark Selected as Read</button>
+        <button style={{ marginLeft: 8, background: '#c00', color: '#fff' }} onClick={deleteAllNotifications}>Delete All</button>
       </div>
       {error && notifications.length === 0 ? (
         <div>No notifications.</div>
       ) : filtered.length === 0 ? (
         <div>No notifications match your filters.</div>
       ) : (
-        <ul>
+        <ul className="notifications-list">
           {paginated.map(n => (
-            <li key={n.id} style={{ marginBottom: 12, color: n.read ? '#888' : '#145c2c' }}>
-              <input
-                type="checkbox"
-                checked={selected.includes(n.id)}
-                onChange={e => {
-                  setSelected(e.target.checked
-                    ? [...selected, n.id]
-                    : selected.filter(id => id !== n.id));
-                }}
-                style={{ marginRight: 8 }}
-              />
-              {n.message} <span style={{ fontSize: '0.9em', color: '#666' }}>({new Date(n.created_at).toLocaleString()})</span>
-              {!n.read && <button style={{ marginLeft: 8 }} onClick={() => markRead(n.id)}>Mark as read</button>}
+            <li key={n.id} className="notification-item">
+              <div className="notification-content">
+                <input
+                  type="checkbox"
+                  checked={selected.includes(n.id)}
+                  onChange={e => {
+                    setSelected(e.target.checked
+                      ? [...selected, n.id]
+                      : selected.filter(id => id !== n.id));
+                  }}
+                  style={{ marginRight: 8 }}
+                />
+                <span>{n.message}</span>
+                <span className="notification-date">({new Date(n.created_at).toLocaleString()})</span>
+                {!n.read && <button style={{ marginLeft: 8 }} onClick={() => markRead(n.id)}>Mark as read</button>}
+              </div>
+              <div className="notification-actions">
+                <button style={{ background: '#c00', color: '#fff' }} onClick={() => deleteNotification(n.id)}>Delete</button>
+              </div>
             </li>
           ))}
         </ul>

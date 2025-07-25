@@ -47,7 +47,7 @@ export default function GotifyConfig() {
   };
 
   return (
-    <div style={{ margin: '20px 0' }}>
+    <div className="table-card" style={{ margin: '20px 0' }}>
       <h3>Gotify Notifications <span title="Configure your personal Gotify server and select which notification types you want to receive. Gotify is a self-hosted push notification service.">🛈</span></h3>
       <div style={{ marginBottom: 8 }}>
         <label>Gotify Server URL: <input value={server} onChange={e => setServer(e.target.value)} placeholder="https://gotify.example.com" style={{ width: 260 }} /></label>

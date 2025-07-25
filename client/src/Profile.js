@@ -40,8 +40,8 @@ function Profile() {
   if (!profile) return <div>No profile data found.</div>;
 
   return (
-    <div className="profile-page">
-      <h2>Profile: {profile.username}</h2>
+    <div className="profile-card">
+      <h2 className="section-header">Profile: {profile.username}</h2>
       {/* Theme Selector */}
       <div style={{ margin: '20px 0' }}>
         <label htmlFor="theme-select"><strong>Theme Customization:</strong> </label>

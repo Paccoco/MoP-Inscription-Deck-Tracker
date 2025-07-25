@@ -15,8 +15,8 @@ function CompletedDecks() {
   }, []);
 
   return (
-    <div className="completed-decks-container">
-      <h2>Completed Decks</h2>
+    <div className="completed-decks-card">
+      <h2 className="section-header">Completed Decks</h2>
       {error && <div className="error">{error}</div>}
       <table>
         <thead>

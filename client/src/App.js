@@ -86,13 +86,21 @@ function ActivityLog({ isAdmin }) {
           </tr>
         </thead>
         <tbody>
-          {log.map((entry, i) => (
-            <tr key={i}>
-              <td>{entry.username}</td>
-              <td>{entry.action}</td>
-              <td>{new Date(entry.timestamp).toLocaleString()}</td>
-            </tr>
-          ))}
+          {log.map((entry, i) => {
+            let dateStr = entry.timestamp || entry.created_at;
+            let dateDisplay = '-';
+            if (dateStr) {
+              const dateObj = new Date(dateStr);
+              dateDisplay = isNaN(dateObj.getTime()) ? '-' : dateObj.toLocaleString();
+            }
+            return (
+              <tr key={i}>
+                <td>{entry.username || entry.user || '-'}</td>
+                <td>{entry.action || entry.message}</td>
+                <td>{dateDisplay}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -586,8 +594,8 @@ function App() {
         {/* Add other navigation buttons as needed */}
       </nav>
       {showPage === 'main' && (
-        <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
-          <h1>Inscription Card Tracker</h1>
+        <div className="dashboard-card">
+          <h1 className="section-header">Inscription Card Tracker</h1>
           <nav style={{ marginBottom: 16 }}>
             {!auth.loggedIn && <>
               <button onClick={() => setShowPage('register')}>Register</button>
@@ -604,7 +612,6 @@ function App() {
               {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
             </>}
           </nav>
-          {/* Add Card Form at the top */}
           <form onSubmit={handleSubmit}>
             <select
               name="card_name"
@@ -619,77 +626,79 @@ function App() {
             </select>
             <button type="submit">Add Card</button>
           </form>
-          {/* Grid Card Summary */}
-          <h2>Card Summary</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Deck</th>
-                {['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'].map(label => (
-                  <th key={label}>{label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {DECK_NAMES.map(deck => {
-                const prefix = deck.split(' ')[0];
-                const trinket = deckTrinketClassicMap[deck];
-                return (
-                  <tr key={deck}>
-                    <td>
-                      <a
-                        href={`https://www.wowhead.com/mop-classic/item=${trinket.id}`}
-                        data-wowhead={`item=${trinket.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer' }}
-                      >
-                        {deck}
-                      </a>
-                    </td>
-                    {CARD_NAMES.filter(name => name.includes(prefix)).map(cardName => (
-                      <td key={cardName}>{deckCardCounts[deck][cardName]}</td>
-                    ))}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          {/* Deck Completion Table */}
-          <h2>Deck Status</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Deck</th>
-                <th>Owned</th>
-                <th>Missing Cards</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {DECK_NAMES.map(deck => {
-                const trinket = deckTrinketClassicMap[deck];
-                return (
-                  <tr key={deck}>
-                    <td>
-                      <a
-                        href={`https://www.wowhead.com/mop-classic/item=${trinket.id}`}
-                        data-wowhead={`item=${trinket.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer' }}
-                      >
-                        {deck} <span style={{fontSize:'0.9em',color:'#f5ba42'}}>({trinket.name})</span>
-                      </a>
-                    </td>
-                    <td>{deckStatus[deck].owned}/8</td>
-                    <td>{deckStatus[deck].missing.join(', ') || 'None'}</td>
-                    <td>{deckStatus[deck].complete ? <span style={{color:'#f5ba42',fontWeight:'bold'}}>Deck Complete!</span> : 'Incomplete'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="table-card">
+            <h2 className="section-header">Card Summary</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Deck</th>
+                  {['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight'].map(label => (
+                    <th key={label}>{label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {DECK_NAMES.map(deck => {
+                  const prefix = deck.split(' ')[0];
+                  const trinket = deckTrinketClassicMap[deck];
+                  return (
+                    <tr key={deck}>
+                      <td>
+                        <a
+                          href={`https://www.wowhead.com/mop-classic/item=${trinket.id}`}
+                          data-wowhead={`item=${trinket.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer' }}
+                        >
+                          {deck}
+                        </a>
+                      </td>
+                      {CARD_NAMES.filter(name => name.includes(prefix)).map(cardName => (
+                        <td key={cardName}>{deckCardCounts[deck][cardName]}</td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="table-card">
+            <h2 className="section-header">Deck Status</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Deck</th>
+                  <th>Owned</th>
+                  <th>Missing Cards</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {DECK_NAMES.map(deck => {
+                  const trinket = deckTrinketClassicMap[deck];
+                  return (
+                    <tr key={deck}>
+                      <td>
+                        <a
+                          href={`https://www.wowhead.com/mop-classic/item=${trinket.id}`}
+                          data-wowhead={`item=${trinket.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: '#145c2c', textDecoration: 'underline', cursor: 'pointer' }}
+                        >
+                          {deck} <span style={{fontSize:'0.9em',color:'#f5ba42'}}>({trinket.name})</span>
+                        </a>
+                      </td>
+                      <td>{deckStatus[deck].owned}/8</td>
+                      <td>{deckStatus[deck].missing.join(', ') || 'None'}</td>
+                      <td>{deckStatus[deck].complete ? <span style={{color:'#f5ba42',fontWeight:'bold'}}>Deck Complete!</span> : 'Incomplete'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
           {/* No card list on main page */}
         </div>
       )}

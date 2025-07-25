@@ -276,3 +276,93 @@ body.classic { background: #2c2c2c; color: #fff; }
     font-size: 1em;
   }
 }
+
+/* Notifications card styles */
+.notifications-card {
+  background: #23272f;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px #0008;
+  padding: 24px 32px;
+  max-width: 600px;
+  margin: 32px auto;
+  color: #c9e7c9;
+}
+
+.notifications-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(20, 44, 34, 0.85);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  color: #c9e7c9;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.notification-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-date {
+  font-size: 0.9em;
+  color: #aaa;
+  margin-left: 12px;
+}
+
+.dashboard-card, .table-card, .admin-card, .profile-card, .completed-decks-card, .activity-log-card {
+  background: #23272f;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px #0008;
+  padding: 24px 32px;
+  max-width: 900px;
+  margin: 32px auto;
+  color: #c9e7c9;
+}
+
+.section-header {
+  font-size: 1.5em;
+  color: #3ad13a;
+  margin-bottom: 18px;
+  font-weight: bold;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Table improvements */
+table {
+  width: 100%;
+  background: #23272f;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #0003;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 24px;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #444;
+}
+
+th {
+  background: #181a20;
+  color: #3ad13a;
+}
