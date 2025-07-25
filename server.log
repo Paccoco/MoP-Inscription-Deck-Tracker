@@ -1,30 +1,17 @@
 nohup: ignoring input
-node:events:495
-      throw Admin users endpoint: {
+Server running on port 5000
+Admin users endpoint: {
   id: 2,
   username: 'Paccoco',
   is_admin: true,
-  iat: 1753433085,
-  exp: 1753519485
+  iat: 1753449248,
+  exp: 1753535648
 }
-tupListenHandle [as _listen2] (node:net:1811:16)
-    at listenInCluster (node:net:1859:12)
-    at Server.listen (node:net:1947:7)
-    at Function.listen (/home/paccoco/project-card-tracker/node_modules/express/lib/application.js:635:24)
-    at Object.<anonymous> (/home/paccoco/project-card-tracker/server-auth.js:585:5)
-    at Module._compile (node:internal/modules/cjs/loader:1356:14)
-    at Module._extensions..js (node:internal/modules/cjs/loader:1414:10)
-    at Module.load (node:internal/modules/cjs/loader:1197:32)
-    at Module._load (node:internal/modules/cjs/loader:1013:12)
-    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:128:12)
-Emitted 'error' event on Server instance at:
-    at emitErrorNT (node:net:1838:8)
-    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
-  code: 'EADDRINUSE',
-  errno: -98,
-  syscall: 'listen',
-  address: '::',
-  port: 5000
+Approve user req.body: { userId: 3 }
+Admin users endpoint: {
+  id: 2,
+  username: 'Paccoco',
+  is_admin: true,
+  iat: 1753449248,
+  exp: 1753535648
 }
-
-Node.js v18.19.1

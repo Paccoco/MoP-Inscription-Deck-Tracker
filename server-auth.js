@@ -227,7 +227,8 @@ function auth(req, res, next) {
 }
 
 // Admin endpoint to approve users
-app.post('/api/admin/approve', auth, (req, res) => {
+app.post('/api/admin/approve', express.json(), auth, (req, res) => {
+  console.log('Approve user req.body:', req.body); // Debug log
   if (!req.user.is_admin) return res.status(403).json({ error: 'Admin only' });
   const { userId } = req.body;
   db.run('UPDATE users SET approved = 1 WHERE id = ?', [userId], function (err) {
@@ -503,6 +504,32 @@ app.get('/api/analytics/contributors', auth, (req, res) => {
   });
 });
 
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+// Catch-all: send React index.html for non-API routes
+app.get('*', (req, res) => {
+  if (!req.path.startsWith('/api')) {
+    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// API: Delete deck request (admin can delete any, user can delete own)
+app.delete('/api/deck-requests/:id', auth, (req, res) => {
+  const requestId = req.params.id;
+  db.get('SELECT username FROM deck_requests WHERE id = ?', [requestId], (err, row) => {
+    if (err || !row) return res.status(404).json({ error: 'Deck request not found' });
+    if (req.user.is_admin || req.user.username === row.username) {
+      db.run('DELETE FROM deck_requests WHERE id = ?', [requestId], function (err2) {
+        if (err2) return res.status(500).json({ error: err2.message });
+        res.json({ success: true, deleted: this.changes });
+      });
+    } else {
+      res.status(403).json({ error: 'Not authorized to delete this deck request' });
+    }
+  });
 });
