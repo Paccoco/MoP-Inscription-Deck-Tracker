@@ -1,10 +1,16 @@
 # Mist of Pandaria Card Tracker
 
-**Version: 0.2.5b**
+**Version: 0.5.0**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
+- Codebase streamlined: redundant logic and UI patterns refactored into shared React components (`NavBar`, `CardTable`, `DeckTable`) and custom hooks (`useFetchCards`, `useFetchDecks`, `useFetchNotifications`).
+- Large components split into smaller, focused ones; domain logic moved to utility functions.
+- Backend notification delivery and activity logging consolidated into helper functions; endpoints merged where possible.
+- Conditional rendering and state management optimized and centralized.
+- All new/refactored code bug checked and validated.
+- README.md and tasks.md are now updated after every completed task for accuracy and transparency.
 - All error and failure messages in the UI are now displayed in red text for better visibility.
 - Removed all email notification options and code. Notifications are now handled via in-app, Discord, or Gotify only.
 - Per-user Gotify notification configuration: Each user can set their own Gotify server, token, and notification types in their profile.
