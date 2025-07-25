@@ -17,6 +17,7 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - Confirmed no secrets or sensitive information in codebase via GitGuardian CLI scan.
 - All previous features and UI/UX improvements remain in place.
 - Version bumped to 0.5.6 for security and notification enhancements.
+- **Admin User Management:** Admins can now remove user access directly from the Admin panel. This action deletes the user, their notification config, and all notifications, and is logged in the activity log for transparency.
 
 ## Release Notes: Version 0.5.7b (2025-07-25)
 
@@ -35,6 +36,10 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
   - All new endpoints and admin features described.
 - **Bug Checks & Validation:**
   - Full bug check and validation for new features.
+- **Admin User Management:**
+  - Admins can now remove user access directly from the Admin panel.
+  - This action deletes the user, their notification config, and all notifications.
+  - Removal is logged in the activity log for transparency.
 
 ### How to Upgrade
 - Pull the latest changes from `master`.
@@ -141,6 +146,10 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - **Guild Bank:** Manage guild-owned cards and decks
 - **Analytics:** View deck completion rates, contributor stats, and payout history
 - **Discord & Gotify Integration:** Configure Discord webhook for automated notifications, and set up Gotify for guild-wide or personal notifications
+- **User Removal:**
+  - Remove user access directly from the Admin panel.
+  - This action deletes the user, their notification config, and all notifications.
+  - Removal is logged in the activity log for transparency.
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards

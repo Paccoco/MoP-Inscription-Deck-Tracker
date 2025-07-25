@@ -682,6 +682,20 @@ app.delete('/api/notifications', auth, (req, res) => {
   });
 });
 
+// Remove user access (admin only)
+app.post('/api/admin/remove-user', express.json(), auth, (req, res) => {
+  if (!req.user.is_admin) return res.status(403).json({ error: 'Admin only.' });
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: 'Username required.' });
+  db.run('DELETE FROM users WHERE username = ?', [username], function (err) {
+    if (err) return res.status(500).json({ error: 'Failed to remove user.' });
+    db.run('DELETE FROM gotify_config WHERE username = ?', [username]);
+    db.run('DELETE FROM notifications WHERE username = ?', [username]);
+    logActivity(req.user.username, `Removed user access for ${username}`);
+    res.json({ success: true });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
