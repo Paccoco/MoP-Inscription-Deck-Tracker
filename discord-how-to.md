@@ -1,44 +1,76 @@
-# 🐼 Mist of Pandaria Card Tracker - How To Guide
+# Mist of Pandaria Card Tracker - Discord How To
 
-Welcome to the MoP Card Tracker for our guild! This site helps us track who has which Inscription Cards, complete decks, and manage payouts for sold decks. Here’s how to use it:
+Welcome to the Mist of Pandaria Card Tracker! This guide will help new users get started with the app and make the most of its features, especially when sharing and collaborating in your guild's Discord server.
 
 ## Getting Started
-1. **Register an Account**
-   - Go to the site and click **Register**.
-   - Enter your username and password.
-   - Wait for an admin to approve your account.
-2. **Login**
+1. **Access the App:**
+   - Open your browser and go to your guild's Card Tracker URL (e.g., `https://decks.paccoco.com`).
+   - Share this link in your Discord guild channel so everyone can join.
+
+2. **Register Your Account:**
+   - Click **Register** on the homepage.
+   - Fill in your details and submit. Wait for an admin to approve your account.
    - Once approved, log in with your credentials.
 
-## Tracking Cards
-- Add cards you own using the **Card Tracker** page.
-- Select the card name and deck, then submit.
-- Remove cards you no longer own by clicking the delete button next to your card.
+## Main Features for New Users
+- **Track Your Cards:**
+  - Go to the **Card Tracker** page.
+  - Add or remove cards you own. Your collection is saved and visible to guild admins/officers.
 
-## Viewing Deck Progress
-- See grid and summary views for all cards and decks.
-- Wowhead tooltips show trinket info for each deck.
-- When a deck is complete, it will be highlighted.
+- **View Deck Progress:**
+  - See which decks are close to completion and who owns which cards.
+  - Hover over trinket icons for Wowhead tooltips.
 
-## Completed Decks
-- Visit the **Completed Decks** page to see:
-  - What each deck was used for (fulfilled/sold)
-  - Sale price (if sold)
-  - Payout split among contributors
+- **Completed Decks:**
+  - View all completed decks, their sale status, payout splits, and estimated values.
 
-## Admin Features (for officers)
-- Approve new users.
-- Allocate completed decks:
-  - Choose from completed/unallocated decks
-  - Fulfill a deck request or sell a deck
-  - Set sale price and recipient
-  - See payout split for contributors
+- **Notifications:**
+  - Get in-app notifications for approvals, deck completions, payouts, and requests.
 
-## Navigation
-- Use the top navigation to switch between Card Tracker, Admin, and Completed Decks pages.
+- **Deck Requests:**
+  - Request specific decks you need. Track fulfillment status and get notified when your request is completed.
 
-## Questions?
-- Ask in Discord if you need help or have suggestions!
+- **Export/Import Data:**
+  - Export your card/deck data to CSV for sharing in Discord or backup.
+  - Import CSV to restore or bulk update your collection.
+
+- **Activity Log:**
+  - See recent actions for transparency (card added/removed, deck completed/sold).
+
+- **Profile:**
+  - View your cards, completed decks, payouts, and recent activity.
+
+
+- **Theme Customization:**
+  - Choose your preferred MoP-themed background and color scheme.
+
+- **Analytics:**
+  - View charts for deck completion rates, contributor stats, and payout trends.
+
+- **Email Notifications:**
+  - Opt-in for email alerts when a requested deck is completed or sold.
+
+- **Card/Deck History:**
+  - View timeline/history for each card and deck.
+
+## Using the App with Discord
+- **Share Progress:**
+  - Post screenshots or CSV exports in your guild's Discord channel to keep everyone updated.
+  - Use Discord threads for deck requests or card trades.
+
+- **Coordinate Deck Completion:**
+  - Discuss which cards are needed and who can contribute.
+  - Use the app's Deck Request feature and tag relevant users in Discord.
+
+- **Celebrate Achievements:**
+  - Announce completed decks, payouts, and big sales in Discord.
+  - Use the app's analytics and activity log for highlights.
+
+## Tips for New Users
+- Keep your card list up to date for accurate tracking.
+- Check notifications regularly for updates from admins/officers.
+- Use the Export feature to share your collection or deck status in Discord.
+- Ask questions in Discord if you need help—admins and officers can assist!
 
 ---
-*Happy deck building and good luck in MoP Classic!*
+*For more help, ask in your guild's Discord or refer to the full README for advanced features.*

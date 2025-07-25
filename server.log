@@ -40,3 +40,14 @@ Admin users endpoint: {
   iat: 1753433085,
   exp: 1753519485
 }
+Error: ENOENT: no such file or directory, stat '/home/paccoco/project-card-tracker/client/build/index.html'
+Error: ENOENT: no such file or directory, stat '/home/paccoco/project-card-tracker/client/build/index.html'
+Error: ENOENT: no such file or directory, stat '/home/paccoco/project-card-tracker/client/build/index.html'
+Error: ENOENT: no such file or directory, stat '/home/paccoco/project-card-tracker/client/build/index.html'
+Admin users endpoint: {
+  id: 2,
+  username: 'Paccoco',
+  is_admin: true,
+  iat: 1753433085,
+  exp: 1753519485
+}
