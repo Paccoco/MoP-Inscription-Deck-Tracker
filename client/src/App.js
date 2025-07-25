@@ -108,6 +108,7 @@ function App() {
   const [deckRequests, setDeckRequests] = useState([]);
   const [requestForm, setRequestForm] = useState({ deck: '' });
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Fetch cards from backend
   useEffect(() => {
@@ -118,8 +119,9 @@ function App() {
     try {
       const res = await axios.get('/api/cards');
       setCards(res.data);
+      setErrorMsg('');
     } catch (err) {
-      alert('Error fetching cards');
+      setErrorMsg('Error fetching cards');
     }
   };
 
@@ -129,8 +131,10 @@ function App() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setCompletedDecks(res.data);
+      setErrorMsg('');
     } catch (err) {
       setCompletedDecks([]);
+      setErrorMsg('Error fetching completed decks');
     }
   };
 
@@ -140,8 +144,10 @@ function App() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setDeckRequests(res.data);
+      setErrorMsg('');
     } catch (err) {
       setDeckRequests([]);
+      setErrorMsg('Error fetching deck requests');
     }
   };
 
@@ -163,7 +169,7 @@ function App() {
     const deckPrefix = form.card_name.split(' ')[2] || form.card_name.split(' ')[form.card_name.split(' ').length - 1];
     const deck = DECK_NAMES.find(d => d.includes(deckPrefix));
     if (!deck) {
-      alert('Could not determine deck from card name.');
+      setErrorMsg('Could not determine deck from card name.');
       return;
     }
     try {
@@ -172,8 +178,9 @@ function App() {
       });
       setForm({ card_name: '', deck: '' });
       fetchCards();
+      setErrorMsg('');
     } catch (err) {
-      alert('Error adding card');
+      setErrorMsg('Error adding card');
     }
   };
 
@@ -183,8 +190,9 @@ function App() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       fetchCards();
+      setErrorMsg('');
     } catch (err) {
-      alert('Error deleting card');
+      setErrorMsg('Error deleting card');
     }
   };
 
@@ -232,9 +240,9 @@ function App() {
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        setAuth({ loggedIn: true, isAdmin: !!payload.is_admin });
+        setAuth({ loggedIn: true, isAdmin: !!payload.is_admin, username: payload.username });
       } catch {
-        setAuth({ loggedIn: false, isAdmin: false });
+        setAuth({ loggedIn: false, isAdmin: false, username: undefined });
       }
     }
   }, []);
@@ -388,10 +396,11 @@ function App() {
           });
           setRequestForm({ deck: '' });
           fetchDeckRequests();
+          setErrorMsg('');
           alert('Deck request submitted!');
         } catch (err) {
           const msg = err.response?.data?.error || 'Error submitting request';
-          alert(msg);
+          setErrorMsg(msg);
         }
       }}>
         <select
@@ -433,9 +442,18 @@ function App() {
         <tbody>
           {deckRequests.map(req => {
             const trinket = deckTrinketClassicMap[req.deck];
+            // Debug: Log current user and request user for Remove button logic
+            console.log('DEBUG: auth.username:', auth.username, 'req.username:', req.username, 'isAdmin:', auth.isAdmin);
+            const isOwnRequest = auth.username === req.username;
+            const canRemove = auth.isAdmin || isOwnRequest;
             return (
               <tr key={req.id} style={{ background: req.fulfilled ? '#e0ffe0' : undefined }}>
-                <td>{req.username}</td>
+                <td>
+                  {req.username}
+                  {isOwnRequest && (
+                    <span style={{ marginLeft: 8, color: '#f5ba42', fontWeight: 'bold', fontSize: '0.95em' }} title="This is your request">(You)</span>
+                  )}
+                </td>
                 <td>
                   {req.deck === 'Tiger Deck' ? (
                     <span>
@@ -463,14 +481,39 @@ function App() {
                 <td>{req.contribution}</td>
                 <td>{new Date(req.requested_at).toLocaleString()}</td>
                 <td>{req.fulfilled ? `Fulfilled${req.fulfilled_at ? ' (' + new Date(req.fulfilled_at).toLocaleString() + ')' : ''}` : 'Pending'}</td>
-                {auth.isAdmin && <td>
-                  {!req.fulfilled && <button onClick={async () => {
-                    await axios.post('/api/deck-requests/fulfill', { requestId: req.id }, {
-                      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                    });
-                    fetchDeckRequests();
-                  }}>Mark Fulfilled</button>}
-                </td>}
+                <td>
+                  {!req.fulfilled && (
+                    <>
+                      {auth.isAdmin && (
+                        <button onClick={async () => {
+                          const reason = prompt('Enter reason for removing this request (sent to user):');
+                          if (!reason) return;
+                          await axios.delete(`/api/deck-requests/${req.id}`, {
+                            data: { reason },
+                            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                          });
+                          fetchDeckRequests();
+                        }}>Remove (Admin)</button>
+                      )}
+                      {isOwnRequest && (
+                        <button onClick={async () => {
+                          await axios.delete(`/api/deck-requests/${req.id}`, {
+                            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                          });
+                          fetchDeckRequests();
+                        }}>Remove</button>
+                      )}
+                    </>
+                  )}
+                  {auth.isAdmin && !req.fulfilled && (
+                    <button onClick={async () => {
+                      await axios.post('/api/deck-requests/fulfill', { requestId: req.id }, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                      });
+                      fetchDeckRequests();
+                    }}>Mark Fulfilled</button>
+                  )}
+                </td>
               </tr>
             );
           })}

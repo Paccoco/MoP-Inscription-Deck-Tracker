@@ -586,6 +586,31 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
+// API: Remove deck request (admin or user)
+app.delete('/api/deck-requests/:id', express.json(), auth, (req, res) => {
+  const requestId = req.params.id;
+  const { reason } = req.body || {};
+  db.get('SELECT * FROM deck_requests WHERE id = ?', [requestId], (err, request) => {
+    if (err || !request) return res.status(404).json({ error: 'Request not found' });
+    const isAdmin = !!req.user.is_admin;
+    const isOwner = req.user.username === request.username;
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({ error: 'Not authorized to remove this request' });
+    }
+    db.run('DELETE FROM deck_requests WHERE id = ?', [requestId], function (err2) {
+      if (err2) return res.status(500).json({ error: err2.message });
+      logActivity(req.user.username, `Removed deck request for '${request.deck}'${isAdmin ? ` (admin)` : ''}`);
+      if (isAdmin && reason) {
+        // Notify user with reason
+        db.run('INSERT INTO notifications (username, message, read, created_at) VALUES (?, ?, 0, ?)', [request.username, `Your deck request for '${request.deck}' was removed by an admin. Reason: ${reason}`, new Date().toISOString()]);
+        sendDiscordNotification(`Admin removed deck request for '${request.deck}' by ${request.username}. Reason: ${reason}`);
+        sendGotifyNotification(request.username, 'deck_request_removed', `Your deck request for '${request.deck}' was removed by an admin. Reason: ${reason}`);
+      }
+      res.json({ deleted: this.changes });
+    });
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

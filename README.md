@@ -1,10 +1,11 @@
 # Mist of Pandaria Card Tracker
 
-**Version: 0.2.1a**
+**Version: 0.2.2a**
 
 A self-hosted web app for World of Warcraft Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
+- All error and failure messages in the UI are now displayed in red text for better visibility.
 - Removed all email notification options and code. Notifications are now handled via in-app, Discord, or Gotify only.
 - Per-user Gotify notification configuration: Each user can set their own Gotify server, token, and notification types in their profile.
 - Admins receive notifications for new user registrations needing approval.
