@@ -1,6 +1,8 @@
 # Mist of Pandaria Card Tracker
 
-A self-hosted web app for World of Warcraft Classic guilds to track Inscription Cards, complete decks, and manage deck sales and payouts. Built for easy guild management, sharing, and transparency.
+**Version: 0.1a**
+
+A self-hosted web app for World of Warcraft Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Features
 - Track all Mist of Pandaria Inscription Cards
@@ -12,28 +14,28 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - SQLite database for persistent storage
 - React frontend, Express backend
 - Easy deployment and auto-start script
-- Admin panel for user approval and deck allocation
-- Completed Decks page: view disposition (fulfilled/sold), sale price, and payout split
+- Admin panel for user approval, deck allocation, and role management
+- Completed Decks page: view disposition (fulfilled/sold), sale price, payout split, and estimated deck value
 - Backend endpoint for unallocated completed decks
-- Improved navigation: Card Tracker, Admin, Completed Decks
-- **Notifications:** In-app notifications for admin approvals, deck completions, and payouts
+- Improved navigation: Card Tracker, Admin, Completed Decks, Profile, Notifications, Analytics
+- **Notifications:** In-app notifications for admin approvals, deck completions, payouts, and requests
 - **Deck Request Workflow:** Users can request specific decks and track fulfillment status
 - **Export/Import Data:** Export card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update
 - **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency
-- **User Profile Page:** View your cards, completed decks, payouts, and recent activity
-- **Role-Based Permissions:** Admin, Officer, and User roles with different access levels
-- **Admin Panel:** Approve users, allocate decks, fulfill requests, view contributor breakdown, manage payouts
+- **User Profile:** View your cards, completed decks, payouts, and recent activity
+- **Role-Based Permissions:** Admin, Officer, and User roles
 - **Guild Bank:** Track and manage guild-owned cards and decks
-- **API Documentation:** Built-in API docs for endpoints
-- **Analytics Dashboard:** View deck completion rates, contributor stats, and payout history
-- **Error Handling:** Improved UI for empty states (profile, notifications, activity log)
-- **Modern UI:** Navigation as buttons, MoP visuals, color fixes, mobile-friendly
-- **Auto-Proceed:** App rebuilds and restarts after changes
+- **Analytics Dashboard:** Charts for deck completion rates, contributor stats, payout trends
+- **Theme Customization:** Choose between several MoP-themed backgrounds and color schemes
+- **Deck Value Estimator:** See estimated deck/trinket values in real time
+- **Email Notifications:** Opt-in for email alerts when a requested deck is completed or sold
+- **Card/Deck History:** Timeline/history for each card and deck, including ownership changes and sales
 
 ## Tech Stack
 - Node.js + Express.js (backend)
 - React (frontend)
 - SQLite (database)
+- Chart.js (analytics)
 
 ## Setup & Installation
 1. **Clone the repository:**
@@ -58,38 +60,42 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
    node server-auth.js
    ```
    Or use the provided `start-card-tracker.sh` script for auto-start on reboot.
-
 5. **Access the app:**
    Open your browser and go to `http://localhost:5000` (or your server's IP/domain).
 
 ## How To Use
 ### For All Users
-- **Register:** Create an account and wait for admin approval.
-- **Login:** Access your account once approved.
-- **Track Cards:** Add/remove cards you own on the Card Tracker page.
-- **View Deck Progress:** See grid/summary views and Wowhead trinket tooltips. Completed decks are highlighted.
-- **Completed Decks:** View all completed decks, their disposition, sale price, and payout split.
-- **Notifications:** View in-app notifications for approvals, deck completions, and payouts.
-- **Deck Requests:** Request specific decks and track their fulfillment status.
-- **Export/Import:** Export your card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update.
-- **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency.
-- **Profile:** View your cards, completed decks, payouts, and recent activity.
-- **Guild Bank:** View and manage guild-owned cards and decks.
+- **Register:** Create an account and wait for admin approval
+- **Login:** Access your account once approved
+- **Track Cards:** Add/remove cards you own on the Card Tracker page
+- **View Deck Progress:** See grid/summary views and Wowhead trinket tooltips. Completed decks are highlighted
+- **Completed Decks:** View all completed decks, their disposition, sale price, payout split, and estimated value
+- **Notifications:** View in-app notifications for approvals, deck completions, payouts, and requests
+- **Deck Requests:** Request specific decks and track their fulfillment status
+- **Export/Import:** Export your card/deck data to CSV for sharing or backup, and import CSV to restore or bulk update
+- **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency
+- **Profile:** View your cards, completed decks, payouts, and recent activity
+- **Guild Bank:** View and manage guild-owned cards and decks
+- **Theme Customization:** Choose your preferred MoP-themed background and color scheme
+- **Analytics:** View charts for deck completion rates, contributor stats, and payout trends
+- **Email Notifications:** Opt-in for email alerts when a requested deck is completed or sold
+- **Card/Deck History:** View timeline/history for each card and deck
 
 ### For Admins/Officers
-- **Approve Users:** Review and approve new registrations.
+- **Approve Users:** Review and approve new registrations
 - **Allocate Completed Decks:**
   - Select from completed/unallocated decks
   - Fulfill a deck request or sell a deck
   - Set sale price and recipient
   - View payout split for contributors
-  - **Notifications:** Users are notified automatically for approvals, deck completions, and payouts.
-  - **Deck Requests:** View and fulfill deck requests from users.
-  - **Export/Import:** Export all card/deck data to CSV, and import CSV to restore or bulk update.
-  - **Activity Log:** View recent actions for all users for transparency.
-  - **Role Management:** Assign roles (Admin, Officer, User)
-  - **Guild Bank:** Manage guild-owned cards and decks
-  - **Analytics:** View deck completion rates, contributor stats, and payout history
+  - View estimated deck value
+- **Notifications:** Users are notified automatically for approvals, deck completions, payouts, and requests
+- **Deck Requests:** View and fulfill deck requests from users
+- **Export/Import:** Export all card/deck data to CSV, and import CSV to restore or bulk update
+- **Activity Log:** View recent actions for all users for transparency
+- **Role Management:** Assign roles (Admin, Officer, User)
+- **Guild Bank:** Manage guild-owned cards and decks
+- **Analytics:** View deck completion rates, contributor stats, and payout history
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards
@@ -107,6 +113,9 @@ A self-hosted web app for World of Warcraft Classic guilds to track Inscription 
 - `/api/profile` - Get user profile info
 - `/api/guild-bank` - Get/manage guild bank cards and decks
 - `/api/analytics` - Get analytics dashboard data
+- `/api/decks/:id/value` - Get estimated deck value
+- `/api/cards/:id/history` - Get card history
+- `/api/decks/:id/history` - Get deck history
 
 ## Contributing
 Pull requests and suggestions are welcome! Please open an issue or PR for improvements.
