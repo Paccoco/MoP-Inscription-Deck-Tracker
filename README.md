@@ -5,18 +5,19 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 0.5.7b**
+**Version: 0.6.0**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
+- Site-wide auto-refresh and session expiration handling: All major pages now use a unified auto-refresh hook (`useAutoRefresh`) for live data updates and automatic session expiration detection. This improves reliability and user experience across Activity Log, Guild Bank, Card/Deck History, Deck Value History, Analytics, Completed Decks, Card Tracker, Onboarding Modal, Gotify Config, and App.
 - Enhanced Gotify security notifications: Now include severity, risk description, and context in alerts. CI workflow passes these details automatically.
 - Security workflow: Automated security checks via GitHub Actions, with Gotify alerts for vulnerabilities detected by npm audit or ggshield.
 - Frontend rebuilt and backend restarted for full bug check and validation after dependency updates.
 - `.gitignore` updated to ignore `server.log` and all log files; `server.log` removed from repository.
 - Confirmed no secrets or sensitive information in codebase via GitGuardian CLI scan.
 - All previous features and UI/UX improvements remain in place.
-- Version bumped to 0.5.6 for security and notification enhancements.
+- Version bumped to 0.6.0 for site-wide auto-refresh/session handling and documentation updates.
 - **Admin User Management:** Admins can now remove user access directly from the Admin panel. This action deletes the user, their notification config, and all notifications, and is logged in the activity log for transparency.
 
 ## Release Notes: Version 0.5.7b (2025-07-25)
