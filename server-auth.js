@@ -262,22 +262,28 @@ app.post('/api/register', express.json(), (req, res) => {
 // Login only allows approved users
 app.post('/api/login', express.json(), (req, res) => {
   const { username, password } = req.body;
+  console.log('[DEBUG] Login attempt:', { username });
   db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
     if (err || !user) {
-      console.error('Login error: Invalid credentials', { username });
-      return res.status(401).json({ error: 'Invalid credentials' });
+      console.error('[DEBUG] Login error: Invalid credentials', { username, err });
+      return res.status(401).json({ error: 'Invalid credentials', debug: 'User not found or DB error' });
     }
     if (!user.approved) {
-      console.error('Login error: Account not approved', { username });
-      return res.status(403).json({ error: 'Account not approved by admin yet.' });
+      console.error('[DEBUG] Login error: Account not approved', { username });
+      return res.status(403).json({ error: 'Account not approved by admin yet.', debug: 'User not approved' });
     }
     bcrypt.compare(password, user.password, (err, result) => {
+      if (err) {
+        console.error('[DEBUG] Bcrypt error:', { username, err });
+        return res.status(500).json({ error: 'Internal error', debug: 'Bcrypt compare failed' });
+      }
       if (result) {
         const token = jwt.sign({ id: user.id, username: user.username, is_admin: !!user.is_admin }, SECRET, { expiresIn: '1d' });
-        res.json({ token });
+        console.log('[DEBUG] Login success:', { username, userId: user.id });
+        res.json({ token, debug: 'Login successful' });
       } else {
-        console.error('Login error: Invalid password', { username });
-        res.status(401).json({ error: 'Invalid credentials' });
+        console.error('[DEBUG] Login error: Invalid password', { username });
+        res.status(401).json({ error: 'Invalid credentials', debug: 'Password mismatch' });
       }
     });
   });
@@ -287,15 +293,15 @@ app.post('/api/login', express.json(), (req, res) => {
 function auth(req, res, next) {
   const header = req.headers['authorization'];
   if (!header) {
-    console.error('Auth failed: No Authorization header');
-    return res.status(401).json({ error: 'Invalid token' });
+    console.error('[DEBUG] Auth failed: No Authorization header');
+    return res.status(401).json({ error: 'Invalid token', debug: 'No Authorization header' });
   }
   const token = header.split(' ')[1];
-  console.log('Auth middleware: Incoming token:', token);
+  console.log('[DEBUG] Auth middleware: Incoming token:', token);
   jwt.verify(token, SECRET, (err, user) => {
     if (err) {
-      console.error('Auth failed: JWT error', err.message);
-      return res.status(401).json({ error: 'Invalid token' });
+      console.error('[DEBUG] Auth failed: JWT error', err.message);
+      return res.status(401).json({ error: 'Invalid token', debug: err.message });
     }
     req.user = user;
     console.log('Auth success:', user);

@@ -5,11 +5,14 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 0.6.0**
+**Version: 0.6.1**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
+- Fixed session expired/login flow for normal users: If no token is present, the app now shows the login/register forms and does not trigger a sessionExpired loop. Only fetches profile if a token exists. This resolves issues where non-admin users could not log in after session expiration.
+- Updated `.github/copilot-instructions.md` to require using `power-restart.sh` for all frontend builds and backend restarts.
+- All bug checks and validation now use the power-restart workflow.
 - Site-wide auto-refresh and session expiration handling: All major pages now use a unified auto-refresh hook (`useAutoRefresh`) for live data updates and automatic session expiration detection. This improves reliability and user experience across Activity Log, Guild Bank, Card/Deck History, Deck Value History, Analytics, Completed Decks, Card Tracker, Onboarding Modal, Gotify Config, and App.
 - Enhanced Gotify security notifications: Now include severity, risk description, and context in alerts. CI workflow passes these details automatically.
 - Security workflow: Automated security checks via GitHub Actions, with Gotify alerts for vulnerabilities detected by npm audit or ggshield.
@@ -19,6 +22,11 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - All previous features and UI/UX improvements remain in place.
 - Version bumped to 0.6.0 for site-wide auto-refresh/session handling and documentation updates.
 - **Admin User Management:** Admins can now remove user access directly from the Admin panel. This action deletes the user, their notification config, and all notifications, and is logged in the activity log for transparency.
+- **Built-in Debugging for Login Issues:**
+  - The backend now logs all login attempts, user lookup, password checks, and JWT validation steps to `server.log`.
+  - All 401/403 responses during login include a `debug` field in the JSON response for easier troubleshooting.
+  - Debug logs are visible in `server.log` and can be used to trace authentication failures (invalid credentials, not approved, password mismatch, missing headers, JWT errors).
+  - To test/debug login issues, attempt to log in and review both the browser console and `server.log` for detailed error context.
 
 ## Release Notes: Version 0.5.7b (2025-07-25)
 
@@ -225,6 +233,7 @@ Below are example screenshots and GIFs demonstrating key features and UI section
 - If notifications are not received, check your Gotify/Discord config and ensure your server is running.
 - For mobile issues, ensure your browser is up to date and try resizing the window.
 - For export/import problems, verify CSV format and file encoding.
+- If login issues occur, review the `debug` field in the JSON response for 401/403 errors, and check `server.log` for detailed debug logs on the backend.
 
 ## Contributing
 Pull requests and suggestions are welcome! Please open an issue or PR for improvements.
@@ -254,3 +263,21 @@ npm test -- --coverage
 
 ---
 *Created by Paccoco for Mist of Pandaria Classic guilds.*
+
+## Power Restart Script
+
+A new script `power-restart.sh` is available to automate rebuilding the frontend and restarting the backend:
+
+### Usage
+```bash
+./power-restart.sh
+```
+- Kills any backend process running on port 5000
+- Rebuilds the React frontend
+- Restarts the backend (`nohup node server-auth.js > server.log 2>&1 &`)
+- Prints status and access URL
+
+This script streamlines the workflow for bug checks, validation, and deployment. Make sure it is executable:
+```bash
+chmod +x power-restart.sh
+```

@@ -48,7 +48,7 @@ const deckTrinketClassicMap = {
   'Tiger Deck': { name: "Relic of Xuen", id: 79328 }
 };
 
-function ActivityLog({ isAdmin }) {
+function ActivityLog({ isAdmin, setShowPage }) {
   const [log, setLog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -109,10 +109,11 @@ function ActivityLog({ isAdmin }) {
 }
 
 function App() {
+  const token = localStorage.getItem('token');
   const [cards, setCards] = useState([]);
   const [form, setForm] = useState({ card_name: '', deck: '' });
   const [auth, setAuth] = useState({ loggedIn: false, isAdmin: false });
-  const [showPage, setShowPage] = useState('main');
+  const [showPage, setShowPage] = useState(token ? 'main' : 'login');
   const [completedDecks, setCompletedDecks] = useState([]);
   const [deckRequests, setDeckRequests] = useState([]);
   const [requestForm, setRequestForm] = useState({ deck: '' });
@@ -292,12 +293,34 @@ function App() {
     setProfile(data);
     return data;
   };
-  const { sessionExpired, loading, error } = useAutoRefresh(fetchProfile, 30000);
-  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
+  const { sessionExpired, loading, error } = useAutoRefresh(token ? fetchProfile : null, 30000);
+  if (!token) {
+    if (showPage === 'register') return <Register onRegister={() => setShowPage('login')} />;
+    return <Login onLogin={() => { setShowPage('main'); window.location.reload(); }} />;
+  }
+  if (sessionExpired) {
+    const handleLogin = () => {
+      localStorage.removeItem('token');
+      setShowPage('login');
+      window.location.reload();
+    };
+    const handleRegister = () => {
+      localStorage.removeItem('token');
+      setShowPage('register');
+      window.location.reload();
+    };
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleRegister}>Register</button>
+      </div>
+    );
+  }
 
   if (showPage === 'register') return <Register onRegister={() => setShowPage('login')} />;
   if (showPage === 'login') return <Login onLogin={() => { setShowPage('main'); window.location.reload(); }} />;
-  if (showPage === 'admin') return auth.isAdmin ? <Admin /> : <div>Admin access only.</div>;
+  if (showPage === 'admin') return auth.isAdmin ? <Admin setShowPage={setShowPage} /> : <div>Admin access only.</div>;
   if (showPage === 'mycards') return (
     <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
       <h1>My Cards</h1>
@@ -720,17 +743,15 @@ function App() {
           {/* No card list on main page */}
         </div>
       )}
-      {showPage === 'admin' && <Admin />}
-      {showPage === 'completedDecks' && <CompletedDecks />}
-      {showPage === 'profile' && <Profile />}
-      {showPage === 'notifications' && <Notifications />}
-      {showPage === 'activity' && <ActivityLog isAdmin={auth.isAdmin} />}
+      {showPage === 'admin' && <Admin setShowPage={setShowPage} />}
+      {showPage === 'completedDecks' && <CompletedDecks setShowPage={setShowPage} />}
+      {showPage === 'profile' && <Profile setShowPage={setShowPage} />}
+      {showPage === 'notifications' && <Notifications setShowPage={setShowPage} />}
+      {showPage === 'activity' && <ActivityLog isAdmin={auth.isAdmin} setShowPage={setShowPage} />}
       {/* Analytics dashboard placeholder */}
       {/* Add more detailed charts and export options here */}
       {/* Example: notification delivery rates, user engagement */}
-
       {/* Integrations placeholder: Add support for Telegram, Slack, and per-platform notification preferences here. */}
-
       {/* Performance: Pagination for activity logs and optimized notification delivery queries can be added here. */}
     </div>
   );

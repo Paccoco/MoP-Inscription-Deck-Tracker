@@ -48,6 +48,7 @@ export function useAutoRefresh(fetchFn, interval = 30000) {
   const intervalRef = useRef();
 
   const wrappedFetch = async () => {
+    if (sessionExpired) return null; // Stop fetching after session expired
     setLoading(true);
     try {
       const result = await fetchFn();
@@ -58,6 +59,7 @@ export function useAutoRefresh(fetchFn, interval = 30000) {
       if (err.response && err.response.status === 401) {
         setSessionExpired(true);
         localStorage.removeItem('token');
+        if (intervalRef.current) clearInterval(intervalRef.current); // Stop interval immediately
       } else {
         setError('Failed to fetch data.');
       }

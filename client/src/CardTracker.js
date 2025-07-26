@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAutoRefresh } from './hooks';
 
-function CardTracker() {
+function CardTracker({ setShowPage }) {
   const [cards, setCards] = useState([]);
   const fetchCards = async () => {
     const token = localStorage.getItem('token');
@@ -17,7 +17,15 @@ function CardTracker() {
     return data;
   };
   const { sessionExpired, loading, error } = useAutoRefresh(fetchCards, 30000);
-  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
+  if (sessionExpired) {
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={() => setShowPage('login')}>Login</button>
+        <button onClick={() => setShowPage('register')}>Register</button>
+      </div>
+    );
+  }
 
   return (
     <div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAutoRefresh } from './hooks';
 
-function CardHistory({ cardId }) {
+function CardHistory({ cardId, setShowPage }) {
   const [history, setHistory] = useState([]);
   const fetchHistory = async () => {
     const token = localStorage.getItem('token');
@@ -17,7 +17,15 @@ function CardHistory({ cardId }) {
     return data;
   };
   const { sessionExpired, loading, error } = useAutoRefresh(fetchHistory, 30000);
-  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
+  if (sessionExpired) {
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={() => setShowPage('login')}>Login</button>
+        <button onClick={() => setShowPage('register')}>Register</button>
+      </div>
+    );
+  }
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error loading history.</div>;
 

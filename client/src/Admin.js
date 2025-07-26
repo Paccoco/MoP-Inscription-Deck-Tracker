@@ -122,7 +122,23 @@ function Admin({ setShowPage }) {
   };
 
   if (sessionExpired) {
-    return <div className="session-expired">Session expired. Please log in again.</div>;
+    const handleLogin = () => {
+      localStorage.removeItem('token');
+      setShowPage('login');
+      window.location.reload();
+    };
+    const handleRegister = () => {
+      localStorage.removeItem('token');
+      setShowPage('register');
+      window.location.reload();
+    };
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleRegister}>Register</button>
+      </div>
+    );
   }
 
   return (

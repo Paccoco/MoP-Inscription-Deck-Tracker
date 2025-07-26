@@ -10,7 +10,7 @@ const themes = [
   { name: 'Classic', value: 'classic' }
 ];
 
-function Profile() {
+function Profile({ setShowPage }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,7 +39,25 @@ function Profile() {
 
   if (loading || autoLoading) return <div>Loading profile...</div>;
   if (error || autoError) return <div className="error">{error || autoError}</div>;
-  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
+  if (sessionExpired) {
+    const handleLogin = () => {
+      localStorage.removeItem('token');
+      setShowPage('login');
+      window.location.reload();
+    };
+    const handleRegister = () => {
+      localStorage.removeItem('token');
+      setShowPage('register');
+      window.location.reload();
+    };
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleRegister}>Register</button>
+      </div>
+    );
+  }
   if (!profile) return <div>No profile data found.</div>;
 
   return (

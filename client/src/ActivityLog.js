@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAutoRefresh } from './hooks';
 
-function ActivityLog() {
+function ActivityLog({ setShowPage }) {
   const [activity, setActivity] = useState([]);
   
   const fetchActivity = async () => {
@@ -20,7 +20,25 @@ function ActivityLog() {
   
   const { sessionExpired, loading, error } = useAutoRefresh(fetchActivity, 30000);
   
-  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
+  if (sessionExpired) {
+    const handleLogin = () => {
+      localStorage.removeItem('token');
+      setShowPage('login');
+      window.location.reload();
+    };
+    const handleRegister = () => {
+      localStorage.removeItem('token');
+      setShowPage('register');
+      window.location.reload();
+    };
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleRegister}>Register</button>
+      </div>
+    );
+  }
   
   if (loading) return <div>Loading...</div>;
   

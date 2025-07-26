@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useAutoRefresh } from './hooks';
 
-function DeckRequests() {
+function DeckRequests({ setShowPage }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -24,7 +24,13 @@ function DeckRequests() {
   const { sessionExpired, loading: autoLoading, error: autoError } = useAutoRefresh(fetchRequests, 30000); // Auto-refresh every 30s
 
   if (sessionExpired) {
-    return <div className="session-expired">Session expired. Please log in again.</div>;
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={() => setShowPage('login')}>Login</button>
+        <button onClick={() => setShowPage('register')}>Register</button>
+      </div>
+    );
   }
 
   return (

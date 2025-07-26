@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useAutoRefresh } from './hooks';
 
-export default function Notifications() {
+export default function Notifications({ setShowPage }) {
   const [notifications, setNotifications] = useState([]);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -69,7 +69,23 @@ export default function Notifications() {
   const types = Array.from(new Set(notifications.map(n => n.type).filter(Boolean)));
 
   if (sessionExpired) {
-    return <div className="session-expired">Session expired. Please log in again.</div>;
+    const handleLogin = () => {
+      localStorage.removeItem('token');
+      setShowPage('login');
+      window.location.reload();
+    };
+    const handleRegister = () => {
+      localStorage.removeItem('token');
+      setShowPage('register');
+      window.location.reload();
+    };
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleRegister}>Register</button>
+      </div>
+    );
   }
 
   return (

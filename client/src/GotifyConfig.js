@@ -9,7 +9,7 @@ const NOTIFICATION_TYPES = [
   { key: 'deck_request', label: 'Deck Request Updates' }
 ];
 
-export default function GotifyConfig() {
+export default function GotifyConfig({ setShowPage }) {
   const [server, setServer] = useState('');
   const [token, setToken] = useState('');
   const [types, setTypes] = useState([]);
@@ -62,7 +62,25 @@ export default function GotifyConfig() {
     return data;
   };
   const { sessionExpired, loading, error } = useAutoRefresh(fetchConfig, 30000);
-  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
+  if (sessionExpired) {
+    const handleLogin = () => {
+      localStorage.removeItem('token');
+      setShowPage('login');
+      window.location.reload();
+    };
+    const handleRegister = () => {
+      localStorage.removeItem('token');
+      setShowPage('register');
+      window.location.reload();
+    };
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleRegister}>Register</button>
+      </div>
+    );
+  }
 
   return (
     <div className="table-card" style={{ margin: '20px 0' }}>

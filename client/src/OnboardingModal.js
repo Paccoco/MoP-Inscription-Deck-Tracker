@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAutoRefresh } from './hooks';
 
-function OnboardingModal() {
+function OnboardingModal({ setShowPage }) {
   const [show, setShow] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -25,11 +25,17 @@ function OnboardingModal() {
     if (user && user.showOnboarding) setShow(true);
   }, [user]);
 
-  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
+  if (sessionExpired) {
+    return (
+      <div className="session-expired">
+        Session expired. Please log in again.<br />
+        <button onClick={() => setShowPage('login')}>Login</button>
+        <button onClick={() => setShowPage('register')}>Register</button>
+      </div>
+    );
+  }
 
-  return (
-    // ...existing modal code...
-  );
+  return null;
 }
 
 export default OnboardingModal;
