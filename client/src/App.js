@@ -8,6 +8,7 @@ import CompletedDecks from './CompletedDecks';
 import Profile from './Profile';
 import Notifications from './Notifications';
 import './Notifications.css';
+import { useAutoRefresh } from './hooks';
 
 function OnboardingModal({ show, onClose }) {
   if (!show) return null;
@@ -117,6 +118,7 @@ function App() {
   const [requestForm, setRequestForm] = useState({ deck: '' });
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [profile, setProfile] = useState(null);
 
   // Fetch cards from backend
   useEffect(() => {
@@ -276,6 +278,22 @@ function App() {
     setShowOnboarding(false);
     localStorage.setItem('showOnboarding', 'false');
   };
+
+  const fetchProfile = async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/profile', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      throw { response: { status: 401 } };
+    }
+    const data = await res.json();
+    setProfile(data);
+    return data;
+  };
+  const { sessionExpired, loading, error } = useAutoRefresh(fetchProfile, 30000);
+  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
 
   if (showPage === 'register') return <Register onRegister={() => setShowPage('login')} />;
   if (showPage === 'login') return <Login onLogin={() => { setShowPage('main'); window.location.reload(); }} />;

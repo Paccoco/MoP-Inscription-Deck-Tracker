@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAutoRefresh } from './hooks';
 
-function GuildBank() {
-  const [bankData, setBankData] = useState([]);
-  
-  const fetchBankData = async () => {
+function DeckHistory({ deckId }) {
+  const [history, setHistory] = useState([]);
+  const fetchHistory = async () => {
     const token = localStorage.getItem('token');
-    const res = await fetch('/api/guild-bank', {
+    const res = await fetch(`/api/decks/${deckId}/history`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (res.status === 401) {
@@ -14,26 +13,24 @@ function GuildBank() {
       throw { response: { status: 401 } };
     }
     const data = await res.json();
-    setBankData(Array.isArray(data) ? data : []);
+    setHistory(Array.isArray(data) ? data : []);
     return data;
   };
-  
-  const { sessionExpired, loading, error } = useAutoRefresh(fetchBankData, 30000);
-  
+  const { sessionExpired, loading, error } = useAutoRefresh(fetchHistory, 30000);
   if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
   if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error loading data.</div>;
+  if (error) return <div>Error loading history.</div>;
 
   return (
     <div>
-      <h1>Guild Bank</h1>
+      <h2>Deck History</h2>
       <ul>
-        {bankData.map(item => (
-          <li key={item.id}>{item.name}: {item.amount}</li>
+        {history.map((item) => (
+          <li key={item.id}>{item.action} - {new Date(item.timestamp).toLocaleString()}</li>
         ))}
       </ul>
     </div>
   );
 }
 
-export default GuildBank;
+export default DeckHistory;

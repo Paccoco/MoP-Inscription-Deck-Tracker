@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import DiscordWebhookConfig from './DiscordWebhookConfig';
 import ExportImport from './ExportImport';
+import { useAutoRefresh } from './hooks';
 
 function Admin({ setShowPage }) {
   const [users, setUsers] = useState([]);
@@ -25,65 +26,42 @@ function Admin({ setShowPage }) {
   const [notificationHistory, setNotificationHistory] = useState([]);
   const [securityError, setSecurityError] = useState('');
 
-  useEffect(() => {
+  const fetchAllAdminData = async () => {
     const token = localStorage.getItem('token');
-    const fetchUsers = async () => {
-      try {
-        const res = await axios.get('/api/admin/users', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUsers(res.data);
-      } catch (err) {
-        setError('Failed to load users or not admin');
+    try {
+      const [usersRes, pendingRes, completedDecksRes, notificationStatsRes, recentActivityRes, securityScanRes, dependencyStatusRes, notificationHistoryRes] = await Promise.all([
+        axios.get('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/admin/pending', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/admin/completed-unallocated-decks', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/admin/notification-stats', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/activity/all', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/admin/security-scan', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/admin/dependency-status', { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get('/api/admin/notification-history', { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+      setUsers(usersRes.data);
+      setPending(pendingRes.data);
+      setCompletedDecks(completedDecksRes.data);
+      setNotificationStats(notificationStatsRes.data);
+      setRecentActivity(recentActivityRes.data.slice(0, 5));
+      setSecurityScan(securityScanRes.data);
+      setDependencyStatus(dependencyStatusRes.data);
+      setNotificationHistory(notificationHistoryRes.data);
+      setSecurityError('');
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        setError('Session expired. Please log in again.');
+        localStorage.removeItem('token');
+      } else {
+        setError('Failed to load admin data.');
       }
-    };
-    const fetchPending = async () => {
-      try {
-        const res = await axios.get('/api/admin/pending', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setPending(res.data);
-      } catch {}
-    };
-    const fetchCompletedDecks = async () => {
-      try {
-        const res = await axios.get('/api/admin/completed-unallocated-decks', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setCompletedDecks(res.data);
-      } catch {}
-    };
-    const fetchNotificationStats = async () => {
-      try {
-        const res = await axios.get('/api/admin/notification-stats', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setNotificationStats(res.data);
-      } catch {}
-    };
-    const fetchRecentActivity = async () => {
-      try {
-        const res = await axios.get('/api/activity/all', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setRecentActivity(res.data.slice(0, 5)); // Show last 5 activities
-      } catch {}
-    };
-    // Fetch security dashboard data
-    axios.get('/api/admin/security-scan', { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => setSecurityScan(res.data))
-      .catch(() => setSecurityError('Security scan data unavailable.'));
-    axios.get('/api/admin/dependency-status', { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => setDependencyStatus(res.data))
-      .catch(() => setSecurityError('Dependency status unavailable.'));
-    axios.get('/api/admin/notification-history', { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => setNotificationHistory(res.data))
-      .catch(() => setSecurityError('Notification history unavailable.'));
-    fetchUsers();
-    fetchPending();
-    fetchCompletedDecks();
-    fetchNotificationStats();
-    fetchRecentActivity();
+    }
+  };
+
+  const { sessionExpired, loading, error: autoError } = useAutoRefresh(fetchAllAdminData, 30000);
+
+  useEffect(() => {
+    fetchAllAdminData();
   }, []);
 
   const approveUser = async (userId) => {
@@ -142,6 +120,10 @@ function Admin({ setShowPage }) {
     if (setShowPage) setShowPage('dashboard');
     else window.location.href = '/';
   };
+
+  if (sessionExpired) {
+    return <div className="session-expired">Session expired. Please log in again.</div>;
+  }
 
   return (
     <div className="admin-card">

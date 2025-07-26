@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import GotifyConfig from './GotifyConfig';
+import { useAutoRefresh } from './hooks';
 
 const themes = [
   { name: 'MoP Green', value: 'mop-green' },
@@ -21,22 +22,24 @@ function Profile() {
     document.body.className = e.target.value;
   };
 
+  const fetchProfile = async () => {
+    const token = localStorage.getItem('token');
+    const res = await axios.get('/api/profile', { headers: { Authorization: `Bearer ${token}` } });
+    setProfile(res.data);
+    setLoading(false);
+    return res.data;
+  };
+
+  const { sessionExpired, loading: autoLoading, error: autoError } = useAutoRefresh(fetchProfile, 30000);
+
   useEffect(() => {
     document.body.className = selectedTheme;
-    const token = localStorage.getItem('token');
-    axios.get('/api/profile', { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => {
-        setProfile(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Failed to load profile');
-        setLoading(false);
-      });
+    fetchProfile();
   }, [selectedTheme]);
 
-  if (loading) return <div>Loading profile...</div>;
-  if (error) return <div className="error">{error}</div>;
+  if (loading || autoLoading) return <div>Loading profile...</div>;
+  if (error || autoError) return <div className="error">{error || autoError}</div>;
+  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
   if (!profile) return <div>No profile data found.</div>;
 
   return (

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useAutoRefresh } from './hooks';
 
 const NOTIFICATION_TYPES = [
   { key: 'deck_complete', label: 'Deck Completed' },
@@ -13,6 +14,7 @@ export default function GotifyConfig() {
   const [token, setToken] = useState('');
   const [types, setTypes] = useState([]);
   const [message, setMessage] = useState('');
+  const [config, setConfig] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -45,6 +47,22 @@ export default function GotifyConfig() {
       ? types.filter(t => t !== typeKey)
       : [...types, typeKey]);
   };
+
+  const fetchConfig = async () => {
+    const token = localStorage.getItem('token');
+    const res = await fetch('/api/gotify/config', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      throw { response: { status: 401 } };
+    }
+    const data = await res.json();
+    setConfig(data);
+    return data;
+  };
+  const { sessionExpired, loading, error } = useAutoRefresh(fetchConfig, 30000);
+  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
 
   return (
     <div className="table-card" style={{ margin: '20px 0' }}>

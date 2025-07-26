@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useAutoRefresh } from './hooks';
 
 function CompletedDecks() {
   const [decks, setDecks] = useState([]);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
+  const fetchDecks = async () => {
     const token = localStorage.getItem('token');
-    axios.get('/api/completed-decks', {
+    const res = await fetch('/api/completed-decks', {
       headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setDecks(res.data))
-      .catch(err => setError('Failed to load completed decks'));
-  }, []);
+    });
+    if (res.status === 401) {
+      localStorage.removeItem('token');
+      throw { response: { status: 401 } };
+    }
+    const data = await res.json();
+    setDecks(Array.isArray(data) ? data : []);
+    return data;
+  };
+  const { sessionExpired, loading, error } = useAutoRefresh(fetchDecks, 30000);
+  if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
 
   return (
     <div className="completed-decks-card">

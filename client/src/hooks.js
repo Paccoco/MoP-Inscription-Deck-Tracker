@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 export function useFetchCards() {
@@ -38,4 +38,39 @@ export function useFetchNotifications() {
       .catch(() => setError('Error fetching notifications'));
   }, []);
   return { notifications, error };
+}
+
+// Shared auto-refresh and session handling hook
+export function useAutoRefresh(fetchFn, interval = 30000) {
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const intervalRef = useRef();
+
+  const wrappedFetch = async () => {
+    setLoading(true);
+    try {
+      const result = await fetchFn();
+      setError(null);
+      setLoading(false);
+      return result;
+    } catch (err) {
+      if (err.response && err.response.status === 401) {
+        setSessionExpired(true);
+        localStorage.removeItem('token');
+      } else {
+        setError('Failed to fetch data.');
+      }
+      setLoading(false);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    wrappedFetch();
+    intervalRef.current = setInterval(wrappedFetch, interval);
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
+  return { sessionExpired, loading, error };
 }

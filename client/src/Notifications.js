@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
+import { useAutoRefresh } from './hooks';
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
-  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterRead, setFilterRead] = useState('all');
@@ -11,22 +11,16 @@ export default function Notifications() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
   const fetchNotifications = async () => {
     const token = localStorage.getItem('token');
-    try {
-      const res = await axios.get('/api/notifications', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setNotifications(res.data);
-      setError('');
-    } catch (err) {
-      setError('Failed to load notifications from server.');
-    }
+    const res = await axios.get('/api/notifications', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setNotifications(res.data);
+    return res.data;
   };
+
+  const { sessionExpired, loading, error } = useAutoRefresh(fetchNotifications, 30000);
 
   const markRead = async (id) => {
     const token = localStorage.getItem('token');
@@ -45,7 +39,6 @@ export default function Notifications() {
     fetchNotifications();
   };
 
-  // Delete a single notification
   const deleteNotification = async (id) => {
     const token = localStorage.getItem('token');
     await axios.delete(`/api/notifications/${id}`, {
@@ -54,7 +47,6 @@ export default function Notifications() {
     fetchNotifications();
   };
 
-  // Mass delete all notifications
   const deleteAllNotifications = async () => {
     if (!window.confirm('Are you sure you want to delete ALL notifications? This cannot be undone.')) return;
     const token = localStorage.getItem('token');
@@ -65,7 +57,6 @@ export default function Notifications() {
     fetchNotifications();
   };
 
-  // Filtering and search
   const filtered = notifications.filter(n => {
     const matchesType = filterType === 'all' || (n.type && n.type === filterType);
     const matchesRead = filterRead === 'all' || (filterRead === 'read' ? n.read : !n.read);
@@ -73,12 +64,13 @@ export default function Notifications() {
     return matchesType && matchesRead && matchesSearch;
   });
 
-  // Pagination
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
   const totalPages = Math.ceil(filtered.length / pageSize);
-
-  // Notification types for filter dropdown
   const types = Array.from(new Set(notifications.map(n => n.type).filter(Boolean)));
+
+  if (sessionExpired) {
+    return <div className="session-expired">Session expired. Please log in again.</div>;
+  }
 
   return (
     <div className="notifications-card">
@@ -103,7 +95,9 @@ export default function Notifications() {
         <button disabled={selected.length === 0} onClick={bulkMarkRead}>Mark Selected as Read</button>
         <button style={{ marginLeft: 8, background: '#c00', color: '#fff' }} onClick={deleteAllNotifications}>Delete All</button>
       </div>
-      {error && notifications.length === 0 ? (
+      {loading ? (
+        <div>Loading...</div>
+      ) : error && notifications.length === 0 ? (
         <div>No notifications.</div>
       ) : filtered.length === 0 ? (
         <div>No notifications match your filters.</div>
