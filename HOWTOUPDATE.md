@@ -32,6 +32,12 @@ curl -X POST http://localhost:5000/api/admin/update/schedule \
   }'
 ```
 
+> **Note**: As of version 1.1.1, the update system automatically handles:
+> - Creation of required directories (logs, backups)
+> - Environment file setup (.env from .env.example)
+> - Directory permissions
+> - PM2 log directory initialization
+
 ## Manual Updates
 
 ### Method 1: Git Pull (Development/Source Installations)
@@ -184,7 +190,56 @@ pm2 logs mop-card-tracker --lines 20
 
 ## Troubleshooting
 
+### Quick Diagnosis Tool
+Before troubleshooting manually, run the diagnostic script to identify common issues:
+```bash
+./diagnose.sh
+```
+This script will check:
+- Directory structure and required files
+- Node.js and PM2 setup
+- Git repository status
+- System permissions
+- Environment configuration
+
 ### Common Issues
+
+#### Path and Directory Issues
+**Symptoms**: `ENOENT: no such file or directory` errors, PM2 fails to start
+
+**Solutions**:
+```bash
+# Verify you're in the correct directory
+pwd
+ls -la package.json  # Should show the main package.json
+
+# Create missing directories
+mkdir -p logs
+touch logs/.gitkeep
+
+# Fix PM2 process name if using old references
+pm2 delete mop-inscription-tracker  # old name
+pm2 start ecosystem.config.js       # correct configuration
+
+# Auto-detect and fix paths (new feature in v1.1.1)
+./update.sh  # Now automatically detects the correct project directory
+```
+
+#### Missing Directories or Environment Files
+```bash
+# Create required logs directory
+mkdir -p logs
+touch logs/.gitkeep
+
+# Setup .env file from example
+if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+    cp ".env.example" ".env"
+    echo "Please edit .env file with your configuration"
+fi
+
+# Fix PM2 log directory permissions
+chmod 755 logs
+```
 
 #### Database Migration Errors
 ```bash

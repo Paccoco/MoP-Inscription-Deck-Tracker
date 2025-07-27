@@ -7,9 +7,19 @@ set -e
 echo "=== MoP Inscription Deck Tracker Installation ==="
 echo "Setting up the application with PM2 process management..."
 
-# Configuration
-APP_DIR="/home/paccoco/MoP-Inscription-Deck-Tracker"
+# Configuration - Auto-detect app directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+APP_DIR="$SCRIPT_DIR"
 NODE_VERSION="16"
+
+# Verify we're in the correct directory
+if [ ! -f "$APP_DIR/package.json" ]; then
+    echo "❌ Error: package.json not found in $APP_DIR"
+    echo "Please run this script from the MoP-Inscription-Deck-Tracker directory"
+    exit 1
+fi
+
+echo "📁 Working directory: $APP_DIR"
 
 # Function to check if command exists
 command_exists() {
@@ -50,6 +60,21 @@ setup_database() {
         echo "Database already exists, backing up..."
         cp cards.db "cards.db.backup-$(date +%Y%m%d_%H%M%S)"
     fi
+}
+
+# Function to setup required directories
+setup_directories() {
+    echo "Setting up required directories..."
+    cd "$APP_DIR"
+    
+    # Create logs directory for PM2
+    mkdir -p logs
+    echo "Created logs directory for PM2"
+    
+    # Add .gitkeep to preserve logs directory in git
+    touch logs/.gitkeep
+    
+    echo "Directory setup completed!"
 }
 
 # Function to install dependencies
@@ -178,6 +203,7 @@ main() {
     # Setup application
     setup_environment
     setup_database
+    setup_directories
     install_dependencies
     build_frontend
     

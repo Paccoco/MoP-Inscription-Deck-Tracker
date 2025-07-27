@@ -3,4 +3,4 @@ Description=Send Gotify notification if Card Tracker stops
 
 [Service]
 Type=oneshot
-ExecStart=/home/paccoco/project-card-tracker/gotify_notify.sh %I
+ExecStart=/home/paccoco/MoP-Inscription-Deck-Tracker/gotify_notify.sh %I

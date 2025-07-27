@@ -4,6 +4,18 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$DIR/.."
 
+# Ensure we're in the correct directory
+if [ ! -f "package.json" ]; then
+    echo "Error: package.json not found in current directory: $(pwd)"
+    echo "Expected to be in MoP-Inscription-Deck-Tracker directory"
+    exit 1
+fi
+
+# Setup required directories
+echo "Setting up required directories..."
+mkdir -p logs
+mkdir -p backups
+
 # Create backup
 echo "Creating backup..."
 BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
@@ -38,6 +50,6 @@ cd ..
 
 # Restart the service using pm2
 echo "Restarting service..."
-pm2 restart mop-inscription-tracker
+pm2 restart mop-card-tracker
 
 echo "Update complete!"

@@ -5,7 +5,7 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 1.1.0**
+**Version: 1.1.1**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -259,7 +259,22 @@ This repository uses **Dependabot** for automated dependency updates:
 - CI runs security and test checks before merging
 
 ## Troubleshooting
-- If notifications are not received, check your Gotify/Discord config and ensure your server is running.
-- For mobile issues, ensure your browser is up to date and try resizing the window.
-- For export/import problems, verify CSV format and file encoding.
-- For login issues, check browser console and server logs for more details.
+
+### Quick Diagnosis
+Run the diagnostic script to identify common setup issues:
+```bash
+./diagnose.sh
+```
+This will check your installation for missing files, wrong paths, and configuration issues.
+
+### Common Issues
+- **Path errors**: Ensure you're running scripts from the correct directory (MoP-Inscription-Deck-Tracker)
+- **Missing logs directory**: Run `mkdir -p logs` if PM2 fails to start
+- **Wrong PM2 process name**: Use `mop-card-tracker` (not `mop-inscription-tracker`)
+- **Environment file**: Copy `.env.example` to `.env` and configure your settings
+- **Notifications**: Check your Gotify/Discord config and ensure your server is running
+- **Mobile issues**: Ensure your browser is up to date and try resizing the window
+- **Export/import problems**: Verify CSV format and file encoding
+- **Login issues**: Check browser console and server logs for more details
+
+For detailed troubleshooting, see [HOWTOUPDATE.md](HOWTOUPDATE.md).

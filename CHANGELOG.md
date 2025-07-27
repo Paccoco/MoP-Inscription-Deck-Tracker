@@ -5,6 +5,29 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-07-27
+
+### Fixed
+- Fixed deck completion calculation bug where duplicate cards were counted instead of unique card types
+- Fixed production server update failures due to missing logs directory 
+- Fixed hardcoded paths in scripts causing "ENOENT" errors on different server setups
+- Fixed wrong PM2 process names in rollback and update scripts
+- Fixed missing .env.example file for proper environment configuration
+
+### Added
+- New diagnostic script (`./diagnose.sh`) for identifying common setup and path issues
+- Automated setup of required directories (logs, backups) in update and install scripts
+- .env.example template with comprehensive configuration options
+- Auto-detection of project directory paths in update and install scripts
+- Enhanced troubleshooting documentation for common directory and environment issues
+
+### Improved
+- Update process now automatically creates necessary directories before application startup
+- Installation process includes proper directory structure setup and validation
+- Scripts now verify they're running from correct directory before proceeding
+- Better error handling for missing environment files and wrong paths
+- All scripts updated to use consistent PM2 process name (`mop-card-tracker`)
+
 ## [1.1.0] - 2025-07-27
 
 ### Added

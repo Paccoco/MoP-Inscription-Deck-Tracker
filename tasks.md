@@ -28,5 +28,10 @@
 ## 4. Fix Date Formatting Issues
 - Resolve "Invalid Date" errors in notification displays.
 - Add error handling for date formatting throughout the application.
+
+## 5. Fix Deck Completion Calculation
+- Fix bug where deck completion counts duplicate cards instead of unique card types.
+- Ensure deck completion percentage accurately reflects unique cards owned vs total unique cards needed.
+- ✅ Fixed deck completion calculation in App.js getDeckStatus function to count unique cards only (2025-07-27).
 - Ensure consistent date format display across all components.
 - ✅ Fixed date formatting in Notifications.js and Admin.js components (2025-07-27).

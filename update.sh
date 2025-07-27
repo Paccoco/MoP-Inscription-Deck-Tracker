@@ -6,10 +6,41 @@ set -e
 
 echo "=== MoP Inscription Deck Tracker Update ==="
 
-# Configuration
-APP_DIR="/home/paccoco/MoP-Inscription-Deck-Tracker"
+# Configuration - Auto-detect app directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+APP_DIR="$SCRIPT_DIR"
 BACKUP_DIR="$HOME/mop-backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+# Verify we're in the correct directory
+if [ ! -f "$APP_DIR/package.json" ]; then
+    echo "❌ Error: package.json not found in $APP_DIR"
+    echo "Please run this script from the MoP-Inscription-Deck-Tracker directory"
+    exit 1
+fi
+
+echo "📁 Working directory: $APP_DIR"
+
+# Function to ensure required directories exist
+setup_directories() {
+    echo "Setting up required directories..."
+    cd "$APP_DIR"
+    
+    # Create logs directory for PM2
+    mkdir -p logs
+    
+    # Create backup directory
+    mkdir -p "$BACKUP_DIR"
+    
+    # Create .env file from example if it doesn't exist
+    if [ ! -f ".env" ] && [ -f ".env.example" ]; then
+        echo "Creating .env file from .env.example..."
+        cp ".env.example" ".env"
+        echo "⚠️  Please edit .env file with your configuration before starting the application"
+    fi
+    
+    echo "Directory setup completed!"
+}
 
 # Function to create backup
 create_backup() {
@@ -235,6 +266,9 @@ main() {
     
     # Create backup
     create_backup
+    
+    # Setup required directories
+    setup_directories
     
     # Stop application
     stop_application

@@ -21,7 +21,7 @@ echo "Starting rollback from $BACKUP_DIR..."
 
 # Stop the service
 echo "Stopping service..."
-pm2 stop mop-inscription-tracker
+pm2 stop mop-card-tracker
 
 # Restore backed up files
 echo "Restoring files from backup..."
@@ -40,6 +40,6 @@ npm install
 
 # Restart the service
 echo "Restarting service..."
-pm2 restart mop-inscription-tracker
+pm2 restart mop-card-tracker
 
 echo "Rollback complete!"
