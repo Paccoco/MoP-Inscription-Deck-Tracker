@@ -5,11 +5,13 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 0.6.1**
+**Version: 0.6.3**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
 ## Recent Changes
+- **Improved Card Addition Interface:** Enhanced the card addition form to use a dropdown selection instead of manual text entry, making it easier to add cards accurately and eliminating typos. The dropdown includes all available card names from Crane, Ox, Serpent, and Tiger decks.
+- **Fixed Card Addition Functionality:** Restored the card addition form in the My Cards page, allowing users to add new cards to decks. The form includes input validation and automatically determines the correct deck based on the selected card.
 - Fixed session expired/login flow for normal users: If no token is present, the app now shows the login/register forms and does not trigger a sessionExpired loop. Only fetches profile if a token exists. This resolves issues where non-admin users could not log in after session expiration.
 - Updated `.github/copilot-instructions.md` to require using `power-restart.sh` for all frontend builds and backend restarts.
 - All bug checks and validation now use the power-restart workflow.

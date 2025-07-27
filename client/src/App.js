@@ -404,6 +404,47 @@ function App() {
             <button onClick={() => setShowPage('allcards')}>All Cards</button>
             <button onClick={handleLogout}>Logout</button>
           </nav>
+          
+          {/* Card Addition Form */}
+          <div style={{ marginBottom: 24, padding: 16, borderRadius: 8, backgroundColor: '#23272f', boxShadow: '0 2px 8px #0006' }}>
+            <h2>Add a Card</h2>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label htmlFor="card_name">Card Name:</label>
+                <select
+                  id="card_name"
+                  name="card_name"
+                  value={form.card_name}
+                  onChange={handleChange}
+                  required
+                  style={{ padding: '8px 12px', borderRadius: 4, border: '1px solid #444', background: '#191c24', color: 'white' }}
+                >
+                  <option value="">-- Select a Card --</option>
+                  {CARD_NAMES.map(cardName => (
+                    <option key={cardName} value={cardName}>{cardName}</option>
+                  ))}
+                </select>
+                <small style={{ color: '#aaa' }}>The deck will be automatically determined from the selected card</small>
+              </div>
+              <button 
+                type="submit" 
+                style={{ 
+                  padding: '10px', 
+                  backgroundColor: '#145c2c', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: 4, 
+                  cursor: 'pointer',
+                  marginTop: 8
+                }}
+              >
+                Add Card
+              </button>
+            </form>
+            {errorMsg && <div style={{ color: '#ff6b6b', marginTop: 12 }}>{errorMsg}</div>}
+          </div>
+          
+          <h2>My Cards</h2>
           <table>
             <thead>
               <tr>
