@@ -1,6 +1,6 @@
 {
   "name": "mop-inscription-deck-tracker",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A tracker for MoP Inscription Deck cards and decks",
   "main": "server-auth.js",
   "scripts": {

@@ -17,6 +17,8 @@ function Admin({ setShowPage }) {
   const [payouts, setPayouts] = useState(null);
   const [guildCut, setGuildCut] = useState(null);
   const [serverVersion, setServerVersion] = useState('');
+  const [versionCheckLoading, setVersionCheckLoading] = useState(false);
+  const [versionCheckResult, setVersionCheckResult] = useState(null);
 
   // Summary stats
   const [notificationStats, setNotificationStats] = useState({ total: 0, unread: 0 });
@@ -176,6 +178,40 @@ function Admin({ setShowPage }) {
     }
   };
 
+  // Manual version check function
+  const handleManualVersionCheck = async () => {
+    setVersionCheckLoading(true);
+    setVersionCheckResult(null);
+    const token = localStorage.getItem('token');
+    
+    try {
+      const response = await axios.post('/api/admin/version-check', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setVersionCheckResult(response.data);
+      
+      if (response.data.updateAvailable) {
+        alert(`Update Available!\n\nCurrent Version: ${response.data.localVersion}\nNew Version: ${response.data.remoteVersion}\n\nA notification has been added to your notifications panel.`);
+      } else {
+        alert(`Your installation is up to date!\n\nCurrent Version: ${response.data.localVersion}`);
+      }
+      
+      // Refresh admin data to show new notifications
+      fetchAllAdminData();
+      
+    } catch (err) {
+      console.error('Version check failed:', err);
+      setVersionCheckResult({ 
+        success: false, 
+        error: err.response?.data?.error || 'Failed to check for updates' 
+      });
+      alert(`Version check failed: ${err.response?.data?.error || 'Network error'}`);
+    } finally {
+      setVersionCheckLoading(false);
+    }
+  };
+
   const token = localStorage.getItem('token');
   let decodedUser = null;
   try {
@@ -212,7 +248,24 @@ function Admin({ setShowPage }) {
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1em', gap: '1em' }}>
         <button onClick={goHome}>Home</button>
         <h2 style={{ margin: 0 }}>Admin Panel</h2>
-        <span style={{ marginLeft: 'auto', fontWeight: 'bold', color: '#4caf50' }}>Server Version: {serverVersion}</span>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1em' }}>
+          <span style={{ fontWeight: 'bold', color: '#4caf50' }}>Server Version: {serverVersion}</span>
+          <button 
+            onClick={handleManualVersionCheck} 
+            disabled={versionCheckLoading}
+            style={{ 
+              padding: '6px 12px', 
+              fontSize: '0.9em',
+              backgroundColor: versionCheckLoading ? '#ccc' : '#2196f3',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: versionCheckLoading ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {versionCheckLoading ? 'Checking...' : 'Check for Updates'}
+          </button>
+        </div>
       </div>
       <div style={{ display: 'flex', gap: '2em', marginBottom: '1em' }}>
         <div>
@@ -234,6 +287,30 @@ function Admin({ setShowPage }) {
         </div>
       </div>
       {error && <div className="error">{error}</div>}
+      {versionCheckResult && (
+        <div style={{ 
+          padding: '1em', 
+          marginBottom: '1em', 
+          borderRadius: '8px',
+          backgroundColor: versionCheckResult.updateAvailable ? '#fff3cd' : '#d4edda',
+          border: `1px solid ${versionCheckResult.updateAvailable ? '#ffeaa7' : '#c3e6cb'}`,
+          color: versionCheckResult.updateAvailable ? '#856404' : '#155724'
+        }}>
+          <h4 style={{ margin: '0 0 0.5em 0' }}>
+            {versionCheckResult.updateAvailable ? '🚀 Update Available!' : '✅ Up to Date'}
+          </h4>
+          <div><strong>Current Version:</strong> {versionCheckResult.localVersion}</div>
+          {versionCheckResult.remoteVersion && (
+            <div><strong>Latest Version:</strong> {versionCheckResult.remoteVersion}</div>
+          )}
+          <div style={{ marginTop: '0.5em' }}>{versionCheckResult.message}</div>
+          {versionCheckResult.updateAvailable && (
+            <div style={{ marginTop: '0.5em', fontSize: '0.9em' }}>
+              Check your notifications for update details, or use the automatic update system below.
+            </div>
+          )}
+        </div>
+      )}
       <div className="table-card">
         <h3>Pending Users</h3>
         <ul>

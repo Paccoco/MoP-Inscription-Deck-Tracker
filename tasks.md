@@ -14,7 +14,33 @@
   - ✅ **Production Deployment Ready (2025-07-27)**
     - All changes committed and pushed to both master and dev-branch
     - v1.1.2 release candidate ready for production deployment
-    - Complete resolution of "Error adding card" production issue resolve issues with Discord webhook notifications (not working as intended).
+    - Complete resolution of "Error adding card" production issue
+
+## 7. Manual Version Check in Admin Panel
+- Add manual version check button to admin panel for on-demand update checking.
+- Create backend API endpoint `/api/admin/version-check` to trigger manual version checks.
+- Display version check results with clear messaging about update availability.
+- Log manual version checks in activity log and update database records.
+- ✅ **COMPLETED: Manual Version Check Feature (2025-07-27)**
+  - **Backend:** Added `/api/admin/version-check` endpoint with admin authentication
+  - **Frontend:** Added "Check for Updates" button in admin panel header
+  - **Features:** Instant version checking, clear update availability messaging, activity logging
+  - **UI:** Beautiful result display with color-coded update status and version information
+  - **Integration:** Automatically refreshes admin data to show new notifications when updates are available
+
+## 8. Fix "Failed to load admin data" Error
+- Investigate and resolve admin panel data loading failures.
+- Fix missing database tables and schema inconsistencies.
+- Ensure all admin endpoints work correctly.
+- ✅ **COMPLETED: Admin Panel Data Loading Fix (2025-07-27)**
+  - **Root Cause:** Missing `completed_decks` table causing Promise.all() failure in admin panel
+  - **Solution:** Created missing table with correct schema (deck, contributors, completed_at, disposition, recipient)
+  - **Authentication Fix:** Added missing `auth` middleware to manual version check endpoint
+  - **Database:** Populated test data for comprehensive testing
+  - **Verification:** All admin dashboard endpoints now loading successfully
+
+## 1. Fix Discord Webhook Integration
+- Investigate and resolve issues with Discord webhook notifications (not working as intended).
 - Ensure deck completions, sales, requests, and admin announcements are reliably sent to Discord.
 - Update documentation and activity log for webhook delivery status.
 - ✅ Error handling and activity log updates added to Discord webhook delivery (2025-07-26).

@@ -5,7 +5,7 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 1.1.2**
+**Version: 1.1.3**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -190,8 +190,9 @@ sudo systemctl stop cardtracker
 ### Automatic Updates (Via Admin Panel)
 1. Log in as admin
 2. Navigate to Admin > System Updates
-3. Check for available updates
-4. Click "Update Now" or schedule for later
+3. **Manual Version Check:** Click "Check for Updates" button for immediate version checking
+4. Check for available updates automatically or manually
+5. Click "Update Now" or schedule for later
 
 ### Manual Updates
 ```bash

@@ -5,6 +5,31 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2025-07-27
+
+### Added
+- **Manual Version Check Feature**: New admin panel button for on-demand update checking
+  - Added `/api/admin/version-check` POST endpoint with admin authentication
+  - Integrated manual version check button in admin dashboard
+  - Activity logging and notifications for manual version checks
+  - Real-time feedback on update availability status
+
+### Fixed
+- **CRITICAL: Resolved "Failed to load admin data" error**
+  - Root cause: Missing `completed_decks` table causing Promise.all() failure in admin panel
+  - Created missing `completed_decks` table with correct schema (deck, contributors, completed_at, disposition, recipient)
+  - Fixed authentication flow for manual version check endpoint (added missing `auth` middleware)
+  - All admin dashboard endpoints now loading successfully
+- **Database Schema Consistency**: Aligned server code expectations with actual database structure
+  - Fixed mismatch between init-database.sh and server-auth.js table definitions
+  - Populated test data for comprehensive admin panel testing
+
+### Technical Details
+- Manual version check endpoint properly authenticated with `auth, requireAdmin` middleware chain
+- Admin panel Promise.all() data loading now succeeds with all endpoints functional
+- Comprehensive test data populated for development environment testing
+- Frontend rebuild and backend restart completed for production readiness
+
 ## [1.1.2] - 2025-07-27
 
 ### Fixed

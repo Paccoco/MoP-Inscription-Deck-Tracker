@@ -431,6 +431,72 @@ apiRouter.get('/admin/update/history', requireAdmin, async (req, res) => {
   }
 });
 
+// Manual version check endpoint
+apiRouter.post('/admin/version-check', auth, requireAdmin, async (req, res) => {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+    const localVersion = pkg.version;
+    const remoteInfo = await getRemoteVersionInfo();
+    
+    // Log the manual check
+    await db.run(
+      'INSERT INTO update_checks (check_time, remote_version, local_version, update_available, error) VALUES (?, ?, ?, ?, ?)',
+      [
+        new Date().toISOString(),
+        remoteInfo?.version || null,
+        localVersion,
+        remoteInfo && compareVersions(localVersion, remoteInfo.version) < 0 ? 1 : 0,
+        null
+      ]
+    );
+
+    const updateAvailable = remoteInfo && compareVersions(localVersion, remoteInfo.version) < 0;
+    
+    if (updateAvailable) {
+      // Notify admins of available update
+      const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+      for (const admin of admins) {
+        await db.run(
+          'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+          [admin.username, `Manual version check: New version ${remoteInfo.version} is available for installation`, new Date().toISOString()]
+        );
+      }
+    }
+
+    // Log the manual check activity
+    logActivity(req.user.username, `Manual version check performed - ${updateAvailable ? `Update available: ${remoteInfo.version}` : 'Up to date'}`);
+
+    res.json({
+      success: true,
+      localVersion,
+      remoteVersion: remoteInfo?.version || null,
+      updateAvailable,
+      releaseNotes: remoteInfo?.body || null,
+      publishedAt: remoteInfo?.published_at || null,
+      message: updateAvailable 
+        ? `Update available: ${remoteInfo.version}` 
+        : 'Your installation is up to date'
+    });
+
+  } catch (err) {
+    console.error('Manual version check failed:', err);
+    
+    // Log the failed check
+    await db.run(
+      'INSERT INTO update_checks (check_time, remote_version, local_version, update_available, error) VALUES (?, ?, ?, ?, ?)',
+      [new Date().toISOString(), null, null, 0, err.message]
+    );
+
+    logActivity(req.user.username, `Manual version check failed: ${err.message}`);
+
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to check for updates',
+      details: err.message 
+    });
+  }
+});
+
 // Mount API router before static files
 app.use('/api', apiRouter);
 
