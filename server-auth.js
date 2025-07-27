@@ -93,6 +93,14 @@ db.serialize(() => {
     token TEXT,
     types TEXT -- JSON array of enabled notification types
   )`);
+  // Announcement Table
+  db.run(`CREATE TABLE IF NOT EXISTS announcement (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    message TEXT NOT NULL,
+    expiry DATETIME,
+    links TEXT, -- JSON array of {label, url}
+    active INTEGER DEFAULT 1
+  )`);
 });
 
 // Log activity helper
@@ -309,6 +317,14 @@ function auth(req, res, next) {
   });
 }
 
+// Middleware to require admin
+function requireAdmin(req, res, next) {
+  if (!req.user || !req.user.is_admin) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+}
+
 // Admin endpoint to approve users
 app.post('/api/admin/approve', express.json(), auth, (req, res) => {
   console.log('Approve user req.body:', req.body); // Debug log
@@ -396,7 +412,7 @@ app.post('/api/deck-requests', express.json(), auth, (req, res) => {
 // API: Get deck requests ordered by contribution
 app.get('/api/deck-requests', auth, (req, res) => {
   db.all(`
-    SELECT r.*, IFNULL(c.count,0) as contribution
+    SELECT r.*, IFNULL(c.count,0) as contribution, r.trinket
     FROM deck_requests r
     LEFT JOIN (
       SELECT owner, COUNT(*) as count FROM cards GROUP BY owner
@@ -700,6 +716,88 @@ app.post('/api/admin/remove-user', express.json(), auth, (req, res) => {
     logActivity(req.user.username, `Removed user access for ${username}`);
     res.json({ success: true });
   });
+});
+
+// Announcement endpoints
+app.get('/api/announcements', auth, (req, res) => {
+  db.all('SELECT * FROM announcement WHERE active = 1 ORDER BY id DESC', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    // Parse links JSON
+    rows.forEach(row => { row.links = JSON.parse(row.links || '[]'); });
+    res.json(rows);
+  });
+});
+
+app.post('/api/announcements', express.json(), auth, (req, res) => {
+  if (!req.user.is_admin) return res.status(403).json({ error: 'Admin only' });
+  const { message, expiry, links } = req.body;
+  if (!message || !expiry) {
+    return res.status(400).json({ error: 'Message and expiry are required' });
+  }
+  db.run(
+    'INSERT INTO announcement (message, expiry, links, active) VALUES (?, ?, ?, 1)',
+    [message, expiry, JSON.stringify(links || [])],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID, message, expiry, links });
+    }
+  );
+});
+
+// API: Delete an announcement (admin only)
+app.delete('/api/announcements/:id', auth, (req, res) => {
+  if (!req.user.is_admin) return res.status(403).json({ error: 'Admin only' });
+  const { id } = req.params;
+  db.run('UPDATE announcement SET active = 0 WHERE id = ?', [id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+// Announcement Endpoints
+app.get('/api/announcement', async (req, res) => {
+  try {
+    const row = await db.get('SELECT * FROM announcement WHERE active = 1 ORDER BY id DESC LIMIT 1');
+    if (!row) return res.json({ active: false });
+    // Check expiry
+    if (row.expiry && new Date(row.expiry) < new Date()) {
+      return res.json({ active: false });
+    }
+    let links = [];
+    try { links = JSON.parse(row.links || '[]'); } catch {}
+    res.json({
+      active: true,
+      message: row.message,
+      expiry: row.expiry,
+      links
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch announcement' });
+  }
+});
+
+app.post('/api/admin/announcement', requireAdmin, async (req, res) => {
+  const { message, expiry, links, active } = req.body;
+  if (!message) return res.status(400).json({ error: 'Message required' });
+  try {
+    await db.run('DELETE FROM announcement'); // Only one active announcement
+    await db.run('INSERT INTO announcement (message, expiry, links, active) VALUES (?, ?, ?, ?)',
+      message, expiry || null, JSON.stringify(links || []), active ? 1 : 0);
+    logActivity('Admin pushed announcement', req.user.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to set announcement' });
+  }
+});
+
+app.delete('/api/admin/announcement', requireAdmin, async (req, res) => {
+  try {
+    await db.run('DELETE FROM announcement');
+    logActivity('Admin cleared announcement', req.user.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to clear announcement' });
+  }
 });
 
 app.listen(PORT, () => {

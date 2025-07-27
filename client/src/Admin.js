@@ -3,6 +3,7 @@ import axios from 'axios';
 import DiscordWebhookConfig from './DiscordWebhookConfig';
 import ExportImport from './ExportImport';
 import { useAutoRefresh } from './hooks';
+import AdminAnnouncement from './AdminAnnouncement';
 
 function Admin({ setShowPage }) {
   const [users, setUsers] = useState([]);
@@ -120,6 +121,33 @@ function Admin({ setShowPage }) {
     if (setShowPage) setShowPage('dashboard');
     else window.location.href = '/';
   };
+
+  const handleSetAnnouncement = async (data) => {
+    await fetch('/api/admin/announcement', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
+      body: JSON.stringify(data)
+    });
+    alert('Announcement pushed!');
+  };
+  const handleClearAnnouncement = async () => {
+    await fetch('/api/admin/announcement', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    alert('Announcement cleared!');
+  };
+
+  const token = localStorage.getItem('token');
+  let decodedUser = null;
+  try {
+    decodedUser = token ? JSON.parse(atob(token.split('.')[1])) : null;
+  } catch (e) {
+    decodedUser = null;
+  }
+  // Use user object from backend if available, fallback to decoded token
+  const currentUser = users.find(u => u.username === decodedUser?.username);
+  const isAdmin = currentUser?.is_admin === 1 || currentUser?.is_admin === true;
 
   if (sessionExpired) {
     const handleLogin = () => {
@@ -331,6 +359,7 @@ function Admin({ setShowPage }) {
         <h3>Export / Import Data</h3>
         <ExportImport isAdmin={true} />
       </div>
+      {isAdmin && <AdminAnnouncement onSet={handleSetAnnouncement} onClear={handleClearAnnouncement} />}
     </div>
   );
 }

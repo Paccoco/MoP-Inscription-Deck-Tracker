@@ -68,19 +68,3 @@
 ---
 For new features, follow the established notification and config patterns. Always update the activity log and ensure notification delivery is consistent across in-app, Discord, and Gotify.
 
-## Important Scripts
-- Whenever you need to rebuild the frontend or restart the backend, always use the `power-restart.sh` script from the app home directory.
-- Usage:
-  ```bash
-  ./power-restart.sh
-  ```
-- This script will:
-  - Kill any backend process running on port 5000
-  - Rebuild the React frontend
-  - Restart the backend (`nohup node server-auth.js > server.log 2>&1 &`)
-  - Print status and access URL
-- Ensure the script is executable:
-  ```bash
-  chmod +x power-restart.sh
-  ```
-- This workflow is required for all bug checks, validation, and deployment steps.
