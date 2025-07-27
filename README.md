@@ -27,6 +27,12 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
   - All 401/403 responses during login include a `debug` field in the JSON response for easier troubleshooting.
   - Debug logs are visible in `server.log` and can be used to trace authentication failures (invalid credentials, not approved, password mismatch, missing headers, JWT errors).
   - To test/debug login issues, attempt to log in and review both the browser console and `server.log` for detailed error context.
+- Fixed login flow bug: After successful login, user info is now passed from the backend to the frontend, allowing the app to correctly set login state and fetch protected data (deck requests, completed decks, etc.).
+- Deck Requests table now correctly displays all requests after login for all users.
+- Bug check: Frontend rebuilt and backend restarted; deck requests confirmed visible and up-to-date for all users.
+- **Wowhead Tooltips Region Fix:** Deck/trinket tooltips now use MoP Classic region (`domain=mop-classic`) for accurate item data. Updated Wowhead script and deck/trinket links in the frontend for MoP Classic compatibility.
+- **Deck Requests Table Bug Fix:** Deck Requests table now reliably displays all requests for all users after login. Bug check and validation performed; confirmed working.
+- **Frontend/Backend Rebuilds:** Frontend rebuilt and backend restarted after each major change for validation.
 
 ## Release Notes: Version 0.5.7b (2025-07-25)
 
@@ -71,6 +77,7 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - Completed Decks page: view disposition (fulfilled/sold), sale price, payout split, and estimated deck value
 - Backend endpoint for unallocated completed decks
 - Improved navigation: Card Tracker, Admin, Completed Decks, Profile, Notifications, Analytics
+- **Admin Announcement Modal:** Admins can push out a modal announcement to all users at any time. Announcement includes message, expiry, and optional links. Users see the modal on login/page load if active and not expired.
 - **Notifications:** In-app notifications for admin approvals, deck completions, payouts, requests, and new user registrations. You can now delete individual notifications or mass delete all notifications from the Notifications page.
 - **User Profile:** View your cards, completed decks, payouts, recent activity, and configure Gotify notifications
 - **Discord Integration:** Automated notifications for deck completions, sales, and requests
