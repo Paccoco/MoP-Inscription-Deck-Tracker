@@ -41,7 +41,7 @@
   - **README.md:** Only update for major features, API changes, or setup modifications. Keep it focused on what users need to know.
   - **CHANGELOG.md:** Document all changes with version numbers, dates, and detailed descriptions categorized as "Added", "Changed", "Fixed", or "Removed".
   - **PRODUCTION-DEPLOYMENT.md:** For production server deployments, updates, and troubleshooting. Always reference this guide when helping with production environments.
-- **Comment non-obvious code** and ensure everything is understandable to a mid-level developer.
+- **Comment non-obvious code** and ensure everything is understandable to a low-level developer.
 - When writing complex logic, **add an inline `# Reason:` comment** explaining the why, not just the what.
 
 ### 🧠 AI Behavior Rules
