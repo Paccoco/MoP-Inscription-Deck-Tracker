@@ -12,6 +12,46 @@ APP_DIR="$SCRIPT_DIR"
 BACKUP_DIR="$HOME/mop-backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
+# Command line options
+FORCE_UPDATE=false
+SKIP_GIT=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --force)
+            FORCE_UPDATE=true
+            echo "🚨 Force update enabled - will overwrite local changes"
+            shift
+            ;;
+        --backup-dir)
+            BACKUP_DIR="$2"
+            echo "📁 Using custom backup directory: $BACKUP_DIR"
+            shift 2
+            ;;
+        --skip-git)
+            SKIP_GIT=true
+            echo "⏭️  Skipping git operations"
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Options:"
+            echo "  --force       Force update, overwriting local changes"
+            echo "  --backup-dir  Specify custom backup directory"
+            echo "  --skip-git    Skip git pull operations"
+            echo "  --help, -h    Show this help message"
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 # Verify we're in the correct directory
 if [ ! -f "$APP_DIR/package.json" ]; then
     echo "❌ Error: package.json not found in $APP_DIR"
@@ -99,12 +139,48 @@ start_application() {
 
 # Function to update from git
 update_from_git() {
+    if [ "$SKIP_GIT" = true ]; then
+        echo "⏭️  Skipping git operations as requested"
+        return 0
+    fi
+    
     echo "Updating from Git repository..."
     cd "$APP_DIR"
     
     # Save current branch
     CURRENT_BRANCH=$(git branch --show-current)
     echo "Current branch: $CURRENT_BRANCH"
+    
+    # Check for local changes
+    if [ "$FORCE_UPDATE" = true ]; then
+        echo "🚨 Force update mode: handling local changes..."
+        
+        # Stash any local changes (including untracked files)
+        echo "Stashing local changes..."
+        git add -A
+        git stash push -m "Auto-stash before force update $(date)"
+        
+        # Reset any partial merges or conflicts
+        git reset --hard HEAD
+        git clean -fd
+        
+    else
+        # Check if we have local changes that would conflict
+        git fetch origin
+        if ! git diff --quiet HEAD origin/master 2>/dev/null && ! git diff --quiet HEAD origin/main 2>/dev/null; then
+            if git status --porcelain | grep -q .; then
+                echo "❌ Local changes detected that would be overwritten."
+                echo "Either commit your changes, or run with --force to override."
+                echo ""
+                echo "Files with local changes:"
+                git status --porcelain
+                echo ""
+                echo "To force update and backup local changes, run:"
+                echo "  $0 --force"
+                exit 1
+            fi
+        fi
+    fi
     
     # Fetch latest changes
     git fetch origin
@@ -117,6 +193,11 @@ update_from_git() {
     else
         echo "Updating current branch: $CURRENT_BRANCH"
         git pull origin "$CURRENT_BRANCH"
+    fi
+    
+    if [ "$FORCE_UPDATE" = true ]; then
+        echo "✅ Force update completed. Local changes were stashed."
+        echo "To recover stashed changes later, run: git stash pop"
     fi
 }
 

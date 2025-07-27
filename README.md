@@ -219,6 +219,26 @@ sudo systemctl stop cardtracker
 5. Click "Update Now" or schedule for later
 
 ### Manual Updates
+
+For production servers with git conflicts, use:
+
+```bash
+# Quick fix for git conflicts
+./force-update.sh
+
+# Or use the update script with force option
+./update.sh --force
+
+# Check available options
+./update.sh --help
+```
+
+The `--force` option will:
+- Automatically stash any local changes  
+- Reset the working directory
+- Pull the latest code
+- Continue with the normal update process
+- Preserve your changes in git stash for later recovery
 ```bash
 # Simple update to latest version
 ./update.sh

@@ -316,7 +316,7 @@ apiRouter.post('/admin/update', requireAdmin, async (req, res) => {
         
         // Use the main update.sh which is more comprehensive
         const updateScript = path.join(__dirname, 'update.sh');
-        const updateProcess = require('child_process').spawn('bash', [updateScript, '--backup-dir', backupDir, '--skip-git'], {
+        const updateProcess = require('child_process').spawn('bash', [updateScript, '--backup-dir', backupDir, '--skip-git', '--force'], {
           detached: true,
           stdio: ['ignore', 'pipe', 'pipe']
         });

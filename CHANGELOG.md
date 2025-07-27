@@ -5,6 +5,22 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2025-07-27
+
+### Added
+- **Force Update Options**: Enhanced update system to handle production server git conflicts
+  - Added `--force` option to update.sh that automatically stashes local changes
+  - Created dedicated `force-update.sh` script for production servers with conflicts
+  - Local changes are preserved in git stash and can be recovered later
+  - Admin UI now uses `--force` option for reliable production updates
+  - Added detailed help and command-line options to update scripts
+
+### Enhanced
+- **Production Deployment**: Improved handling of git conflicts during updates
+  - Automatic conflict resolution preserves local changes safely
+  - Better error messages and user guidance for manual updates
+  - Enhanced documentation for production update scenarios
+
 ## [1.2.2] - 2025-07-27
 
 ### Enhanced
