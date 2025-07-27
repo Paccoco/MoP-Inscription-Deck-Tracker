@@ -47,6 +47,12 @@ create_backup() {
     echo "Creating backup..."
     mkdir -p "$BACKUP_DIR"
     
+    # Check if backup directory already has content (e.g., from admin UI)
+    if [ -n "$(find "$BACKUP_DIR" -maxdepth 1 -name "*.backup-*" 2>/dev/null)" ]; then
+        echo "Backup directory already contains backups, skipping duplicate backup creation"
+        return 0
+    fi
+    
     # Backup database
     if [ -f "$APP_DIR/cards.db" ]; then
         cp "$APP_DIR/cards.db" "$BACKUP_DIR/cards.db.backup-$TIMESTAMP"
@@ -59,9 +65,19 @@ create_backup() {
         echo "Environment file backed up to: $BACKUP_DIR/.env.backup-$TIMESTAMP"
     fi
     
-    # Full application backup
+    # Full application backup (excluding PM2 runtime files and other temp files)
     if [ -d "$APP_DIR" ]; then
-        tar -czf "$BACKUP_DIR/app-backup-$TIMESTAMP.tar.gz" -C "$(dirname "$APP_DIR")" "$(basename "$APP_DIR")"
+        echo "Creating full application backup..."
+        tar -czf "$BACKUP_DIR/app-backup-$TIMESTAMP.tar.gz" \
+            -C "$(dirname "$APP_DIR")" \
+            --exclude="$(basename "$APP_DIR")/.pm2" \
+            --exclude="$(basename "$APP_DIR")/node_modules/.cache" \
+            --exclude="$(basename "$APP_DIR")/client/node_modules/.cache" \
+            --exclude="$(basename "$APP_DIR")/logs" \
+            --exclude="$(basename "$APP_DIR")/nohup.out" \
+            --exclude="$(basename "$APP_DIR")/cards.db-shm" \
+            --exclude="$(basename "$APP_DIR")/cards.db-wal" \
+            "$(basename "$APP_DIR")"
         echo "Full backup created: $BACKUP_DIR/app-backup-$TIMESTAMP.tar.gz"
     fi
 }
@@ -202,11 +218,13 @@ rollback() {
 show_usage() {
     echo "Usage: $0 [options]"
     echo "Options:"
-    echo "  --branch <branch>  Update to specific branch (default: current branch)"
-    echo "  --master          Update to master/main branch"
-    echo "  --verify-only     Only verify current installation"
-    echo "  --rollback        Rollback to previous backup"
-    echo "  --help            Show this help message"
+    echo "  --branch <branch>    Update to specific branch (default: current branch)"
+    echo "  --master            Update to master/main branch"
+    echo "  --backup-dir <dir>  Use specific backup directory (default: auto-generated)"
+    echo "  --skip-git          Skip git pull (useful when already pulled)"
+    echo "  --verify-only       Only verify current installation"
+    echo "  --rollback          Rollback to previous backup"
+    echo "  --help              Show this help message"
 }
 
 # Main update process
@@ -224,6 +242,8 @@ main() {
     BRANCH=""
     VERIFY_ONLY=false
     ROLLBACK=false
+    CUSTOM_BACKUP_DIR=""
+    SKIP_GIT=false
     
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -233,6 +253,14 @@ main() {
                 ;;
             --master)
                 BRANCH="master"
+                shift
+                ;;
+            --backup-dir)
+                CUSTOM_BACKUP_DIR="$2"
+                shift 2
+                ;;
+            --skip-git)
+                SKIP_GIT=true
                 shift
                 ;;
             --verify-only)
@@ -280,20 +308,30 @@ main() {
         npm install -g pm2
     fi
     
-    # Create backup
-    create_backup
+    # Use custom backup directory if provided
+    if [ -n "$CUSTOM_BACKUP_DIR" ]; then
+        BACKUP_DIR="$CUSTOM_BACKUP_DIR"
+        echo "Using custom backup directory: $BACKUP_DIR"
+    fi
     
     # Setup required directories
     setup_directories
     
-    # Stop application
+    # Stop application first to prevent file changes during backup
     stop_application
     
-    # Update from git
-    if [ -n "$BRANCH" ]; then
-        update_from_git "$BRANCH"
+    # Create backup after stopping application
+    create_backup
+    
+    # Update from git (skip if already done)
+    if [ "$SKIP_GIT" = false ]; then
+        if [ -n "$BRANCH" ]; then
+            update_from_git "$BRANCH"
+        else
+            update_from_git
+        fi
     else
-        update_from_git
+        echo "Skipping git update (already performed)"
     fi
     
     # Update dependencies

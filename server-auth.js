@@ -273,36 +273,81 @@ apiRouter.post('/admin/update', requireAdmin, async (req, res) => {
         // Update status to in_progress
         await db.run('UPDATE system_updates SET status = ? WHERE id = ?', ['in_progress', updateId]);
 
-        const updateScript = path.join(__dirname, 'scripts', 'update.sh');
-        const updateProcess = require('child_process').spawn('bash', [updateScript, backupDir], {
-          detached: true
+        let updateLog = 'Starting update process...\n';
+        
+        // Function to log both to console and database
+        const logUpdate = (message) => {
+          updateLog += message;
+          console.log(message.trim());
+          db.run('UPDATE system_updates SET log = ? WHERE id = ?', [updateLog, updateId]);
+        };
+
+        // Step 1: First pull the latest code to get the newest update script
+        logUpdate('Step 1: Pulling latest code to get newest update script...\n');
+        
+        const { exec } = require('child_process');
+        const util = require('util');
+        const execPromise = util.promisify(exec);
+        
+        try {
+          // Stop the application first
+          logUpdate('Stopping application...\n');
+          await execPromise('pm2 stop mop-card-tracker').catch(() => {
+            logUpdate('Application was not running or pm2 stop failed\n');
+          });
+          
+          // Pull latest changes first to get newest scripts
+          logUpdate('Pulling latest changes from repository...\n');
+          const { stdout: gitOutput, stderr: gitError } = await execPromise('git fetch origin && git pull origin master');
+          logUpdate(`Git output: ${gitOutput}\n`);
+          if (gitError) logUpdate(`Git warnings: ${gitError}\n`);
+          
+          // Make sure update scripts are executable
+          logUpdate('Making update scripts executable...\n');
+          await execPromise('chmod +x update.sh scripts/update.sh');
+          
+        } catch (pullError) {
+          logUpdate(`Failed to pull latest code: ${pullError.message}\n`);
+          throw pullError;
+        }
+
+        // Step 2: Now run the updated script
+        logUpdate('Step 2: Running the updated update script...\n');
+        
+        // Use the main update.sh which is more comprehensive
+        const updateScript = path.join(__dirname, 'update.sh');
+        const updateProcess = require('child_process').spawn('bash', [updateScript, '--backup-dir', backupDir, '--skip-git'], {
+          detached: true,
+          stdio: ['ignore', 'pipe', 'pipe']
         });
 
-        let updateLog = '';
         updateProcess.stdout.on('data', (data) => {
-          updateLog += data.toString();
-          db.run('UPDATE system_updates SET log = ? WHERE id = ?', [updateLog, updateId]);
+          logUpdate(data.toString());
         });
 
         updateProcess.stderr.on('data', (data) => {
-          updateLog += `[ERROR] ${data.toString()}`;
-          db.run('UPDATE system_updates SET log = ? WHERE id = ?', [updateLog, updateId]);
+          logUpdate(`[ERROR] ${data.toString()}`);
         });
 
         updateProcess.on('close', async (code) => {
           if (code === 0) {
+            logUpdate(`Update completed successfully with exit code ${code}\n`);
             await db.run('UPDATE system_updates SET status = ? WHERE id = ?', ['completed', updateId]);
             sendDiscordNotification(`[System Update] Successfully updated to version ${versionInfo.version}`);
           } else {
+            logUpdate(`Update failed with exit code ${code}\n`);
             await db.run(
               'UPDATE system_updates SET status = ?, error = ? WHERE id = ?',
               ['failed', `Update process exited with code ${code}`, updateId]
             );
             // Trigger rollback
+            logUpdate('Initiating rollback...\n');
             const rollbackScript = path.join(__dirname, 'scripts', 'rollback.sh');
             require('child_process').spawn('bash', [rollbackScript, backupDir], {
-              detached: true
+              detached: true,
+              stdio: 'ignore'
             });
+            sendDiscordNotification(`[System Update] Failed to update to version ${versionInfo.version}, rollback initiated`);
           }
         });
 
