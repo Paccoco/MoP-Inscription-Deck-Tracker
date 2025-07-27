@@ -24,8 +24,6 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - **Admin User Management:** Admins can now remove user access directly from the Admin panel. This action deletes the user, their notification config, and all notifications, and is logged in the activity log for transparency.
 - **Built-in Debugging for Login Issues:**
   - The backend now logs all login attempts, user lookup, password checks, and JWT validation steps to `server.log`.
-  - All 401/403 responses during login include a `debug` field in the JSON response for easier troubleshooting.
-  - Debug logs are visible in `server.log` and can be used to trace authentication failures (invalid credentials, not approved, password mismatch, missing headers, JWT errors).
   - To test/debug login issues, attempt to log in and review both the browser console and `server.log` for detailed error context.
 - Fixed login flow bug: After successful login, user info is now passed from the backend to the frontend, allowing the app to correctly set login state and fetch protected data (deck requests, completed decks, etc.).
 - Deck Requests table now correctly displays all requests after login for all users.
@@ -33,6 +31,8 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - **Wowhead Tooltips Region Fix:** Deck/trinket tooltips now use MoP Classic region (`domain=mop-classic`) for accurate item data. Updated Wowhead script and deck/trinket links in the frontend for MoP Classic compatibility.
 - **Deck Requests Table Bug Fix:** Deck Requests table now reliably displays all requests for all users after login. Bug check and validation performed; confirmed working.
 - **Frontend/Backend Rebuilds:** Frontend rebuilt and backend restarted after each major change for validation.
+- Fixed Discord webhook delivery reliability: All webhook notifications now log delivery failures and errors to the activity log and server.log for transparency and easier debugging.
+- See `server-auth.js` for updated error handling in `sendDiscordNotification`.
 
 ## Release Notes: Version 0.5.7b (2025-07-25)
 
@@ -53,7 +53,6 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
   - Full bug check and validation for new features.
 - **Admin User Management:**
   - Admins can now remove user access directly from the Admin panel.
-  - This action deletes the user, their notification config, and all notifications.
   - Removal is logged in the activity log for transparency.
 
 ### How to Upgrade
@@ -93,24 +92,15 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 ## Setup & Installation
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Paccoco/project-card-tracker.git
-   cd project-card-tracker
    ```
 2. **Install dependencies:**
    ```bash
-   npm install
-   cd client && npm install
-   cd ..
    ```
 3. **Build the React frontend:**
    ```bash
-   cd client
-   npm run build
-   cd ..
    ```
 4. **Start the backend server:**
    ```bash
-   nohup node server-auth.js > server.log 2>&1 &
    ```
 5. **Access the app:**
    Open your browser and go to `http://localhost:5000` (or your server's IP/domain).
@@ -150,9 +140,6 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - **Approve Users:** Review and approve new registrations (receive notification for new user needing approval)
 - **Allocate Completed Decks:**
   - Select from completed/unallocated decks
-  - Fulfill a deck request or sell a deck
-  - Set sale price and recipient
-  - View payout split for contributors
   - View estimated deck value
 - **Notifications:** Users are notified automatically for approvals, deck completions, payouts, requests, and new user registrations
 - **Deck Requests:** View and fulfill deck requests from users
@@ -164,7 +151,6 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - **Discord & Gotify Integration:** Configure Discord webhook for automated notifications, and set up Gotify for guild-wide or personal notifications
 - **User Removal:**
   - Remove user access directly from the Admin panel.
-  - This action deletes the user, their notification config, and all notifications.
   - Removal is logged in the activity log for transparency.
 
 ## API Endpoints
@@ -240,51 +226,3 @@ Below are example screenshots and GIFs demonstrating key features and UI section
 - If notifications are not received, check your Gotify/Discord config and ensure your server is running.
 - For mobile issues, ensure your browser is up to date and try resizing the window.
 - For export/import problems, verify CSV format and file encoding.
-- If login issues occur, review the `debug` field in the JSON response for 401/403 errors, and check `server.log` for detailed debug logs on the backend.
-
-## Contributing
-Pull requests and suggestions are welcome! Please open an issue or PR for improvements.
-
-## License
-MIT
-
-## Test Coverage Reporting
-
-This repository uses **Jest** for backend and frontend test coverage:
-- Run `npm test -- --coverage` to generate a coverage report for all tests.
-- Coverage results are displayed in the terminal and saved in the `coverage/` directory.
-- The admin dashboard displays coverage status and summary (coming soon).
-- A coverage badge will be added to the README once CI integration is complete.
-
-**How to run coverage locally:**
-```bash
-npm test -- --coverage
-```
-
-**How to interpret results:**
-- Coverage summary includes statements, branches, functions, and lines covered.
-- Review uncovered lines/functions for missing tests.
-
-**CI Integration:**
-- Coverage reporting will be integrated into CI workflows for automated status updates.
-
----
-*Created by Paccoco for Mist of Pandaria Classic guilds.*
-
-## Power Restart Script
-
-A new script `power-restart.sh` is available to automate rebuilding the frontend and restarting the backend:
-
-### Usage
-```bash
-./power-restart.sh
-```
-- Kills any backend process running on port 5000
-- Rebuilds the React frontend
-- Restarts the backend (`nohup node server-auth.js > server.log 2>&1 &`)
-- Prints status and access URL
-
-This script streamlines the workflow for bug checks, validation, and deployment. Make sure it is executable:
-```bash
-chmod +x power-restart.sh
-```

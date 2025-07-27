@@ -2,6 +2,7 @@
 - Investigate and resolve issues with Discord webhook notifications (not working as intended).
 - Ensure deck completions, sales, requests, and admin announcements are reliably sent to Discord.
 - Update documentation and activity log for webhook delivery status.
+- ✅ Error handling and activity log updates added to Discord webhook delivery (2025-07-26).
 
 ## 2. Admin Announcement Form UI/UX Redesign
 - Use a card-style container with padding, subtle shadow, and rounded corners.
