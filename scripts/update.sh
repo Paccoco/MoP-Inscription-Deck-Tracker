@@ -16,6 +16,10 @@ echo "Setting up required directories..."
 mkdir -p logs
 mkdir -p backups
 
+# Stop application first
+echo "Stopping application..."
+pm2 stop mop-card-tracker 2>/dev/null || echo "Application was not running"
+
 # Create backup
 echo "Creating backup..."
 BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
@@ -48,8 +52,8 @@ npm install
 npm run build
 cd ..
 
-# Restart the service using pm2
-echo "Restarting service..."
-pm2 restart mop-card-tracker
+# Start the service using pm2
+echo "Starting service..."
+pm2 start mop-card-tracker 2>/dev/null || pm2 restart mop-card-tracker
 
 echo "Update complete!"
