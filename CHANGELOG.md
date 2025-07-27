@@ -27,6 +27,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Scripts now verify they're running from correct directory before proceeding
 - Better error handling for missing environment files and wrong paths
 - All scripts updated to use consistent PM2 process name (`mop-card-tracker`)
+- **Enhanced production deployment script (`deploy-production.sh`) with comprehensive system setup:**
+  - Complete Linux package installation including build tools, development libraries, and security tools
+  - Advanced fail2ban configuration with multiple jails for SSH and Nginx protection
+  - System optimization with log rotation, user limits, and swap configuration
+  - Automatic security updates configuration
+  - Node.js LTS installation with global tools (yarn, typescript)
+  - Redis server installation for caching and session management
+  - System monitoring tools (htop, tree, nano, vim)
+  - Production-ready web server setup with SSL and security headers
 
 ## [1.1.0] - 2025-07-27
 

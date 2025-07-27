@@ -73,6 +73,12 @@ For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG
 - SQLite (database)
 - Chart.js (analytics)
 
+## System Requirements
+- **OS**: Ubuntu 20.04+ or Debian 11+ (script supports APT package manager)
+- **RAM**: 1GB minimum (2GB recommended, script adds swap if needed)
+- **Disk**: 5GB minimum (10GB recommended for logs and backups)
+- **Network**: Public IP with domain name for SSL certificates
+
 ## Setup & Installation
 
 ### Quick Install (Recommended)
@@ -81,6 +87,36 @@ git clone https://github.com/Paccoco/MoP-Inscription-Deck-Tracker.git
 cd MoP-Inscription-Deck-Tracker
 ./install.sh
 ```
+
+### Production Server Deployment (Complete Setup)
+For a full production deployment with Nginx, SSL, firewall, and monitoring:
+```bash
+# 1. Clone the repository
+git clone https://github.com/Paccoco/MoP-Inscription-Deck-Tracker.git
+cd MoP-Inscription-Deck-Tracker
+
+# 2. Edit deployment configuration
+sudo nano deploy-production.sh
+# Change DOMAIN="your-domain.com" to your actual domain
+
+# 3. Run the production deployment script
+sudo ./deploy-production.sh
+```
+
+**The production script automatically sets up:**
+- ✅ Dedicated app user and secure file permissions
+- ✅ Complete system dependencies (Node.js LTS, PM2, Nginx, SQLite, Redis)
+- ✅ Development tools (build-essential, Python3, TypeScript, Yarn)
+- ✅ Security tools (fail2ban, UFW firewall, SSL certificates)
+- ✅ System utilities (htop, tree, nano, vim, rsync, cron)
+- ✅ Application deployment and build process
+- ✅ Secure environment configuration with random passwords
+- ✅ Nginx reverse proxy with SSL certificates (Let's Encrypt)
+- ✅ Advanced firewall configuration with fail2ban protection
+- ✅ PM2 process management with auto-restart and monitoring
+- ✅ System optimization (log rotation, swap, security updates)
+- ✅ Health monitoring with automated recovery (5-minute intervals)
+- ✅ Backup directories and comprehensive logging setup
 
 ### Manual Installation
 1. **Clone the repository:**
@@ -201,6 +237,34 @@ sudo systemctl disable cardtracker
 
 # View service logs
 journalctl -u cardtracker -f
+```
+
+### Production Server Management
+For production deployments using `deploy-production.sh`:
+```bash
+# Application management (as the app user)
+sudo -u mop-tracker pm2 status
+sudo -u mop-tracker pm2 logs mop-card-tracker
+sudo -u mop-tracker pm2 restart mop-card-tracker
+
+# Nginx management
+sudo systemctl status nginx
+sudo nginx -t                    # Test configuration
+sudo systemctl reload nginx     # Reload after config changes
+
+# SSL certificate renewal (automatic via cron)
+sudo certbot renew --dry-run    # Test renewal
+sudo systemctl status certbot.timer
+
+# Firewall management
+sudo ufw status                  # Check firewall status
+sudo ufw allow from [IP]         # Allow specific IP
+
+# Health monitoring
+sudo tail -f /opt/mop-card-tracker/logs/health.log
+
+# View admin credentials
+sudo cat /opt/mop-card-tracker/.env
 ```
 
 ## Discord & Gotify Integration

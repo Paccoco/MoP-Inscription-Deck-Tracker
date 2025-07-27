@@ -53,15 +53,82 @@ create_app_user() {
 # Function to install system dependencies
 install_system_dependencies() {
     print_status "Installing system dependencies..."
-    apt-get update
-    apt-get install -y curl wget git sqlite3 nginx certbot python3-certbot-nginx ufw
     
-    # Install Node.js via NodeSource
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    # Update package list
+    apt-get update
+    
+    # Install essential build tools and system utilities
+    apt-get install -y \
+        curl \
+        wget \
+        git \
+        unzip \
+        zip \
+        tar \
+        gzip \
+        build-essential \
+        software-properties-common \
+        apt-transport-https \
+        ca-certificates \
+        gnupg \
+        lsb-release
+    
+    # Install development libraries and tools
+    apt-get install -y \
+        python3 \
+        python3-pip \
+        python3-dev \
+        pkg-config \
+        libssl-dev \
+        libffi-dev \
+        libxml2-dev \
+        libxslt1-dev \
+        zlib1g-dev \
+        libjpeg-dev \
+        libpng-dev
+    
+    # Install database and networking tools
+    apt-get install -y \
+        sqlite3 \
+        libsqlite3-dev \
+        redis-server \
+        cron \
+        logrotate \
+        rsync \
+        htop \
+        tree \
+        nano \
+        vim
+    
+    # Install web server and security tools
+    apt-get install -y \
+        nginx \
+        certbot \
+        python3-certbot-nginx \
+        ufw \
+        fail2ban \
+        acl
+    
+    # Install Node.js via NodeSource (LTS version)
+    print_status "Installing Node.js..."
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
     apt-get install -y nodejs
     
+    # Verify Node.js installation
+    print_status "Node.js version: $(node --version)"
+    print_status "npm version: $(npm --version)"
+    
     # Install PM2 globally
+    print_status "Installing PM2..."
     npm install -g pm2
+    
+    # Install useful global npm packages
+    npm install -g \
+        yarn \
+        typescript \
+        @types/node
+    
+    print_status "System dependencies installation completed!"
 }
 
 # Function to setup application
@@ -90,8 +157,10 @@ setup_application() {
     # Build frontend
     sudo -u "$APP_USER" bash -c "cd $APP_DIR/client && npm run build"
     
-    # Create logs directory
+    # Create required directories (from v1.1.1 fixes)
     sudo -u "$APP_USER" mkdir -p "$APP_DIR/logs"
+    sudo -u "$APP_USER" touch "$APP_DIR/logs/.gitkeep"
+    sudo -u "$APP_USER" mkdir -p "$APP_DIR/backups"
 }
 
 # Function to setup environment
@@ -99,11 +168,26 @@ setup_environment() {
     print_status "Setting up environment configuration..."
     
     if [ ! -f "$APP_DIR/.env" ]; then
-        # Generate secure JWT secret
-        JWT_SECRET=$(openssl rand -base64 32)
-        
-        # Create .env file
-        cat > "$APP_DIR/.env" << EOF
+        # Copy from .env.example if available (v1.1.1 improvement)
+        if [ -f "$APP_DIR/.env.example" ]; then
+            print_status "Creating .env from .env.example template..."
+            cp "$APP_DIR/.env.example" "$APP_DIR/.env"
+            
+            # Replace placeholder values with secure ones
+            JWT_SECRET=$(openssl rand -base64 32)
+            ADMIN_PASSWORD=$(openssl rand -base64 12)
+            
+            sed -i "s/your-super-secret-jwt-key-change-this-in-production/$JWT_SECRET/g" "$APP_DIR/.env"
+            sed -i "s/admin123/$ADMIN_PASSWORD/g" "$APP_DIR/.env"
+            sed -i "s/NODE_ENV=production/NODE_ENV=production/g" "$APP_DIR/.env"
+        else
+            # Fallback to old method if .env.example doesn't exist
+            # Fallback to old method if .env.example doesn't exist
+            # Generate secure JWT secret
+            JWT_SECRET=$(openssl rand -base64 32)
+            
+            # Create .env file
+            cat > "$APP_DIR/.env" << EOF
 # MoP Card Tracker Production Configuration
 NODE_ENV=production
 PORT=5000
@@ -122,11 +206,12 @@ ADMIN_PASSWORD=$(openssl rand -base64 12)
 # Optional: External Database URL
 # DATABASE_URL=
 EOF
+        fi
         
         chown "$APP_USER:$APP_USER" "$APP_DIR/.env"
         chmod 600 "$APP_DIR/.env"
         
-        print_warning "Default admin password generated. Check $APP_DIR/.env"
+        print_warning "Admin credentials configured. Check $APP_DIR/.env"
     else
         print_status "Environment file already exists"
     fi
@@ -258,6 +343,125 @@ setup_firewall() {
     ufw --force enable
 }
 
+# Function to setup fail2ban
+setup_fail2ban() {
+    print_status "Configuring fail2ban..."
+    
+    # Create jail.local configuration
+    cat > /etc/fail2ban/jail.local << 'EOF'
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 5
+backend = systemd
+
+[sshd]
+enabled = true
+port = ssh
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+maxretry = 3
+bantime = 3600
+
+[nginx-http-auth]
+enabled = true
+filter = nginx-http-auth
+port = http,https
+logpath = /var/log/nginx/error.log
+maxretry = 3
+bantime = 3600
+
+[nginx-noscript]
+enabled = true
+port = http,https
+filter = nginx-noscript
+logpath = /var/log/nginx/access.log
+maxretry = 6
+bantime = 86400
+
+[nginx-badbots]
+enabled = true
+port = http,https
+filter = nginx-badbots
+logpath = /var/log/nginx/access.log
+maxretry = 2
+bantime = 86400
+
+[nginx-noproxy]
+enabled = true
+port = http,https
+filter = nginx-noproxy
+logpath = /var/log/nginx/access.log
+maxretry = 2
+bantime = 86400
+EOF
+
+    # Start and enable fail2ban
+    systemctl start fail2ban
+    systemctl enable fail2ban
+    
+    print_status "fail2ban configured and started"
+}
+
+# Function to optimize system settings
+optimize_system() {
+    print_status "Optimizing system settings..."
+    
+    # Configure log rotation for the application
+    cat > /etc/logrotate.d/mop-card-tracker << 'EOF'
+/opt/mop-card-tracker/logs/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0644 mop-tracker mop-tracker
+    postrotate
+        sudo -u mop-tracker pm2 reload mop-card-tracker
+    endscript
+}
+EOF
+
+    # Set proper limits for the app user
+    cat >> /etc/security/limits.conf << 'EOF'
+mop-tracker soft nofile 65536
+mop-tracker hard nofile 65536
+mop-tracker soft nproc 4096
+mop-tracker hard nproc 4096
+EOF
+
+    # Configure swap if not present (for small VPS)
+    if [ ! -f /swapfile ] && [ $(free -m | awk '/^Mem:/{print $2}') -lt 2048 ]; then
+        print_status "Creating swap file for low-memory server..."
+        fallocate -l 1G /swapfile
+        chmod 600 /swapfile
+        mkswap /swapfile
+        swapon /swapfile
+        echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    fi
+    
+    # Enable automatic security updates
+    apt-get install -y unattended-upgrades
+    cat > /etc/apt/apt.conf.d/50unattended-upgrades << 'EOF'
+Unattended-Upgrade::Automatic-Reboot "false";
+Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+EOF
+    
+    # Configure automatic updates
+    cat > /etc/apt/apt.conf.d/20auto-upgrades << 'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";
+EOF
+
+    # Restart services to apply limits
+    systemctl daemon-reload
+    
+    print_status "System optimization completed"
+}
+
 # Function to create monitoring script
 create_monitoring() {
     print_status "Creating monitoring script..."
@@ -323,11 +527,23 @@ show_summary() {
     echo "  sudo nginx -t"
     echo "  sudo systemctl reload nginx"
     echo ""
+    print_status "Security commands:"
+    echo "  sudo fail2ban-client status"
+    echo "  sudo ufw status"
+    echo "  sudo fail2ban-client status sshd"
+    echo ""
+    print_status "System monitoring:"
+    echo "  sudo systemctl status mop-card-tracker"
+    echo "  htop"
+    echo "  tail -f $APP_DIR/logs/combined.log"
+    echo ""
     print_warning "Next steps:"
     echo "1. Edit $APP_DIR/.env to set admin credentials"
     echo "2. Configure DNS to point $DOMAIN to this server"
     echo "3. Test the application and SSL certificate"
     echo "4. Setup database backups"
+    echo "5. Review fail2ban logs: sudo tail -f /var/log/fail2ban.log"
+    echo "6. Monitor application: $APP_DIR/monitor.sh"
     echo ""
 }
 
@@ -350,6 +566,8 @@ main() {
     setup_nginx
     setup_ssl
     setup_firewall
+    setup_fail2ban
+    optimize_system
     create_monitoring
     show_summary
 }
