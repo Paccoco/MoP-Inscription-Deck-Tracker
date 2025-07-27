@@ -24,16 +24,22 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 
 For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
 
-## 🚨 Critical Update: Version 1.1.2 (2025-07-27)
+## � Latest Release: Version 1.1.3 (2025-07-27)
 
-### Fixed "Error adding card" Production Issue
-**RESOLVED:** The reported "Error adding card" issue was caused by missing database tables on production servers. This version includes:
+### New Features & Critical Fixes
+- **Manual Version Check:** Added "Check for Updates" button in admin panel for on-demand update checking
+- **Fixed Admin Panel:** Resolved "Failed to load admin data" error affecting admin dashboard
+- **Production-Ready Scripts:** All deployment scripts verified and updated with correct database schemas
+- **Enhanced Documentation:** Comprehensive production deployment guide and troubleshooting
 
-- **Database initialization script** (`init-database.js`) to create all required tables
-- **Complete schema setup** for production deployments
-- **Verified functionality** for card adding, authentication, and user management
+### 🔧 Production Deployment
+For new servers or updates, see the comprehensive [Production Deployment Guide](PRODUCTION-DEPLOYMENT.md).
 
-**For Production Servers:** Run `node init-database.js` to create missing database tables before starting the application.
+**Quick Update for Existing Servers:**
+```bash
+git pull origin master
+./update.sh
+```
 
 ## Release Notes: Version 1.1.1 (2025-07-27)
 
@@ -99,14 +105,16 @@ cd MoP-Inscription-Deck-Tracker
 ./install.sh
 ```
 
-### Production Server Deployment (Complete Setup)
-For a full production deployment with Nginx, SSL, firewall, and monitoring:
+### Production Server Deployment
+**📖 For comprehensive production deployment including troubleshooting and updates, see the [Production Deployment Guide](PRODUCTION-DEPLOYMENT.md).**
+
+For a quick production setup with Nginx, SSL, firewall, and monitoring:
 ```bash
 # 1. Clone the repository
 git clone https://github.com/Paccoco/MoP-Inscription-Deck-Tracker.git
 cd MoP-Inscription-Deck-Tracker
 
-# 2. Edit deployment configuration
+# 2. Edit deployment configuration (optional)
 sudo nano deploy-production.sh
 # Change DOMAIN="your-domain.com" to your actual domain
 
@@ -152,11 +160,11 @@ sudo ./deploy-production.sh
    cd client && npm run build && cd ..
    ```
 
-5. **Initialize the database (CRITICAL for v1.1.2+):**
+5. **Initialize the database (CRITICAL for v1.1.3+):**
    ```bash
-   node init-database.js
+   ./init-database.sh
    ```
-   > **Important:** This step creates all required database tables. Skip this and card adding will fail with "Error adding card".
+   > **Important:** This step creates all required database tables. Skip this and the admin panel will show "Failed to load admin data" errors.
 
 6. **Configure environment:**
    ```bash

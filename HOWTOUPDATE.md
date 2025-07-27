@@ -2,37 +2,41 @@
 
 This guide provides step-by-step instructions for updating your MoP Inscription Deck Tracker installation from one version to the next.
 
-## 🚨 CRITICAL UPDATE NOTICE - v1.1.2
+## 🚨 CRITICAL UPDATE NOTICE - v1.1.3
 
 **READ THIS FIRST BEFORE UPDATING!**
 
-### Database Fix Required - "Error adding card" Issue
-If you're experiencing "Error adding card" errors on your production server, this update completely resolves the issue.
+### Production Deployment Guide Available
+**For comprehensive production server deployment and update procedures, see [PRODUCTION-DEPLOYMENT.md](PRODUCTION-DEPLOYMENT.md).**
+
+### Database Schema Fixes Required - "Failed to load admin data" Issue
+If you're experiencing "Failed to load admin data" errors on your admin panel, this update completely resolves the issue.
 
 #### ⚠️ IMMEDIATE ACTION REQUIRED:
 ```bash
-# 1. CRITICAL: Initialize missing database tables BEFORE updating
-node init-database.js
+# 1. CRITICAL: Update to latest scripts and initialize database
+git pull origin master
+./init-database.sh
 
-# 2. For production servers (recommended):
-NODE_ENV=production node init-production-database.js
+# 2. Restart application
+pm2 restart mop-card-tracker
 
-# 3. Verify all tables exist:
-sqlite3 cards.db ".tables"
-# Should show: activity_log  cards  decks  discord_webhook  notifications  system_updates  update_checks  users
+# 3. Verify admin panel loads correctly
+curl -H "Authorization: Bearer YOUR_TOKEN" http://localhost:5000/api/admin/completed-unallocated-decks
 ```
 
 #### Why This Is Critical:
-- **Root Cause**: Missing database tables cause server crashes when users try to add cards
-- **Impact**: Production users cannot add cards until database is properly initialized
-- **Solution**: Database initialization creates missing tables while preserving all existing data
-- **Safety**: 100% safe - no existing data will be lost
+- **Root Cause**: Missing `completed_decks` table and schema mismatches cause admin panel failures
+- **Impact**: Admin panel shows "Failed to load admin data" preventing administrative functions
+- **Solution**: Updated database initialization scripts create missing tables with correct schemas
+- **Safety**: 100% safe - no existing data will be lost, only missing tables added
 
 #### What Gets Fixed:
-- ✅ Creates all missing database tables that caused card adding failures
-- ✅ Preserves all existing production data
-- ✅ Adds comprehensive database safety system
-- ✅ Resolves "Error adding card" for all users
+- ✅ Creates missing `completed_decks` table with correct schema (deck, contributors, completed_at, disposition, recipient)
+- ✅ Adds missing tables: `scheduled_updates`, proper `gotify_config`, etc.
+- ✅ Fixes schema mismatches between init scripts and server expectations
+- ✅ Resolves "Failed to load admin data" for all admin users
+- ✅ All production deployment scripts now verified and production-ready
 
 **This must be run BEFORE proceeding with any update commands below.**
 
@@ -50,12 +54,22 @@ sqlite3 cards.db ".tables"
 
 ## Automatic Updates (Recommended)
 
+**📖 For production server updates, also see [PRODUCTION-DEPLOYMENT.md](PRODUCTION-DEPLOYMENT.md) for comprehensive deployment procedures.**
+
 ### Using the Admin Panel
 1. **Access Admin Panel**: Log in as an admin user and navigate to the Admin section
-2. **Check for Updates**: The system automatically checks for updates every 24 hours
-3. **Review Update Information**: Check the version details, changelog, and release notes
-4. **Initiate Update**: Click "Update Now" or schedule the update for a specific time
-5. **Monitor Progress**: The system will show update progress and automatically restart when complete
+2. **Manual Version Check**: Click "Check for Updates" button for immediate update availability check
+3. **Automatic Checks**: The system automatically checks for updates every 24 hours
+4. **Review Update Information**: Check the version details, changelog, and release notes
+5. **Initiate Update**: Click "Update Now" or schedule the update for a specific time
+6. **Monitor Progress**: The system will show update progress and automatically restart when complete
+
+### Quick Production Update
+```bash
+# For existing production servers (recommended method)
+git pull origin master
+./update.sh
+```
 
 ### Scheduled Updates
 ```bash
@@ -77,9 +91,26 @@ curl -X POST http://localhost:5000/api/admin/update/schedule \
 
 ## Manual Updates
 
-> **⚠️ IMPORTANT**: Before running any manual update commands, ensure you have completed the [Critical Database Fix](#-critical-update-notice---v112) if updating to v1.1.2 or later.
+> **⚠️ IMPORTANT**: Before running any manual update commands, ensure you have completed the [Critical Database Fix](#-critical-update-notice---v113) if updating to v1.1.3 or later.
 
-### Method 1: Git Pull (Development/Source Installations)
+**📖 For production environments, see [PRODUCTION-DEPLOYMENT.md](PRODUCTION-DEPLOYMENT.md) for detailed production-specific procedures.**
+
+### Method 1: Using Update Script (Recommended)
+
+```bash
+# Simple one-command update for existing installations
+git pull origin master
+./update.sh
+```
+
+The update script automatically:
+- ✅ Runs database initialization to ensure all tables exist
+- ✅ Installs dependencies and builds frontend
+- ✅ Handles schema updates and missing tables
+- ✅ Restarts PM2 process
+- ✅ Preserves all existing data
+
+### Method 2: Git Pull (Development/Source Installations)
 
 ```bash
 # 1. Stop the application
@@ -94,8 +125,8 @@ cp /home/paccoco/MoP-Inscription-Deck-Tracker/cards.db /home/paccoco/MoP-Inscrip
 # 4. Pull latest changes
 cd /home/paccoco/MoP-Inscription-Deck-Tracker
 git fetch origin
-git checkout main  # or the target branch
-git pull origin main
+git checkout master  # or the target branch
+git pull origin master
 
 # 5. Update dependencies
 npm install

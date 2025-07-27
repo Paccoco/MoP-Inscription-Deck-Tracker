@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Integrated manual version check button in admin dashboard
   - Activity logging and notifications for manual version checks
   - Real-time feedback on update availability status
+- **Production Deployment Guide**: Comprehensive `PRODUCTION-DEPLOYMENT.md` documentation
+  - Complete guide for new server deployments and existing server updates
+  - Database schema verification commands and troubleshooting procedures
+  - Common issues and solutions with step-by-step fixes
+  - Environment configuration and testing validation scripts
 
 ### Fixed
 - **CRITICAL: Resolved "Failed to load admin data" error**
@@ -20,14 +25,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Created missing `completed_decks` table with correct schema (deck, contributors, completed_at, disposition, recipient)
   - Fixed authentication flow for manual version check endpoint (added missing `auth` middleware)
   - All admin dashboard endpoints now loading successfully
+- **CRITICAL: Production Deployment Script Fixes**
+  - Fixed `init-database.sh` schema mismatches (deck vs deck_name, completed_at vs created_at)
+  - Updated `init-production-database.js` with missing tables (completed_decks, deck_requests, activity, announcement, gotify_config, scheduled_updates)
+  - Enhanced `install.sh` and `update.sh` to properly run database initialization
+  - Created `test-production-scripts.sh` validation tool (17 checks, 0 failures)
 - **Database Schema Consistency**: Aligned server code expectations with actual database structure
-  - Fixed mismatch between init-database.sh and server-auth.js table definitions
+  - Fixed mismatch between init scripts and server-auth.js table definitions
   - Populated test data for comprehensive admin panel testing
+
+### Changed
+- **Copilot Instructions Updated**: Added reference to PRODUCTION-DEPLOYMENT.md for production server guidance
+- **README.md**: Updated with v1.1.3 release information and production deployment guide references
+- **Production Scripts**: All deployment scripts now verified and production-ready
 
 ### Technical Details
 - Manual version check endpoint properly authenticated with `auth, requireAdmin` middleware chain
 - Admin panel Promise.all() data loading now succeeds with all endpoints functional
 - Comprehensive test data populated for development environment testing
+- All production deployment scripts validated and ready for both new servers and updates
 - Frontend rebuild and backend restart completed for production readiness
 
 ## [1.1.2] - 2025-07-27
