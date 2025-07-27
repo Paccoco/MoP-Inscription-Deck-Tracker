@@ -133,7 +133,9 @@ export default function Notifications({ setShowPage }) {
                   style={{ marginRight: 8 }}
                 />
                 <span>{n.message}</span>
-                <span className="notification-date">({new Date(n.created_at).toLocaleString()})</span>
+                <span className="notification-date">
+                  {n.created_at ? new Date(n.created_at).toLocaleString() : 'Unknown date'}
+                </span>
                 {!n.read && <button style={{ marginLeft: 8 }} onClick={() => markRead(n.id)}>Mark as read</button>}
               </div>
               <div className="notification-actions">

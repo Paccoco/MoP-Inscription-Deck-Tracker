@@ -5,62 +5,38 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 0.6.3**
+**Version: 1.0.1**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
-## Recent Changes
-- **Improved Card Addition Interface:** Enhanced the card addition form to use a dropdown selection instead of manual text entry, making it easier to add cards accurately and eliminating typos. The dropdown includes all available card names from Crane, Ox, Serpent, and Tiger decks.
-- **Fixed Card Addition Functionality:** Restored the card addition form in the My Cards page, allowing users to add new cards to decks. The form includes input validation and automatically determines the correct deck based on the selected card.
-- Fixed session expired/login flow for normal users: If no token is present, the app now shows the login/register forms and does not trigger a sessionExpired loop. Only fetches profile if a token exists. This resolves issues where non-admin users could not log in after session expiration.
-- Updated `.github/copilot-instructions.md` to require using `power-restart.sh` for all frontend builds and backend restarts.
-- All bug checks and validation now use the power-restart workflow.
-- Site-wide auto-refresh and session expiration handling: All major pages now use a unified auto-refresh hook (`useAutoRefresh`) for live data updates and automatic session expiration detection. This improves reliability and user experience across Activity Log, Guild Bank, Card/Deck History, Deck Value History, Analytics, Completed Decks, Card Tracker, Onboarding Modal, Gotify Config, and App.
-- Enhanced Gotify security notifications: Now include severity, risk description, and context in alerts. CI workflow passes these details automatically.
-- Security workflow: Automated security checks via GitHub Actions, with Gotify alerts for vulnerabilities detected by npm audit or ggshield.
-- Frontend rebuilt and backend restarted for full bug check and validation after dependency updates.
-- `.gitignore` updated to ignore `server.log` and all log files; `server.log` removed from repository.
-- Confirmed no secrets or sensitive information in codebase via GitGuardian CLI scan.
-- All previous features and UI/UX improvements remain in place.
-- Version bumped to 0.6.0 for site-wide auto-refresh/session handling and documentation updates.
-- **Admin User Management:** Admins can now remove user access directly from the Admin panel. This action deletes the user, their notification config, and all notifications, and is logged in the activity log for transparency.
-- **Built-in Debugging for Login Issues:**
-  - The backend now logs all login attempts, user lookup, password checks, and JWT validation steps to `server.log`.
-  - To test/debug login issues, attempt to log in and review both the browser console and `server.log` for detailed error context.
-- Fixed login flow bug: After successful login, user info is now passed from the backend to the frontend, allowing the app to correctly set login state and fetch protected data (deck requests, completed decks, etc.).
-- Deck Requests table now correctly displays all requests after login for all users.
-- Bug check: Frontend rebuilt and backend restarted; deck requests confirmed visible and up-to-date for all users.
-- **Wowhead Tooltips Region Fix:** Deck/trinket tooltips now use MoP Classic region (`domain=mop-classic`) for accurate item data. Updated Wowhead script and deck/trinket links in the frontend for MoP Classic compatibility.
-- **Deck Requests Table Bug Fix:** Deck Requests table now reliably displays all requests for all users after login. Bug check and validation performed; confirmed working.
-- **Frontend/Backend Rebuilds:** Frontend rebuilt and backend restarted after each major change for validation.
-- Fixed Discord webhook delivery reliability: All webhook notifications now log delivery failures and errors to the activity log and server.log for transparency and easier debugging.
-- See `server-auth.js` for updated error handling in `sendDiscordNotification`.
+## Major Features
 
-## Release Notes: Version 0.5.7b (2025-07-25)
+- **Card & Deck Tracking:** Track all MoP Inscription cards, deck completion status, and contributors
+- **User Management:** Registration, approval, roles (Admin, Officer, User), and profile management
+- **Notification System:** Unified system for in-app, Discord webhook, and per-user Gotify notifications
+- **Admin Panel:** User approval, deck allocation, analytics, export/import, notification config
+- **Activity Logging:** Transparent logging of all major actions
+- **Analytics:** Contributor leaderboard, deck fulfillment speed, card acquisition trends
+- **Export/Import:** CSV-based data portability for cards and decks (admin only)
+- **Responsive UI:** Mobile-friendly, MoP-themed interface
+
+For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
+
+## Release Notes: Version 1.0.1 (2025-07-27)
+
+### Major Improvements
+- Fixed date formatting throughout the application for better reliability
+- Enhanced error handling for date displays in notification components
+
+## Previous Major Release: Version 1.0.0 (2025-07-26)
 
 ### Major Features & Improvements
-- **Security Dashboard (Admin Panel):**
-  - View recent security scan results (npm audit, ggshield), dependency status, and notification history.
-  - Filterable tables, export options, and CI log links for transparency.
-- **Automated Dependency Updates:**
-  - Dependabot integration for weekly PRs on outdated/vulnerable dependencies.
-  - Documented workflow for safe, automated updates.
-- **Automated Test Coverage Reporting:**
-  - Jest coverage reporting for backend and frontend.
-  - Coverage instructions and CI integration documented.
-- **Documentation:**
-  - README updated for new features, workflows, and troubleshooting.
-  - All new endpoints and admin features described.
-- **Bug Checks & Validation:**
-  - Full bug check and validation for new features.
-- **Admin User Management:**
-  - Admins can now remove user access directly from the Admin panel.
-  - Removal is logged in the activity log for transparency.
-
-### How to Upgrade
-- Pull the latest changes from `master`.
-- Rebuild frontend and restart backend for full feature access.
-- Review new admin dashboard and workflows in README.
+- Initial stable release of MoP Inscription Deck Tracker
+- Complete card and deck tracking functionality
+- Fully functional user authentication with JWT
+- Admin panel with comprehensive user management
+- Discord webhook integration for notifications
+- Gotify notification support for personalized alerts
 
 ## Features
 - Track all Mist of Pandaria Inscription Cards
@@ -69,21 +45,16 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - Mobile-friendly, responsive design
 - Dark mode and MoP-themed visuals
 - Add/remove cards and owners
-- Notifications page features improved readability with a solid background and aligned delete buttons
-- All major sections use card-style backgrounds and improved layout for a modern, clean look
 - SQLite database for persistent storage
 - React frontend, Express backend
 - Easy deployment and auto-start script
 - Admin panel for user approval, deck allocation, and role management
-- Completed Decks page: view disposition (fulfilled/sold), sale price, payout split, and estimated deck value
-- Backend endpoint for unallocated completed decks
-- Improved navigation: Card Tracker, Admin, Completed Decks, Profile, Notifications, Analytics
-- **Admin Announcement Modal:** Admins can push out a modal announcement to all users at any time. Announcement includes message, expiry, and optional links. Users see the modal on login/page load if active and not expired.
-- **Notifications:** In-app notifications for admin approvals, deck completions, payouts, requests, and new user registrations. You can now delete individual notifications or mass delete all notifications from the Notifications page.
-- **User Profile:** View your cards, completed decks, payouts, recent activity, and configure Gotify notifications
-- **Discord Integration:** Automated notifications for deck completions, sales, and requests
-- **Contributor Deck Completion Alerts:** In-app notifications for contributors when a deck is completed
-- **Gotify Notifications:** Each user can configure their own Gotify server and token in their profile, and select which notification types they want to receive (deck completion, approval, payout, requests, new user registration for admins).
+- Completed Decks page with disposition, sale price, and payout information
+- Admin Announcement Modal for important guild communications
+- Notifications for approvals, deck completions, payouts, and more
+- User Profile with personal cards, completed decks, and notification settings
+- Discord Integration for automated guild notifications
+- Gotify Notifications for personalized alerts
 
 ## Tech Stack
 - Node.js + Express.js (backend)
@@ -94,30 +65,33 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 ## Setup & Installation
 1. **Clone the repository:**
    ```bash
+   git clone https://github.com/yourusername/mop-inscription-deck-tracker.git
+   cd mop-inscription-deck-tracker
    ```
 2. **Install dependencies:**
    ```bash
+   npm install
+   cd client && npm install
    ```
 3. **Build the React frontend:**
    ```bash
+   cd client && npm run build
    ```
 4. **Start the backend server:**
    ```bash
+   node server-auth.js
+   ```
+   Or use the provided startup script:
+   ```bash
+   ./start-card-tracker.sh
    ```
 5. **Access the app:**
    Open your browser and go to `http://localhost:5000` (or your server's IP/domain).
 
 ## Discord & Gotify Integration
 - Configure Discord webhook and Gotify server/token in the Admin Panel.
-- **Each user can configure their own Gotify server and token in their profile, and select which notification types they want to receive.**
+- Each user can configure their own Gotify server and token in their profile, and select which notification types they want to receive.
 - Automated notifications for deck completions, sales, requests, admin approvals, and new user registrations (admin only).
-
-## Advanced Analytics
-- View contributor leaderboard, deck fulfillment speed, and card acquisition trends in the Admin Panel.
-
-## Progress Bar & Alerts
-- See deck completion progress bars in Completed Decks and Admin Panel.
-- Contributors receive alerts when a deck they contributed to is completed.
 
 ## How To Use
 ### For All Users
@@ -130,30 +104,19 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - **Deck Requests:** Request specific decks and track their fulfillment status
 - **Activity Log:** View recent actions (card added/removed, deck completed/sold) for transparency
 - **Profile:** View your cards, completed decks, payouts, recent activity, and configure Gotify notifications
-- **Guild Bank:** View and manage guild-owned cards and decks
-- **Theme Customization:** Choose your preferred MoP-themed background and color scheme
 - **Analytics:** View charts for deck completion rates, contributor stats, and payout trends
 - **Card/Deck History:** View timeline/history for each card and deck
-- **Onboarding Modal:** See a quick-start guide after registration
-- **Deck Value History:** View historical price trends for decks/trinkets
-- **Discord & Gotify Integration:** Get automated notifications in your guild's Discord channel and/or your own Gotify server
 
 ### For Admins/Officers
 - **Approve Users:** Review and approve new registrations (receive notification for new user needing approval)
-- **Allocate Completed Decks:**
-  - Select from completed/unallocated decks
-  - View estimated deck value
+- **Allocate Completed Decks:** Select from completed/unallocated decks and view estimated deck value
 - **Notifications:** Users are notified automatically for approvals, deck completions, payouts, requests, and new user registrations
-- **Deck Requests:** View and fulfill deck requests from users
 - **Export/Import:** Export/import all card/deck data to CSV (**admin panel only**)
 - **Activity Log:** View recent actions for all users for transparency
 - **Role Management:** Assign roles (Admin, Officer, User)
-- **Guild Bank:** Manage guild-owned cards and decks
 - **Analytics:** View deck completion rates, contributor stats, and payout history
 - **Discord & Gotify Integration:** Configure Discord webhook for automated notifications, and set up Gotify for guild-wide or personal notifications
-- **User Removal:**
-  - Remove user access directly from the Admin panel.
-  - Removal is logged in the activity log for transparency.
+- **User Removal:** Remove user access directly from the Admin panel
 
 ## API Endpoints
 - `/api/cards` - Get/add/delete cards
@@ -165,66 +128,23 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - `/api/deck-requests` - Get/add deck requests
 - `/api/export/cards` - Export all cards as CSV (**admin only**)
 - `/api/export/decks` - Export all completed decks as CSV (**admin only**)
-- `/api/import/cards` - Import cards from CSV (**admin only**)
-- `/api/import/decks` - Import completed decks from CSV (**admin only**)
 - `/api/activity` - Get recent activity log
 - `/api/activity/all` - Get recent activity log for all users (**admin only**)
 - `/api/profile` - Get user profile info
 - `/api/gotify/config` - Configure Gotify server/token and notification types (per user)
-- `/api/guild-bank` - Get/manage guild bank cards and decks
 - `/api/analytics` - Get analytics dashboard data
-- `/api/decks/:id/value` - Get estimated deck value
-- `/api/decks/:deck/value-history` - Get historical value for a deck
 - `/api/cards/:id/history` - Get card history
 - `/api/decks/:id/history` - Get deck history
 - `/api/discord/webhook` - Configure Discord webhook for notifications
 
 ## Automated Dependency Updates
-
-This repository uses **Dependabot** (or Renovate) for automated dependency updates:
-- Dependabot is enabled in GitHub repository settings to check for outdated or vulnerable dependencies in `package.json` and `package-lock.json`.
-- Dependabot automatically creates pull requests for dependency updates on a weekly schedule (or on release).
-- Each PR includes details about the update, changelog, and security impact.
-- All dependency update PRs are reviewed and merged after passing CI and security checks.
-
-**Workflow:**
-1. Dependabot scans for outdated/vulnerable dependencies.
-2. Creates PRs for updates.
-3. CI runs security and test checks.
-4. Admin reviews and merges PRs.
-
-For more details, see `.github/dependabot.yml` or repository settings.
-
-## Discord How-To
-See `discord-how-to.md` for a user guide on sharing progress, coordinating deck completions, and using the app with Discord.
-
-## Screenshots & GIFs
-
-Below are example screenshots and GIFs demonstrating key features and UI sections. Add your own images to `docs/screenshots/` and update the links as needed.
-
-### Dashboard/Main UI
-![Dashboard](docs/screenshots/dashboard.png)
-
-### Notification Configuration (Gotify/Discord)
-![Notification Config](docs/screenshots/notification-config.png)
-
-### Admin Panel (User Approval, Deck Allocation)
-![Admin Panel](docs/screenshots/admin-panel.png)
-
-### Mobile View (Responsive Design)
-![Mobile View](docs/screenshots/mobile-view.png)
-
-### Completed Decks & Analytics
-![Completed Decks](docs/screenshots/completed_decks.png)
-![Analytics](docs/screenshots/analytics.png)
-
-### Example GIF: Deck Completion Flow
-![Deck Completion Flow](docs/screenshots/deck-completion.gif)
-
----
-*Replace these placeholders with your own screenshots and GIFs for a more visual onboarding experience.*
+This repository uses **Dependabot** for automated dependency updates:
+- Weekly checks for outdated or vulnerable dependencies
+- Automated pull requests for updates
+- CI runs security and test checks before merging
 
 ## Troubleshooting
 - If notifications are not received, check your Gotify/Discord config and ensure your server is running.
 - For mobile issues, ensure your browser is up to date and try resizing the window.
 - For export/import problems, verify CSV format and file encoding.
+- For login issues, check browser console and server logs for more details.

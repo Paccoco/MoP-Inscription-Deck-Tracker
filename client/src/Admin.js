@@ -189,7 +189,7 @@ function Admin({ setShowPage }) {
           <strong>Recent Activity:</strong>
           <ul style={{ margin: 0, paddingLeft: 16 }}>
             {recentActivity.length === 0 ? <li>No recent activity.</li> : recentActivity.map((a, i) => (
-              <li key={i}>{a.message} <span style={{ fontSize: '0.9em', color: '#666' }}>({new Date(a.created_at).toLocaleString()})</span></li>
+              <li key={i}>{a.action} <span style={{ fontSize: '0.9em', color: '#666' }}>({new Date(a.timestamp).toLocaleString()})</span></li>
             ))}
           </ul>
         </div>
@@ -233,7 +233,9 @@ function Admin({ setShowPage }) {
           <select value={selectedDeckId} onChange={e => setSelectedDeckId(e.target.value)} required>
             <option value="">Select Completed Deck</option>
             {completedDecks.map(deck => (
-              <option key={deck.id} value={deck.id}>{deck.name} (Contributors: {deck.contributors.map(c => c.owner).join(', ')})</option>
+              <option key={deck.id} value={deck.id}>
+                {deck.deck} (Completed: {new Date(deck.completed_at).toLocaleDateString()})
+              </option>
             ))}
           </select>
           <select value={disposition} onChange={e => setDisposition(e.target.value)} required>
@@ -259,42 +261,27 @@ function Admin({ setShowPage }) {
             <div>Guild Cut: {guildCut} gold</div>
           </div>
         )}
-        <h3>Completed Decks Progress</h3>
+        <h3>Completed Decks</h3>
         <table>
           <thead>
             <tr>
               <th>Deck</th>
               <th>Contributors</th>
-              <th>Progress</th>
               <th>Completed At</th>
+              <th>Disposition</th>
+              <th>Recipient</th>
             </tr>
           </thead>
           <tbody>
-            {completedDecks.map(deck => (
+            {completedDecks.length === 0 ? (
+              <tr><td colSpan="5">No completed decks found.</td></tr>
+            ) : completedDecks.map(deck => (
               <tr key={deck.id}>
-                <td>{deck.name}</td>
-                <td>{deck.contributors.map(c => c.owner).join(', ')}</td>
-                <td>
-                  {typeof deck.collectedCards === 'number' && typeof deck.totalCards === 'number' ? (
-                    <div style={{ minWidth: 180 }}>
-                      <div style={{ background: '#eee', borderRadius: '4px', height: '16px', width: '100%' }}>
-                        <div
-                          style={{
-                            width: `${Math.round((deck.collectedCards / deck.totalCards) * 100)}%`,
-                            background: '#4caf50',
-                            height: '100%',
-                            borderRadius: '4px',
-                            transition: 'width 0.5s',
-                          }}
-                        />
-                      </div>
-                      <span style={{ fontSize: '12px' }}>
-                        {deck.collectedCards} / {deck.totalCards} cards ({Math.round((deck.collectedCards / deck.totalCards) * 100)}%)
-                      </span>
-                    </div>
-                  ) : 'N/A'}
-                </td>
-                <td>{deck.completed_at ? new Date(deck.completed_at).toLocaleString() : 'N/A'}</td>
+                <td>{deck.deck}</td>
+                <td>{JSON.parse(deck.contributors).map(c => c.owner).join(', ')}</td>
+                <td>{new Date(deck.completed_at).toLocaleString()}</td>
+                <td>{deck.disposition}</td>
+                <td>{deck.recipient || 'N/A'}</td>
               </tr>
             ))}
           </tbody>
@@ -307,8 +294,8 @@ function Admin({ setShowPage }) {
           <h3>Security Scan Results</h3>
           {securityScan ? (
             <div>
-              <div><strong>npm audit:</strong> {securityScan.npm_audit.summary} <span style={{ color: '#888' }}>({new Date(securityScan.npm_audit.date).toLocaleString()})</span></div>
-              <div><strong>ggshield:</strong> {securityScan.ggshield.summary} <span style={{ color: '#888' }}>({new Date(securityScan.ggshield.date).toLocaleString()})</span></div>
+              <div><strong>npm audit:</strong> {securityScan.npm_audit.summary.total_issues} issues found <span style={{ color: '#888' }}>({new Date(securityScan.npm_audit.date).toLocaleString()})</span></div>
+              <div><strong>ggshield:</strong> {securityScan.ggshield.summary.total_issues} issues found <span style={{ color: '#888' }}>({new Date(securityScan.ggshield.date).toLocaleString()})</span></div>
               <button onClick={() => window.open('/security-scan.json', '_blank')}>Export Security Scan JSON</button>
               <a href="https://github.com/Paccoco/project-card-tracker/actions?query=workflow%3A%22Security+%26+Dependency+Audit%22" target="_blank" rel="noopener noreferrer" style={{ marginLeft: 16 }}>View CI Logs</a>
             </div>
@@ -318,13 +305,17 @@ function Admin({ setShowPage }) {
           <h3>Dependency Status</h3>
           {dependencyStatus ? (
             <div>
-              <div><strong>Outdated:</strong> {dependencyStatus.outdated.length}</div>
-              <div><strong>Vulnerable:</strong> {dependencyStatus.vulnerable.length}</div>
-              {dependencyStatus.outdated.length > 0 && (
-                <ul>{dependencyStatus.outdated.map((dep, i) => <li key={i}>{dep}</li>)}</ul>
-              )}
-              {dependencyStatus.vulnerable.length > 0 && (
-                <ul>{dependencyStatus.vulnerable.map((dep, i) => <li key={i}>{dep}</li>)}</ul>
+              <div><strong>Total Dependencies:</strong> {dependencyStatus.total_dependencies}</div>
+              <div><strong>Outdated:</strong> {dependencyStatus.outdated}</div>
+              <div><strong>Up to Date:</strong> {dependencyStatus.up_to_date}</div>
+              {dependencyStatus.details && dependencyStatus.details.length > 0 && (
+                <ul>
+                  {dependencyStatus.details.map((dep, i) => (
+                    <li key={i}>
+                      {dep.package}: {dep.current_version} → {dep.latest_version} ({dep.status})
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           ) : <div>Loading dependency status...</div>}
@@ -346,7 +337,7 @@ function Admin({ setShowPage }) {
                 <tr key={i}>
                   <td>{n.message}</td>
                   <td>{n.username}</td>
-                  <td>{new Date(n.created_at).toLocaleString()}</td>
+                  <td>{n.created_at ? new Date(n.created_at).toLocaleString() : 'Unknown date'}</td>
                 </tr>
               ))}
             </tbody>

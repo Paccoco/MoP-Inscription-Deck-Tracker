@@ -1,4 +1,4 @@
-# Copilot Agent Instructions for Mist of Pandaria Card Tracker
+# Copilot Instructions for Mist of Pandaria Card Tracker
 
 ## Project Overview
 - This is a full-stack, self-hosted web app for WoW Mist of Pandaria Classic guilds to track Inscription Cards, decks, sales, payouts, and notifications.
@@ -8,13 +8,20 @@
 
 ### 🔄 Project Awareness & Context
 - **Always read `PLANNING.md`** at the start of a new conversation to understand the project's architecture, goals, style, and constraints.
-- **Check `TASK.md`** before starting a new task. If the task isn’t listed, add it with a brief description and today's date.
+- **Check `TASK.md`** before starting a new task. If the task isn't listed, add it with a brief description and today's date.
 - **Use consistent naming conventions, file structure, and architecture patterns** as described in `PLANNING.md`.
+- **README.md and CHANGELOG.md management:**
+  - **README.md** should contain only major features, setup instructions, and high-level information. It's the first point of contact for users and should be concise.
+  - **CHANGELOG.md** should track all detailed changes, bug fixes, and improvements with version numbers and dates. Every code change should be documented here.
+  - When making changes:
+    - Add detailed notes to CHANGELOG.md under the appropriate version section
+    - Only update README.md for major feature additions, API changes, or setup modifications
+    - Version numbers should be consistent between both files
 
 ### 🧱 Code Structure & Modularity
 - **Never create a file longer than 500 lines of code.** If a file approaches this limit, refactor by splitting it into modules or helper files.
 - **Organize code into clearly separated modules**, grouped by feature or responsibility.
-- **Use clear, consistent imports** (prefer relative imports within packages).wa
+- **Use clear, consistent imports** (prefer relative imports within packages).
 
 ### 🧪 Testing & Reliability
 - **Always create tests for new features** (functions, classes, routes, etc).
@@ -27,10 +34,12 @@
 
 ### ✅ Task Completion
 - **Mark completed tasks in `TASK.md`** immediately after finishing them.
-- Add new sub-tasks or TODOs discovered during development to `TASK.md` under a “Discovered During Work” section.
+- Add new sub-tasks or TODOs discovered during development to `TASK.md` under a "Discovered During Work" section.
 
 ### 📚 Documentation & Explainability
-- **Update `README.md`** when new features are added, dependencies change, or setup steps are modified.
+- **Update documentation:**
+  - **README.md:** Only update for major features, API changes, or setup modifications. Keep it focused on what users need to know.
+  - **CHANGELOG.md:** Document all changes with version numbers, dates, and detailed descriptions categorized as "Added", "Changed", "Fixed", or "Removed".
 - **Comment non-obvious code** and ensure everything is understandable to a mid-level developer.
 - When writing complex logic, **add an inline `# Reason:` comment** explaining the why, not just the what.
 
@@ -38,8 +47,6 @@
 - **Never assume missing context. Ask questions if uncertain.**
 - **Never hallucinate libraries or functions**
 - **Always confirm file paths and module names** exist before referencing them in code or tests.
-
-
 
 ## Architecture & Data Flow
 - Frontend communicates with backend via REST API endpoints (see README for full list).
@@ -72,8 +79,6 @@
 - `README.md`: Setup, features, API reference, troubleshooting.
 
 ## Copilot Agent Policy
-- Every time you make a code or feature change, you MUST update the README.md to reflect the change. This includes bug fixes, UI/UX changes, new features, workflow updates, or any modification that affects usage, setup, or functionality.
-- README.md must always be kept in sync with the current state of the codebase and user-facing features.
 - You MUST always ask the user for confirmation before committing or pushing any changes to GitHub.
 - You MUST always bug check (validate and test) code before reporting a task as completed.
 - When updating or tracking tasks in `tasks.md`, ONLY use ✅ to mark completed tasks. Incomplete or not started tasks should not be marked in any way.
