@@ -5,6 +5,16 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2025-07-27
+
+### Enhanced
+- **Smart Update Process**: Admin UI updates now ensure latest update scripts are used
+  - Git pull is performed first to get newest update.sh script before running it
+  - Added `--backup-dir` and `--skip-git` options to update.sh for better control
+  - Prevents duplicate git pulls and backup creation when called from UI
+  - Improved logging and error handling during UI-initiated updates
+  - Enhanced rollback capabilities with better error recovery
+
 ## [1.2.1] - 2025-07-27
 
 ### Fixed
