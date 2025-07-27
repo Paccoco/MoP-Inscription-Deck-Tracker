@@ -123,19 +123,50 @@ function Admin({ setShowPage }) {
   };
 
   const handleSetAnnouncement = async (data) => {
-    await fetch('/api/admin/announcement', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('token')}` },
-      body: JSON.stringify(data)
-    });
-    alert('Announcement pushed!');
+    console.log('Setting announcement with data:', data);
+    try {
+      const response = await fetch('/api/admin/announcement', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          Authorization: `Bearer ${localStorage.getItem('token')}` 
+        },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      console.log('Announcement API response:', result);
+      
+      if (response.ok) {
+        alert('Announcement pushed successfully!');
+      } else {
+        alert(`Failed to push announcement: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error pushing announcement:', error);
+      alert(`Error pushing announcement: ${error.message}`);
+    }
   };
   const handleClearAnnouncement = async () => {
-    await fetch('/api/admin/announcement', {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    });
-    alert('Announcement cleared!');
+    console.log('Clearing announcements...');
+    try {
+      const response = await fetch('/api/admin/announcement', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      
+      const result = await response.json();
+      console.log('Clear announcement API response:', result);
+      
+      if (response.ok) {
+        alert('Announcements cleared successfully!');
+      } else {
+        alert(`Failed to clear announcements: ${result.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error clearing announcements:', error);
+      alert(`Error clearing announcements: ${error.message}`);
+    }
   };
 
   const token = localStorage.getItem('token');

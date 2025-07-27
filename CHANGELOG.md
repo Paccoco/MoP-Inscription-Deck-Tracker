@@ -5,7 +5,36 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.4] - 2025-07-27
+
+### Fixed
+- Fixed announcement modal not displaying to users after being pushed
+- Added missing code to fetch announcements when the app loads
+- Improved announcement expiry handling to properly filter expired announcements
+- Enhanced announcement rendering with better styling and error handling
+- Added activity logging for announcement creation and clearing
+- Fixed JSON parsing issues with announcement links
+- Improved debugging and error handling for announcements
+- Fixed announcement modal styling to match the site's dark theme with MoP green accents
+- Added persistent dismissal of announcements using localStorage to prevent reappearing after navigation
+- Removed database files from git tracking to prevent overwriting production databases during updates
+
+## [1.0.3] - 2025-07-27
+
+### Changed
+- Updated Admin Announcement Form to use dropdown for expiry time with preset options (1 hour, 1 day, 1 week)
+- Improved expiry time UX by replacing datetime picker with simple dropdown select
+- Added expiry time calculation logic to automatically set the correct ISO timestamp
+
+## [1.0.2] - 2025-07-27
+
+### Added
+- Redesigned Admin Announcement Form UI/UX with card-style container
+- Added form validation for announcement form with styled error messages
+- Implemented announcement preview feature to show how messages will appear to users
+- Added tooltips and helper text for form fields to improve usability
+- Improved accessibility with proper ARIA attributes and labels
+- Enhanced mobile responsiveness for the announcement form
 
 ## [1.0.1] - 2025-07-27
 

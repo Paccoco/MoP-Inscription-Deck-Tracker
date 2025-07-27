@@ -17,6 +17,7 @@
 - Add accessibility features: proper labels, aria attributes, keyboard navigation.
 - Show a live preview of the announcement as it will appear to users.
 - Test on desktop and mobile for consistency and usability.
+- ✅ Completed Admin Announcement Form UI/UX redesign with card-style container, improved layout, validation, previews, and responsive design (2025-07-27).
 
 ## 3. Documentation Improvements
 - Create CHANGELOG.md to track detailed changes to the application.

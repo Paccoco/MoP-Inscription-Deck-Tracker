@@ -5,7 +5,7 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 1.0.1**
+**Version: 1.0.4**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -22,11 +22,14 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 
 For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
 
-## Release Notes: Version 1.0.1 (2025-07-27)
+## Release Notes: Version 1.0.4 (2025-07-27)
 
 ### Major Improvements
-- Fixed date formatting throughout the application for better reliability
-- Enhanced error handling for date displays in notification components
+- Fixed announcement modal styling to match the site's dark theme with MoP green accents
+- Added persistent dismissal of announcements using localStorage to prevent reappearing after navigation
+- Improved error handling and debugging for the announcement system
+- Removed database files from git tracking to prevent overwriting production databases during updates
+- Added database initialization script for new installations
 
 ## Previous Major Release: Version 1.0.0 (2025-07-26)
 
@@ -68,16 +71,28 @@ For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG
    git clone https://github.com/yourusername/mop-inscription-deck-tracker.git
    cd mop-inscription-deck-tracker
    ```
-2. **Install dependencies:**
+2. **Initialize the database:**
+   ```bash
+   ./init-database.sh
+   ```
+   This will create the necessary database schema for the application.
+
+3. **Install dependencies:**
    ```bash
    npm install
    cd client && npm install
    ```
-3. **Build the React frontend:**
+4. **Build the React frontend:**
    ```bash
    cd client && npm run build
    ```
-4. **Start the backend server:**
+5. **Create an admin user:**
+   ```bash
+   node update-admin-password.js
+   ```
+   Follow the prompts to set up the admin account.
+
+6. **Start the backend server:**
    ```bash
    node server-auth.js
    ```
@@ -85,7 +100,7 @@ For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG
    ```bash
    ./start-card-tracker.sh
    ```
-5. **Access the app:**
+7. **Access the app:**
    Open your browser and go to `http://localhost:5000` (or your server's IP/domain).
 
 ## Discord & Gotify Integration

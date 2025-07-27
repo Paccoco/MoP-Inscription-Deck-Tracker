@@ -140,12 +140,14 @@ function App() {
   // All useEffect hooks at the top level
   useEffect(() => {
     fetchCards();
+    fetchAnnouncements(); // Add this line to fetch announcements
   }, []);
   useEffect(() => {
     console.log('useEffect [auth.loggedIn, showPage] triggered', auth.loggedIn, showPage);
     if (auth.loggedIn) {
       fetchCompletedDecks();
       fetchDeckRequests();
+      fetchAnnouncements(); // Add this line to fetch announcements when user logs in
     }
   }, [auth.loggedIn, showPage]);
   useEffect(() => { if (localStorage.getItem('showOnboarding') !== 'false') { setShowOnboarding(true); } }, []);
@@ -187,6 +189,58 @@ function App() {
       setErrorMsg('Error fetching deck requests');
     }
   };
+  
+  // Add fetchAnnouncements function
+  const fetchAnnouncements = async () => {
+    console.log('Fetching announcements...');
+    try {
+      const res = await axios.get('/api/announcement', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      console.log('Fetched announcements:', res.data);
+      
+      if (res.data && res.data.length > 0) {
+        // Check for active announcements that haven't expired
+        const now = new Date();
+        const activeAnnouncements = res.data.filter(a => 
+          a.active && (!a.expiry || new Date(a.expiry) > now)
+        );
+        
+        console.log('Active announcements after filtering:', activeAnnouncements);
+        
+        if (activeAnnouncements.length > 0) {
+          // Check if the user has already dismissed this announcement
+          const dismissedAnnouncements = JSON.parse(localStorage.getItem('dismissedAnnouncements') || '[]');
+          console.log('Dismissed announcements from localStorage:', dismissedAnnouncements);
+          
+          // Find announcements that haven't been dismissed
+          const unreadAnnouncements = activeAnnouncements.filter(a => 
+            !dismissedAnnouncements.includes(a.id)
+          );
+          
+          console.log('Unread announcements after filtering dismissed:', unreadAnnouncements);
+          
+          if (unreadAnnouncements.length > 0) {
+            // The links should already be parsed by the server
+            const announcement = unreadAnnouncements[0];
+            console.log('Setting announcement:', announcement);
+            setAnnouncement(announcement);
+            console.log('Setting showAnnouncement to true');
+            setShowAnnouncement(true);
+          } else {
+            console.log('No unread announcements found after filtering dismissed');
+          }
+        } else {
+          console.log('No active announcements found after filtering');
+        }
+      } else {
+        console.log('No announcements returned from API');
+      }
+    } catch (err) {
+      console.error('Error fetching announcements:', err);
+    }
+  };
+  
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -308,7 +362,7 @@ function App() {
   return (
     <div className="App">
       <OnboardingModal show={showOnboarding} onClose={handleCloseOnboarding} />
-      <AnnouncementModal announcement={announcement} onClose={() => setShowAnnouncement(false)} />
+      {showAnnouncement && <AnnouncementModal announcement={announcement} onClose={() => setShowAnnouncement(false)} />}
       <nav>
         <button onClick={() => setShowPage('main')}>Card Tracker</button>
         {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
