@@ -5,7 +5,7 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 1.1.1**
+**Version: 1.1.2**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -24,7 +24,18 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 
 For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
 
-## Release Notes: Version 1.1.0 (2025-07-27)
+## 🚨 Critical Update: Version 1.1.2 (2025-07-27)
+
+### Fixed "Error adding card" Production Issue
+**RESOLVED:** The reported "Error adding card" issue was caused by missing database tables on production servers. This version includes:
+
+- **Database initialization script** (`init-database.js`) to create all required tables
+- **Complete schema setup** for production deployments
+- **Verified functionality** for card adding, authentication, and user management
+
+**For Production Servers:** Run `node init-database.js` to create missing database tables before starting the application.
+
+## Release Notes: Version 1.1.1 (2025-07-27)
 
 ### Major New Features
 - **Automated Update System:** Built-in version checking and update management
@@ -141,13 +152,19 @@ sudo ./deploy-production.sh
    cd client && npm run build && cd ..
    ```
 
-5. **Configure environment:**
+5. **Initialize the database (CRITICAL for v1.1.2+):**
+   ```bash
+   node init-database.js
+   ```
+   > **Important:** This step creates all required database tables. Skip this and card adding will fail with "Error adding card".
+
+6. **Configure environment:**
    ```bash
    cp .env.example .env
    # Edit .env file with your settings
    ```
 
-6. **Start with PM2:**
+7. **Start with PM2:**
    ```bash
    ./start-card-tracker.sh
    ```

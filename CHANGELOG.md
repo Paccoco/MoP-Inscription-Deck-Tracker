@@ -5,6 +5,31 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-07-27
+
+### Fixed
+- **CRITICAL: Fixed "Error adding card" issue reported by production users**
+  - Root cause: Missing database tables causing server crashes
+  - Created comprehensive database initialization script (`init-database.js`)
+  - Added all required tables: users, cards, decks, notifications, system_updates, activity_log, discord_webhook, update_checks
+  - Fixed authentication flow and card ownership assignment
+  - Verified frontend and backend card adding functionality working correctly
+
+### Added
+- Database initialization script for creating all required tables
+- Test user creation functionality for safe local debugging
+- Comprehensive card adding test suite (`test-frontend-flow.js`, `test-frontend-detailed.js`)
+- Production-ready database schema with proper foreign key constraints
+- Test users: `testadmin`/`testadmin123` (admin) and `testuser`/`testuser123` (regular user)
+
+### Technical Details
+- Backend properly extracts `owner` from JWT token for card ownership
+- Frontend sends correct payload: `{card_name, deck}`
+- All authentication endpoints working correctly
+- Input validation and error handling functioning properly
+- Duplicate cards allowed (correct business logic)
+- Server running stable on PM2 without crashes
+
 ## [1.1.1] - 2025-07-27
 
 ### Fixed

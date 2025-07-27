@@ -35,3 +35,15 @@
 - ✅ Fixed deck completion calculation in App.js getDeckStatus function to count unique cards only (2025-07-27).
 - Ensure consistent date format display across all components.
 - ✅ Fixed date formatting in Notifications.js and Admin.js components (2025-07-27).
+
+## 6. Debug "Error adding card" Production Issue
+- Investigate user reports of "Error adding card" messages on production servers.
+- Create local test environment to safely reproduce the issue without affecting production.
+- Identify root cause and implement comprehensive fix.
+- ✅ **RESOLVED: Critical production bug fixed (2025-07-27)**
+  - **Root Cause:** Missing database tables causing server crashes when users tried to add cards
+  - **Solution:** Created comprehensive database initialization script (`init-database.js`)
+  - **Database Schema:** Added all required tables (users, cards, decks, notifications, system_updates, activity_log, discord_webhook, update_checks)
+  - **Testing:** Verified frontend and backend card adding functionality working correctly
+  - **Test Users:** Created testadmin/testadmin123 (admin) and testuser/testuser123 (regular user) for debugging
+  - **Production Ready:** Database initialization script ready for production deployment
