@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 function Login({ onLogin }) {
   const [form, setForm] = useState({ username: '', password: '' });
@@ -15,7 +16,11 @@ function Login({ onLogin }) {
     try {
       const res = await axios.post('/api/login', form);
       localStorage.setItem('token', res.data.token);
-      onLogin();
+      const decoded = jwtDecode(res.data.token);
+      onLogin({
+        username: decoded.username,
+        isAdmin: decoded.is_admin || false
+      });
     } catch (err) {
       if (err.response?.data?.error === 'Account not approved by admin yet.') {
         setError('Your account is pending admin approval.');
