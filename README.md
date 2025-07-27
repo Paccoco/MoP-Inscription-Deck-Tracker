@@ -68,8 +68,13 @@ For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG
 ## Setup & Installation
 1. **Clone the repository:**
    ```bash
+<<<<<<< HEAD
    git clone https://github.com/yourusername/mop-inscription-deck-tracker.git
    cd mop-inscription-deck-tracker
+=======
+   git clone https://github.com/Paccoco/MoP-Inscription-Deck-Tracker.git
+   cd MoP-Inscription-Deck-Tracker
+>>>>>>> master
    ```
 2. **Initialize the database:**
    ```bash
@@ -94,10 +99,13 @@ For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG
 
 6. **Start the backend server:**
    ```bash
+<<<<<<< HEAD
    node server-auth.js
    ```
    Or use the provided startup script:
    ```bash
+=======
+>>>>>>> master
    ./start-card-tracker.sh
    ```
 7. **Access the app:**
