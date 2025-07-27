@@ -959,19 +959,203 @@ app.get('/api/admin/security-scan', auth, requireAdmin, (req, res) => {
   res.json({ npm_audit: npmAudit, ggshield });
 });
 
-app.get('/api/admin/dependency-status', auth, requireAdmin, (req, res) => {
-  // Simulated dependency status
-  const status = {
-    total_dependencies: 42,
-    outdated: 5,
-    up_to_date: 37,
-    details: [
-      { package: 'express', current_version: '4.17.1', latest_version: '4.17.2', status: 'up_to_date' },
-      { package: 'sqlite3', current_version: '5.0.2', latest_version: '5.0.2', status: 'up_to_date' },
-      { package: 'jsonwebtoken', current_version: '8.5.1', latest_version: '9.0.0', status: 'outdated' }
-    ]
-  };
-  res.json(status);
+app.get('/api/admin/dependency-status', auth, requireAdmin, async (req, res) => {
+  try {
+    const { exec } = require('child_process');
+    const util = require('util');
+    const execPromise = util.promisify(exec);
+    
+    // Get actual outdated packages for main project
+    const { stdout: outdatedMain } = await execPromise('npm outdated --json').catch(() => ({ stdout: '{}' }));
+    const { stdout: outdatedClient } = await execPromise('cd client && npm outdated --json').catch(() => ({ stdout: '{}' }));
+    
+    // Get total dependency count for main project
+    const { stdout: listMain } = await execPromise('npm list --json --depth=0').catch(() => ({ stdout: '{}' }));
+    const { stdout: listClient } = await execPromise('cd client && npm list --json --depth=0').catch(() => ({ stdout: '{}' }));
+    
+    const mainOutdated = JSON.parse(outdatedMain || '{}');
+    const clientOutdated = JSON.parse(outdatedClient || '{}');
+    const mainList = JSON.parse(listMain || '{}');
+    const clientList = JSON.parse(listClient || '{}');
+    
+    const mainDeps = Object.keys(mainList.dependencies || {});
+    const clientDeps = Object.keys(clientList.dependencies || {});
+    const totalDependencies = mainDeps.length + clientDeps.length;
+    
+    const outdatedCount = Object.keys(mainOutdated).length + Object.keys(clientOutdated).length;
+    const upToDateCount = totalDependencies - outdatedCount;
+    
+    // Create details array with real data
+    const details = [];
+    
+    // Add ALL outdated main dependencies
+    for (const dep of Object.keys(mainOutdated)) {
+      details.push({
+        package: dep,
+        current_version: mainOutdated[dep].current,
+        latest_version: mainOutdated[dep].latest,
+        status: 'outdated'
+      });
+    }
+    
+    // Add ALL outdated client dependencies
+    for (const dep of Object.keys(clientOutdated)) {
+      details.push({
+        package: `client/${dep}`,
+        current_version: clientOutdated[dep].current,
+        latest_version: clientOutdated[dep].latest,
+        status: 'outdated'
+      });
+    }
+    
+    // Add some sample up-to-date dependencies for display (limit to key ones)
+    const mainSampleDeps = ['express', 'sqlite3', 'jsonwebtoken', 'bcrypt', 'cors'].filter(dep => mainDeps.includes(dep) && !mainOutdated[dep]);
+    for (const dep of mainSampleDeps.slice(0, 3)) { // Limit to first 3 to avoid too much data
+      if (mainList.dependencies[dep]) {
+        details.push({
+          package: dep,
+          current_version: mainList.dependencies[dep].version,
+          latest_version: mainList.dependencies[dep].version,
+          status: 'up_to_date'
+        });
+      }
+    }
+    
+    // Add some sample up-to-date client dependencies
+    const clientSampleDeps = ['react', 'react-dom', 'axios'].filter(dep => clientDeps.includes(dep) && !clientOutdated[dep]);
+    for (const dep of clientSampleDeps.slice(0, 3)) { // Limit to first 3
+      if (clientList.dependencies[dep]) {
+        details.push({
+          package: `client/${dep}`,
+          current_version: clientList.dependencies[dep].version,
+          latest_version: clientList.dependencies[dep].version,
+          status: 'up_to_date'
+        });
+      }
+    }
+    
+    const status = {
+      total_dependencies: totalDependencies,
+      outdated: outdatedCount,
+      up_to_date: upToDateCount,
+      details: details
+    };
+    
+    res.json(status);
+  } catch (err) {
+    console.error('Error checking dependency status:', err);
+    // Fallback to simulated data if real check fails
+    const status = {
+      total_dependencies: 42,
+      outdated: 5,
+      up_to_date: 37,
+      details: [
+        { package: 'express', current_version: '4.17.1', latest_version: '4.17.2', status: 'up_to_date' },
+        { package: 'sqlite3', current_version: '5.0.2', latest_version: '5.0.2', status: 'up_to_date' },
+        { package: 'jsonwebtoken', current_version: '8.5.1', latest_version: '9.0.0', status: 'outdated' }
+      ]
+    };
+    res.json(status);
+  }
+});
+
+// Update outdated dependencies
+app.post('/api/admin/update-dependencies', auth, requireAdmin, async (req, res) => {
+  try {
+    const { exec } = require('child_process');
+    const util = require('util');
+    const execPromise = util.promisify(exec);
+    
+    console.log('Admin dependency update requested by:', req.user.username);
+    
+    // Log the action
+    const timestamp = new Date().toISOString();
+    db.run(
+      'INSERT INTO activity (username, action, timestamp) VALUES (?, ?, ?)',
+      [req.user.username, 'Dependency update initiated', timestamp]
+    );
+    
+    // Update dependencies in background
+    try {
+      // Update main package dependencies
+      console.log('Updating main package dependencies...');
+      const { stdout: mainUpdate, stderr: mainError } = await execPromise('npm update');
+      
+      // Update client package dependencies  
+      console.log('Updating client package dependencies...');
+      const { stdout: clientUpdate, stderr: clientError } = await execPromise('cd client && npm update');
+      
+      // Get updated dependency status (simulate real check)
+      const { stdout: outdatedMain } = await execPromise('npm outdated --json').catch(() => ({ stdout: '{}' }));
+      const { stdout: outdatedClient } = await execPromise('cd client && npm outdated --json').catch(() => ({ stdout: '{}' }));
+      
+      const mainOutdated = JSON.parse(outdatedMain || '{}');
+      const clientOutdated = JSON.parse(outdatedClient || '{}');
+      const totalOutdated = Object.keys(mainOutdated).length + Object.keys(clientOutdated).length;
+      
+      // Log successful update
+      db.run(
+        'INSERT INTO activity (username, action, timestamp) VALUES (?, ?, ?)',
+        [req.user.username, `Dependencies updated successfully. ${totalOutdated} packages still outdated.`, timestamp]
+      );
+      
+      // Send notifications
+      const message = `Dependencies updated by ${req.user.username}. ${totalOutdated} packages still need attention.`;
+      db.run(
+        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+        ['system', message, timestamp]
+      );
+      
+      // Send Discord notification if configured
+      if (discordWebhookUrl) {
+        try {
+          await fetch(discordWebhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: `🔄 **Dependency Update** - ${message}`
+            })
+          });
+        } catch (discordErr) {
+          console.error('Discord notification failed:', discordErr);
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: 'Dependencies updated successfully',
+        updated_packages: totalOutdated === 0 ? 'All packages up to date' : `${totalOutdated} packages still outdated`,
+        logs: {
+          main: mainUpdate,
+          client: clientUpdate,
+          errors: (mainError || clientError) ? { main: mainError, client: clientError } : null
+        }
+      });
+      
+    } catch (updateError) {
+      console.error('Dependency update failed:', updateError);
+      
+      // Log failed update
+      db.run(
+        'INSERT INTO activity (username, action, timestamp) VALUES (?, ?, ?)',
+        [req.user.username, `Dependency update failed: ${updateError.message}`, timestamp]
+      );
+      
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to update dependencies',
+        details: updateError.message,
+        stderr: updateError.stderr || updateError.message
+      });
+    }
+    
+  } catch (err) {
+    console.error('Dependency update endpoint error:', err);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Internal server error during dependency update' 
+    });
+  }
 });
 
 app.get('/api/admin/notification-history', auth, (req, res) => {

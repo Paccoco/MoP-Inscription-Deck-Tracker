@@ -61,6 +61,99 @@ function initializeProductionDatabase() {
       }
     });
 
+    // Create completed_decks table
+    db.run(`CREATE TABLE IF NOT EXISTS completed_decks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      deck TEXT NOT NULL,
+      contributors TEXT,
+      completed_at TEXT,
+      disposition TEXT,
+      recipient TEXT
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating completed_decks table:', err);
+      } else {
+        console.log('✅ Completed decks table ready');
+      }
+    });
+
+    // Create deck_requests table
+    db.run(`CREATE TABLE IF NOT EXISTS deck_requests (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      deck TEXT NOT NULL,
+      requested_at TEXT NOT NULL,
+      fulfilled INTEGER DEFAULT 0
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating deck_requests table:', err);
+      } else {
+        console.log('✅ Deck requests table ready');
+      }
+    });
+
+    // Create activity table
+    db.run(`CREATE TABLE IF NOT EXISTS activity (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      action TEXT NOT NULL,
+      timestamp TEXT
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating activity table:', err);
+      } else {
+        console.log('✅ Activity table ready');
+      }
+    });
+
+    // Create announcement table
+    db.run(`CREATE TABLE IF NOT EXISTS announcement (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      message TEXT NOT NULL,
+      expiry TEXT,
+      links TEXT,
+      active INTEGER DEFAULT 1
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating announcement table:', err);
+      } else {
+        console.log('✅ Announcement table ready');
+      }
+    });
+
+    // Create gotify_config table
+    db.run(`CREATE TABLE IF NOT EXISTS gotify_config (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      server TEXT,
+      token TEXT,
+      types TEXT
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating gotify_config table:', err);
+      } else {
+        console.log('✅ Gotify config table ready');
+      }
+    });
+
+    // Create scheduled_updates table
+    db.run(`CREATE TABLE IF NOT EXISTS scheduled_updates (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      version TEXT NOT NULL,
+      scheduled_time TEXT NOT NULL,
+      created_by TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      status TEXT DEFAULT 'pending',
+      completed_at TEXT,
+      error TEXT
+    )`, (err) => {
+      if (err) {
+        console.error('Error creating scheduled_updates table:', err);
+      } else {
+        console.log('✅ Scheduled updates table ready');
+      }
+    });
+
     // Create discord_webhook table
     db.run(`CREATE TABLE IF NOT EXISTS discord_webhook (
       id INTEGER PRIMARY KEY CHECK (id = 1),

@@ -154,6 +154,21 @@ db.serialize(() => {
     }
   });
 
+  // Create deck_requests table
+  db.run(`CREATE TABLE IF NOT EXISTS deck_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL,
+    deck TEXT NOT NULL,
+    requested_at TEXT NOT NULL,
+    fulfilled INTEGER DEFAULT 0
+  )`, (err) => {
+    if (err) {
+      console.error('Error creating deck_requests table:', err);
+    } else {
+      console.log('Deck requests table created successfully');
+    }
+  });
+
   // Only create test users if NODE_ENV is not production
   if (process.env.NODE_ENV !== 'production') {
     console.log('🧪 Creating test users for development/testing...');

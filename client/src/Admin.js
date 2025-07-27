@@ -29,6 +29,8 @@ function Admin({ setShowPage }) {
   const [dependencyStatus, setDependencyStatus] = useState(null);
   const [notificationHistory, setNotificationHistory] = useState([]);
   const [securityError, setSecurityError] = useState('');
+  const [dependencyUpdateLoading, setDependencyUpdateLoading] = useState(false);
+  const [dependencyUpdateResult, setDependencyUpdateResult] = useState(null);
 
   const fetchAllAdminData = async () => {
     const token = localStorage.getItem('token');
@@ -209,6 +211,44 @@ function Admin({ setShowPage }) {
       alert(`Version check failed: ${err.response?.data?.error || 'Network error'}`);
     } finally {
       setVersionCheckLoading(false);
+    }
+  };
+
+  // Update outdated dependencies function
+  const handleUpdateDependencies = async () => {
+    if (!window.confirm('This will update all outdated dependencies. This process may take a few minutes and will restart services. Continue?')) {
+      return;
+    }
+    
+    setDependencyUpdateLoading(true);
+    setDependencyUpdateResult(null);
+    const token = localStorage.getItem('token');
+    
+    try {
+      const response = await axios.post('/api/admin/update-dependencies', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      setDependencyUpdateResult(response.data);
+      
+      if (response.data.success) {
+        alert(`Dependencies Updated Successfully!\n\n${response.data.message}\n\n${response.data.updated_packages}\n\nRefreshing dependency status...`);
+        // Refresh admin data to show updated dependency status
+        fetchAllAdminData();
+      } else {
+        alert(`Dependency update failed: ${response.data.error}`);
+      }
+      
+    } catch (err) {
+      console.error('Dependency update failed:', err);
+      setDependencyUpdateResult({ 
+        success: false, 
+        error: err.response?.data?.error || 'Failed to update dependencies',
+        details: err.response?.data?.details || 'Network error'
+      });
+      alert(`Dependency update failed: ${err.response?.data?.error || 'Network error'}`);
+    } finally {
+      setDependencyUpdateLoading(false);
     }
   };
 
@@ -432,6 +472,33 @@ function Admin({ setShowPage }) {
                     </li>
                   ))}
                 </ul>
+              )}
+              {dependencyStatus.outdated > 0 && (
+                <div style={{ marginTop: '1em' }}>
+                  <button 
+                    onClick={handleUpdateDependencies} 
+                    disabled={dependencyUpdateLoading}
+                    style={{ 
+                      backgroundColor: '#ff6b35', 
+                      color: 'white', 
+                      border: 'none', 
+                      padding: '10px 15px', 
+                      borderRadius: 4, 
+                      cursor: dependencyUpdateLoading ? 'not-allowed' : 'pointer',
+                      marginRight: '10px'
+                    }}
+                  >
+                    {dependencyUpdateLoading ? 'Updating Dependencies...' : `Update ${dependencyStatus.outdated} Outdated Package${dependencyStatus.outdated !== 1 ? 's' : ''}`}
+                  </button>
+                  {dependencyUpdateResult && (
+                    <span style={{ 
+                      color: dependencyUpdateResult.success ? 'green' : 'red',
+                      fontSize: '0.9em'
+                    }}>
+                      {dependencyUpdateResult.success ? '✅ Update completed!' : `❌ ${dependencyUpdateResult.error}`}
+                    </span>
+                  )}
+                </div>
               )}
             </div>
           ) : <div>Loading dependency status...</div>}

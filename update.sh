@@ -131,6 +131,15 @@ run_migrations() {
     echo "Checking for database migrations..."
     cd "$APP_DIR"
     
+    # Always run init-database.sh to ensure all tables exist with correct schema
+    if [ -f "init-database.sh" ]; then
+        echo "Running database initialization to ensure all tables exist..."
+        chmod +x init-database.sh
+        ./init-database.sh
+    else
+        echo "⚠️  Warning: init-database.sh not found, skipping database schema update"
+    fi
+    
     # If migration script exists, run it
     if [ -f "scripts/migrate.js" ]; then
         echo "Running database migrations..."

@@ -54,8 +54,13 @@ setup_database() {
     
     if [ ! -f "cards.db" ]; then
         echo "Creating new database..."
-        # Database will be created automatically when the app starts
-        # but we can run any initial setup here if needed
+        if [ -f "init-database.sh" ]; then
+            echo "Running database initialization script..."
+            chmod +x init-database.sh
+            ./init-database.sh
+        else
+            echo "⚠️  Warning: init-database.sh not found, database will be created when app starts"
+        fi
     else
         echo "Database already exists, backing up..."
         cp cards.db "cards.db.backup-$(date +%Y%m%d_%H%M%S)"
