@@ -213,6 +213,72 @@ sudo systemctl stop cardtracker
 
 For detailed update procedures, see [HOWTOUPDATE.md](HOWTOUPDATE.md).
 
+## 🔐 Database Safety & Protection
+
+### Production Database Protection
+The application includes comprehensive safeguards to protect production databases during updates:
+
+- **Database files are excluded from git** - No risk of overwriting production data
+- **Automatic backups** created before any update operations
+- **Safety checks** verify production environment and existing data
+- **Environment-aware initialization** - Test users only created in development
+
+### Database Initialization Scripts
+- `init-database.js` - Development/testing with optional test users
+- `init-production-database.js` - Production-safe initialization (tables only)
+- `check-database-safety.sh` - Pre-update safety verification
+
+### Update Safety Features
+```bash
+# Updates automatically run safety checks
+./update.sh  # Includes database protection verification
+
+# Manual safety check
+./check-database-safety.sh
+
+# Production-safe database initialization
+NODE_ENV=production node init-production-database.js
+```
+
+**Key Safety Guarantees:**
+- ✅ Existing production data is never overwritten
+- ✅ Database backups created before every update
+- ✅ Tables are created only if they don't exist
+- ✅ Test users are never created in production environments
+
+## Process Management
+
+## Database Safety & Protection
+
+### 🔐 Production Database Protection
+The application includes comprehensive safety measures to protect production databases:
+
+**Automatic Safety Features:**
+- ✅ Database files excluded from git (`.gitignore`)
+- ✅ Automatic backup creation before any updates
+- ✅ Production environment detection
+- ✅ Database safety checker script
+
+**Update Safety:**
+```bash
+# Run database safety check manually
+./check-database-safety.sh
+
+# Updates automatically run safety checks
+./update.sh  # <-- Includes database protection
+```
+
+**Production vs Development:**
+- **Production:** Uses `NODE_ENV=production` - no test users created
+- **Development:** Creates test users (`testadmin`/`testadmin123`, `testuser`/`testuser123`)
+
+**Database Files Protected:**
+- `cards.db` - Main database file
+- `cards.db-journal` - SQLite journal file  
+- `cards.db-wal` - Write-ahead log file
+
+> **Important:** Production databases are NEVER overwritten during updates. Only table structure is updated while preserving all existing data.
+
 ## Process Management
 
 ### PM2 Commands

@@ -204,6 +204,13 @@ show_usage() {
 main() {
     echo "Starting update process..."
     
+    # Run database safety check first
+    if [ -f "$APP_DIR/check-database-safety.sh" ]; then
+        echo "Running database safety check..."
+        "$APP_DIR/check-database-safety.sh"
+        echo ""
+    fi
+    
     # Parse command line arguments
     BRANCH=""
     VERIFY_ONLY=false

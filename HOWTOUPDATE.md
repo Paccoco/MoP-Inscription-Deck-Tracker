@@ -2,7 +2,44 @@
 
 This guide provides step-by-step instructions for updating your MoP Inscription Deck Tracker installation from one version to the next.
 
+## 🚨 CRITICAL UPDATE NOTICE - v1.1.2
+
+**READ THIS FIRST BEFORE UPDATING!**
+
+### Database Fix Required - "Error adding card" Issue
+If you're experiencing "Error adding card" errors on your production server, this update completely resolves the issue.
+
+#### ⚠️ IMMEDIATE ACTION REQUIRED:
+```bash
+# 1. CRITICAL: Initialize missing database tables BEFORE updating
+node init-database.js
+
+# 2. For production servers (recommended):
+NODE_ENV=production node init-production-database.js
+
+# 3. Verify all tables exist:
+sqlite3 cards.db ".tables"
+# Should show: activity_log  cards  decks  discord_webhook  notifications  system_updates  update_checks  users
+```
+
+#### Why This Is Critical:
+- **Root Cause**: Missing database tables cause server crashes when users try to add cards
+- **Impact**: Production users cannot add cards until database is properly initialized
+- **Solution**: Database initialization creates missing tables while preserving all existing data
+- **Safety**: 100% safe - no existing data will be lost
+
+#### What Gets Fixed:
+- ✅ Creates all missing database tables that caused card adding failures
+- ✅ Preserves all existing production data
+- ✅ Adds comprehensive database safety system
+- ✅ Resolves "Error adding card" for all users
+
+**This must be run BEFORE proceeding with any update commands below.**
+
+---
+
 ## Table of Contents
+- [🚨 CRITICAL UPDATE NOTICE - v1.1.2](#-critical-update-notice---v112)
 - [Automatic Updates (Recommended)](#automatic-updates-recommended)
 - [Manual Updates](#manual-updates)
 - [Pre-Update Checklist](#pre-update-checklist)
@@ -39,6 +76,8 @@ curl -X POST http://localhost:5000/api/admin/update/schedule \
 > - PM2 log directory initialization
 
 ## Manual Updates
+
+> **⚠️ IMPORTANT**: Before running any manual update commands, ensure you have completed the [Critical Database Fix](#-critical-update-notice---v112) if updating to v1.1.2 or later.
 
 ### Method 1: Git Pull (Development/Source Installations)
 
@@ -111,6 +150,26 @@ pm2 restart mop-card-tracker
 ```
 
 ## Pre-Update Checklist
+
+### Database Safety Verification
+**🔐 CRITICAL: Always verify database protection before updating**
+
+```bash
+# Run database safety check
+./check-database-safety.sh
+
+# Verify database files are protected
+ls -la cards.db*  # Should show existing database files
+cat .gitignore    # Should exclude *.db files
+```
+
+**Key Safety Confirmations:**
+- ✅ Database files (*.db) are in .gitignore
+- ✅ Production data exists and will be preserved
+- ✅ Backups will be created automatically
+- ✅ Only table structure will be updated, not data
+
+### Standard Pre-Update Steps
 
 ### Essential Backups
 - [ ] **Database Backup**: `cp cards.db cards.db.backup-$(date +%Y%m%d_%H%M%S)`
@@ -298,6 +357,9 @@ tail -f /var/log/sqlite.log  # if logging enabled
 ```
 
 ## Version-Specific Upgrade Notes
+
+### ✅ v1.1.2 Database Fix (Covered Above)
+See the [Critical Update Notice](#-critical-update-notice---v112) at the top of this document for required database initialization steps.
 
 ### Upgrading to v1.2.0
 - **New Features**: Enhanced notification system, security dashboard

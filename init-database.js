@@ -1,11 +1,41 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 
 const dbPath = path.join(__dirname, 'cards.db');
-const db = new sqlite3.Database(dbPath);
 
-console.log('Creating database tables...');
+// Safety check: Warn if database already exists with data
+if (fs.existsSync(dbPath)) {
+  console.log('⚠️  WARNING: Database file already exists!');
+  
+  // Check if database has data
+  const db = new sqlite3.Database(dbPath);
+  db.get('SELECT COUNT(*) as count FROM users WHERE 1', (err, row) => {
+    if (!err && row && row.count > 0) {
+      console.log('🚨 CRITICAL WARNING: Database contains existing users!');
+      console.log('   This script should NOT be run on production servers with existing data.');
+      console.log('   Production data will be preserved, but test users may be added.');
+      console.log('   Press Ctrl+C within 10 seconds to cancel...');
+      
+      setTimeout(() => {
+        console.log('⏳ Continuing with database initialization...');
+        initializeDatabase();
+      }, 10000);
+      return;
+    } else {
+      console.log('📂 Empty database detected, proceeding with initialization...');
+      initializeDatabase();
+    }
+  });
+} else {
+  console.log('🆕 Creating new database...');
+  initializeDatabase();
+}
+
+function initializeDatabase() {
+  const db = new sqlite3.Database(dbPath);
+  console.log('Creating database tables...');
 
 db.serialize(() => {
   // Create users table based on the usage in server-auth.js
@@ -124,48 +154,59 @@ db.serialize(() => {
     }
   });
 
-  // Now create test users
-  bcrypt.hash('testadmin123', 10, (err, adminHash) => {
-    if (err) {
-      console.error('Error hashing admin password:', err);
-      return;
-    }
+  // Only create test users if NODE_ENV is not production
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('🧪 Creating test users for development/testing...');
     
-    db.run('INSERT OR REPLACE INTO users (id, username, password, is_admin, approved) VALUES (?, ?, ?, ?, ?)',
-      [999, 'testadmin', adminHash, 1, 1], (err) => {
-        if (err) {
-          console.error('Admin creation error:', err);
-        } else {
-          console.log('Test admin user created: testadmin/testadmin123');
-        }
-      });
-  });
-
-  bcrypt.hash('testuser123', 10, (err, userHash) => {
-    if (err) {
-      console.error('Error hashing user password:', err);
-      return;
-    }
-    
-    db.run('INSERT OR REPLACE INTO users (id, username, password, is_admin, approved) VALUES (?, ?, ?, ?, ?)',
-      [998, 'testuser', userHash, 0, 1], (err) => {
-        if (err) {
-          console.error('User creation error:', err);
-        } else {
-          console.log('Test regular user created: testuser/testuser123');
-        }
-      });
-  });
-
-  // Verify users were created
-  setTimeout(() => {
-    db.all('SELECT id, username, is_admin, approved FROM users WHERE id IN (999, 998)', [], (err, rows) => {
+    // Now create test users
+    bcrypt.hash('testadmin123', 10, (err, adminHash) => {
       if (err) {
-        console.error('Query error:', err);
-      } else {
-        console.log('Created users:', rows);
+        console.error('Error hashing admin password:', err);
+        return;
       }
-      db.close();
+      
+      db.run('INSERT OR REPLACE INTO users (id, username, password, is_admin, approved) VALUES (?, ?, ?, ?, ?)',
+        [999, 'testadmin', adminHash, 1, 1], (err) => {
+          if (err) {
+            console.error('Admin creation error:', err);
+          } else {
+            console.log('Test admin user created: testadmin/testadmin123');
+          }
+        });
     });
-  }, 1000);
-});
+
+    bcrypt.hash('testuser123', 10, (err, userHash) => {
+      if (err) {
+        console.error('Error hashing user password:', err);
+        return;
+      }
+      
+      db.run('INSERT OR REPLACE INTO users (id, username, password, is_admin, approved) VALUES (?, ?, ?, ?, ?)',
+        [998, 'testuser', userHash, 0, 1], (err) => {
+          if (err) {
+            console.error('User creation error:', err);
+          } else {
+            console.log('Test regular user created: testuser/testuser123');
+          }
+        });
+    });
+
+    // Verify users were created
+    setTimeout(() => {
+      db.all('SELECT id, username, is_admin, approved FROM users WHERE id IN (999, 998)', [], (err, rows) => {
+        if (err) {
+          console.error('Query error:', err);
+        } else {
+          console.log('Created test users:', rows);
+        }
+        db.close();
+      });
+    }, 1000);
+  } else {
+    console.log('🏭 Production environment detected - skipping test user creation');
+    setTimeout(() => {
+      db.close();
+    }, 1000);
+  }
+  });
+}

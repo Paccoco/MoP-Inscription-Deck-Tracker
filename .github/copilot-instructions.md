@@ -47,6 +47,7 @@
 - **Never assume missing context. Ask questions if uncertain.**
 - **Never hallucinate libraries or functions**
 - **Always confirm file paths and module names** exist before referencing them in code or tests.
+- **CRITICAL: NEVER use streaming log commands like `pm2 logs` without `--lines X` limit** - streaming logs will break the AI session. Always use `pm2 logs mop-card-tracker --lines 20` or similar with a specific line count.
 
 ## Architecture & Data Flow
 - Frontend communicates with backend via REST API endpoints (see README for full list).
