@@ -5,7 +5,7 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 1.0.4**
+**Version: 1.1.0**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -19,17 +19,25 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - **Analytics:** Contributor leaderboard, deck fulfillment speed, card acquisition trends
 - **Export/Import:** CSV-based data portability for cards and decks (admin only)
 - **Responsive UI:** Mobile-friendly, MoP-themed interface
+- **Auto-Update System:** Automated version checking, scheduled updates, and rollback capabilities
+- **Update Management:** Comprehensive admin tools for system updates with backup and recovery
 
 For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
 
-## Release Notes: Version 1.0.4 (2025-07-27)
+## Release Notes: Version 1.1.0 (2025-07-27)
 
-### Major Improvements
-- Fixed announcement modal styling to match the site's dark theme with MoP green accents
-- Added persistent dismissal of announcements using localStorage to prevent reappearing after navigation
-- Improved error handling and debugging for the announcement system
-- Removed database files from git tracking to prevent overwriting production databases during updates
-- Added database initialization script for new installations
+### Major New Features
+- **Automated Update System:** Built-in version checking and update management
+- **Scheduled Updates:** Plan system updates for specific times with automatic execution
+- **Backup & Recovery:** Automated backup creation and rollback capabilities
+- **Update Guide:** Comprehensive `HOWTOUPDATE.md` with step-by-step upgrade procedures
+- **Enhanced Admin Tools:** Real-time update monitoring and system management
+
+### Technical Improvements
+- Fixed critical database connection issues causing API failures
+- Improved error handling and database operation reliability
+- Enhanced SQLite configuration with WAL mode and foreign key support
+- Resolved frontend build and static file serving problems
 
 ## Previous Major Release: Version 1.0.0 (2025-07-26)
 
@@ -66,50 +74,134 @@ For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG
 - Chart.js (analytics)
 
 ## Setup & Installation
+
+### Quick Install (Recommended)
+```bash
+git clone https://github.com/Paccoco/MoP-Inscription-Deck-Tracker.git
+cd MoP-Inscription-Deck-Tracker
+./install.sh
+```
+
+### Manual Installation
 1. **Clone the repository:**
    ```bash
-<<<<<<< HEAD
-   git clone https://github.com/yourusername/mop-inscription-deck-tracker.git
-   cd mop-inscription-deck-tracker
-=======
    git clone https://github.com/Paccoco/MoP-Inscription-Deck-Tracker.git
    cd MoP-Inscription-Deck-Tracker
->>>>>>> master
    ```
-2. **Initialize the database:**
+
+2. **Install PM2 (Process Manager):**
    ```bash
-   ./init-database.sh
+   npm install -g pm2
    ```
-   This will create the necessary database schema for the application.
 
 3. **Install dependencies:**
    ```bash
    npm install
-   cd client && npm install
+   cd client && npm install && cd ..
    ```
+
 4. **Build the React frontend:**
    ```bash
-   cd client && npm run build
+   cd client && npm run build && cd ..
    ```
-5. **Create an admin user:**
-   ```bash
-   node update-admin-password.js
-   ```
-   Follow the prompts to set up the admin account.
 
-6. **Start the backend server:**
+5. **Configure environment:**
    ```bash
-<<<<<<< HEAD
-   node server-auth.js
+   cp .env.example .env
+   # Edit .env file with your settings
    ```
-   Or use the provided startup script:
+
+6. **Start with PM2:**
    ```bash
-=======
->>>>>>> master
    ./start-card-tracker.sh
    ```
+   Or manually:
+   ```bash
+   pm2 start ecosystem.config.js
+   pm2 save
+   ```
+
 7. **Access the app:**
    Open your browser and go to `http://localhost:5000` (or your server's IP/domain).
+
+### System Service Setup
+The installation script automatically sets up a systemd service for auto-start on boot:
+```bash
+sudo systemctl status cardtracker
+sudo systemctl start cardtracker
+sudo systemctl stop cardtracker
+```
+
+## Updating
+
+### Automatic Updates (Via Admin Panel)
+1. Log in as admin
+2. Navigate to Admin > System Updates
+3. Check for available updates
+4. Click "Update Now" or schedule for later
+
+### Manual Updates
+```bash
+# Simple update to latest version
+./update.sh
+
+# Update to specific branch
+./update.sh --branch master
+
+# Update to master branch
+./update.sh --master
+
+# Verify installation only
+./update.sh --verify-only
+
+# Rollback if needed
+./update.sh --rollback
+```
+
+For detailed update procedures, see [HOWTOUPDATE.md](HOWTOUPDATE.md).
+
+## Process Management
+
+### PM2 Commands
+```bash
+# Check application status
+pm2 status
+
+# View application logs
+pm2 logs mop-card-tracker
+
+# Restart application
+pm2 restart mop-card-tracker
+
+# Stop application
+pm2 stop mop-card-tracker
+
+# Monitor resources
+pm2 monit
+
+# Save PM2 configuration
+pm2 save
+
+# Setup auto-start on boot
+pm2 startup
+```
+
+### Systemd Service Commands
+```bash
+# Check service status
+sudo systemctl status cardtracker
+
+# Start/stop service
+sudo systemctl start cardtracker
+sudo systemctl stop cardtracker
+
+# Enable/disable auto-start
+sudo systemctl enable cardtracker
+sudo systemctl disable cardtracker
+
+# View service logs
+journalctl -u cardtracker -f
+```
 
 ## Discord & Gotify Integration
 - Configure Discord webhook and Gotify server/token in the Admin Panel.

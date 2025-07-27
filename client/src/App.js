@@ -291,11 +291,13 @@ function App() {
     DECK_NAMES.forEach(deck => {
       const deckCards = CARD_NAMES.filter(name => name.includes(deck.split(' ')[0]));
       const ownedCards = cards.filter(card => card.deck === deck).map(card => card.card_name);
-      const missing = deckCards.filter(name => !ownedCards.includes(name));
+      // Get unique card names to avoid counting duplicates
+      const uniqueOwnedCards = [...new Set(ownedCards)];
+      const missing = deckCards.filter(name => !uniqueOwnedCards.includes(name));
       deckStatus[deck] = {
         complete: missing.length === 0,
         missing,
-        owned: ownedCards.length
+        owned: uniqueOwnedCards.length
       };
     });
     return deckStatus;

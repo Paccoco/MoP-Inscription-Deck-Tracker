@@ -16,6 +16,7 @@ function Admin({ setShowPage }) {
   const [salePrice, setSalePrice] = useState('');
   const [payouts, setPayouts] = useState(null);
   const [guildCut, setGuildCut] = useState(null);
+  const [serverVersion, setServerVersion] = useState('');
 
   // Summary stats
   const [notificationStats, setNotificationStats] = useState({ total: 0, unread: 0 });
@@ -63,6 +64,12 @@ function Admin({ setShowPage }) {
 
   useEffect(() => {
     fetchAllAdminData();
+    // Fetch server version
+    axios.get('/api/version').then(res => {
+      setServerVersion(res.data.version);
+    }).catch(() => {
+      setServerVersion('unknown');
+    });
   }, []);
 
   const approveUser = async (userId) => {
@@ -205,6 +212,7 @@ function Admin({ setShowPage }) {
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1em', gap: '1em' }}>
         <button onClick={goHome}>Home</button>
         <h2 style={{ margin: 0 }}>Admin Panel</h2>
+        <span style={{ marginLeft: 'auto', fontWeight: 'bold', color: '#4caf50' }}>Server Version: {serverVersion}</span>
       </div>
       <div style={{ display: 'flex', gap: '2em', marginBottom: '1em' }}>
         <div>

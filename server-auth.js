@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
@@ -11,97 +12,427 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const SECRET = process.env.JWT_SECRET || 'mop_secret';
 
-// SQLite database setup
+// Initialize SQLite database
+let db;
 const dbPath = path.join(__dirname, 'cards.db');
-const db = new sqlite3.Database(dbPath);
+try {
+  db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+      console.error('Error connecting to database:', err);
+      process.exit(1);
+    }
+    console.log('Connected to SQLite database at', dbPath);
+  });
+  
+  // Enable foreign keys and WAL mode for better performance
+  db.run('PRAGMA foreign_keys = ON');
+  db.run('PRAGMA journal_mode = WAL');
+} catch (err) {
+  console.error('Failed to initialize database:', err);
+  process.exit(1);
+}
 
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS cards (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    card_name TEXT NOT NULL,
-    owner TEXT NOT NULL,
-    deck TEXT NOT NULL
-  )`);
-  // Create users table
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    is_admin INTEGER DEFAULT 0,
-    approved INTEGER DEFAULT 0
-  )`);
-  // Create completed_decks table
-  db.run(`CREATE TABLE IF NOT EXISTS completed_decks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    deck TEXT NOT NULL,
-    contributors TEXT NOT NULL, -- JSON string: [{owner, card_name}]
-    completed_at TEXT NOT NULL,
-    disposition TEXT NOT NULL, -- 'sold' or 'given'
-    recipient TEXT -- username or external
-  )`);
-  // Create deck_requests table
-  db.run(`CREATE TABLE IF NOT EXISTS deck_requests (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    deck TEXT NOT NULL,
-    requested_at TEXT NOT NULL,
-    fulfilled INTEGER DEFAULT 0,
-    fulfilled_at TEXT
-  )`);
-  // Create activity table
-  db.run(`CREATE TABLE IF NOT EXISTS activity (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    action TEXT NOT NULL,
-    timestamp TEXT NOT NULL
-  )`);
-  // Create notifications table
-  db.run(`CREATE TABLE IF NOT EXISTS notifications (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL,
-    message TEXT NOT NULL,
-    read INTEGER DEFAULT 0,
-    created_at TEXT NOT NULL
-  )`);
-  // Card history table
-  db.run(`CREATE TABLE IF NOT EXISTS card_history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    card_id INTEGER,
-    owner TEXT,
-    action TEXT,
-    timestamp TEXT
-  )`);
-  // Deck history table
-  db.run(`CREATE TABLE IF NOT EXISTS deck_history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    deck_id INTEGER,
-    action TEXT,
-    details TEXT,
-    timestamp TEXT
-  )`);
-  // Deck value history table
-  db.run(`CREATE TABLE IF NOT EXISTS deck_value_history (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    deck TEXT NOT NULL,
-    value INTEGER NOT NULL,
-    timestamp TEXT NOT NULL
-  )`);
-  // Gotify config table
-  db.run(`CREATE TABLE IF NOT EXISTS gotify_config (
-    username TEXT PRIMARY KEY,
-    server TEXT,
-    token TEXT,
-    types TEXT -- JSON array of enabled notification types
-  )`);
-  // Announcement Table
-  db.run(`CREATE TABLE IF NOT EXISTS announcement (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    message TEXT NOT NULL,
-    expiry DATETIME,
-    links TEXT, -- JSON array of {label, url}
-    active INTEGER DEFAULT 1
-  )`);
+// Ensure admin user exists on startup
+async function ensureAdminExists() {
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  if (!adminUsername || !adminPassword) {
+    console.warn('Admin credentials not found in environment variables');
+    return;
+  }
+
+  try {
+    const hash = await bcrypt.hash(adminPassword, 10);
+    db.get('SELECT * FROM users WHERE username = ?', [adminUsername], (err, user) => {
+      if (err) {
+        console.error('Error checking admin user:', err);
+        return;
+      }
+
+      if (user) {
+        // Update existing admin
+        db.run(
+          'UPDATE users SET password = ?, is_admin = 1, approved = 1 WHERE username = ?',
+          [hash, adminUsername],
+          (err) => {
+            if (err) console.error('Error updating admin user:', err);
+            else console.log('Admin user updated successfully');
+          }
+        );
+      } else {
+        // Create new admin
+        db.run(
+          'INSERT INTO users (username, password, is_admin, approved) VALUES (?, ?, 1, 1)',
+          [adminUsername, hash],
+          (err) => {
+            if (err) console.error('Error creating admin user:', err);
+            else console.log('Admin user created successfully');
+          }
+        );
+      }
+    });
+  } catch (err) {
+    console.error('Error ensuring admin exists:', err);
+  }
+}
+
+// Initialize middleware
+app.use(cors());
+app.use(express.json());
+
+// Serve static files from the React build directory
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// Handle React routing by serving index.html for any non-API routes
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
+
+// Create API router with middleware to log requests
+const apiRouter = express.Router();
+apiRouter.use((req, res, next) => {
+  console.log(`API Request: ${req.method} ${req.originalUrl}`);
+  next();
+});
+
+// Helper function to compare versions (handles pre-releases)
+function compareVersions(v1, v2) {
+  const parse = v => {
+    const [version, prerelease] = v.split('-');
+    const [major, minor, patch] = version.split('.').map(Number);
+    return { major, minor, patch, prerelease };
+  };
+  
+  const v1parts = parse(v1);
+  const v2parts = parse(v2);
+  
+  if (v1parts.major !== v2parts.major) return v1parts.major - v2parts.major;
+  if (v1parts.minor !== v2parts.minor) return v1parts.minor - v2parts.minor;
+  if (v1parts.patch !== v2parts.patch) return v1parts.patch - v2parts.patch;
+  
+  // Handle pre-releases (e.g., -beta.1, -alpha.2)
+  if (!v1parts.prerelease && v2parts.prerelease) return 1;
+  if (v1parts.prerelease && !v2parts.prerelease) return -1;
+  if (v1parts.prerelease === v2parts.prerelease) return 0;
+  return v1parts.prerelease < v2parts.prerelease ? -1 : 1;
+}
+
+// Helper function to fetch remote version info from GitHub
+async function getRemoteVersionInfo() {
+  try {
+    // Fetch package.json
+    const pkgResponse = await fetch('https://api.github.com/repos/Paccoco/MoP-Inscription-Deck-Tracker/contents/package.json');
+    if (!pkgResponse.ok) {
+      throw new Error('Failed to fetch remote package.json');
+    }
+    const pkgData = await pkgResponse.json();
+    const content = Buffer.from(pkgData.content, 'base64').toString('utf8');
+    const remotePkg = JSON.parse(content);
+
+    // Fetch latest release info
+    const releaseResponse = await fetch('https://api.github.com/repos/Paccoco/MoP-Inscription-Deck-Tracker/releases/latest');
+    const releaseInfo = releaseResponse.ok ? await releaseResponse.json() : null;
+
+    return {
+      version: remotePkg.version,
+      releaseUrl: releaseInfo?.html_url || null,
+      changelog: releaseInfo?.body || null,
+      assets: releaseInfo?.assets || []
+    };
+  } catch (err) {
+    console.error('Error fetching remote version:', err);
+    return null;
+  }
+}
+
+// Version endpoint (no auth required)
+apiRouter.get('/version', async (req, res) => {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+    const localVersion = pkg.version;
+    const remoteInfo = await getRemoteVersionInfo();
+    
+    console.log('Local version:', localVersion);
+    console.log('Remote version info:', remoteInfo);
+    
+    if (!remoteInfo) {
+      return res.json({ 
+        version: localVersion,
+        remoteVersion: null,
+        upToDate: null
+      });
+    }
+    
+    const versionCompare = compareVersions(localVersion, remoteInfo.version);
+    
+    res.json({ 
+      version: localVersion,
+      remoteVersion: remoteInfo.version,
+      upToDate: versionCompare >= 0,
+      updateAvailable: versionCompare < 0,
+      isPrerelease: remoteInfo.version.includes('-'),
+      releaseUrl: remoteInfo.releaseUrl,
+      changelog: remoteInfo.changelog,
+      updateAssets: remoteInfo.assets
+    });
+  } catch (err) {
+    console.error('Error reading version:', err);
+    res.status(500).json({ error: 'Could not read version.' });
+  }
+});
+
+// Automatic update check (runs every 24 hours)
+async function checkForUpdates() {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+    const localVersion = pkg.version;
+    const remoteInfo = await getRemoteVersionInfo();
+    
+    // Log the check
+    await db.run(
+      'INSERT INTO update_checks (check_time, remote_version, local_version, update_available, error) VALUES (?, ?, ?, ?, ?)',
+      [
+        new Date().toISOString(),
+        remoteInfo?.version || null,
+        localVersion,
+        remoteInfo && compareVersions(localVersion, remoteInfo.version) < 0 ? 1 : 0,
+        null
+      ]
+    );
+
+    if (remoteInfo && compareVersions(localVersion, remoteInfo.version) < 0) {
+      // Notify admins of available update
+      const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+      for (const admin of admins) {
+        await db.run(
+          'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+          [admin.username, `New version ${remoteInfo.version} is available for installation`, new Date().toISOString()]
+        );
+      }
+    }
+  } catch (err) {
+    console.error('Update check failed:', err);
+    await db.run(
+      'INSERT INTO update_checks (check_time, remote_version, local_version, update_available, error) VALUES (?, ?, ?, ?, ?)',
+      [new Date().toISOString(), null, null, 0, err.message]
+    );
+  }
+}
+
+// Schedule automatic update checks
+setInterval(checkForUpdates, 24 * 60 * 60 * 1000); // Every 24 hours
+setTimeout(checkForUpdates, 5000); // First check after 5 seconds
+
+// Admin update endpoint
+apiRouter.post('/admin/update', requireAdmin, async (req, res) => {
+  try {
+    const versionInfo = await getRemoteVersionInfo();
+    if (!versionInfo) {
+      return res.status(500).json({ error: 'Failed to fetch update information.' });
+    }
+
+    const updateId = (await db.run(
+      'INSERT INTO system_updates (version, update_time, status, initiated_by) VALUES (?, ?, ?, ?)',
+      [versionInfo.version, new Date().toISOString(), 'pending', req.user.username]
+    )).lastID;
+
+    // Create backup
+    const backupDir = path.join(__dirname, 'backups', `${new Date().toISOString()}_${versionInfo.version}`);
+    await new Promise((resolve, reject) => {
+      fs.mkdir(backupDir, { recursive: true }, err => err ? reject(err) : resolve());
+    });
+
+    // Update backup path in database
+    await db.run('UPDATE system_updates SET backup_path = ? WHERE id = ?', [backupDir, updateId]);
+
+    // Notify admins and send Discord notification
+    const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+    for (const admin of admins) {
+      await db.run(
+        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+        [admin.username, `System update to version ${versionInfo.version} initiated by ${req.user.username}`, new Date().toISOString()]
+      );
+    }
+
+    sendDiscordNotification(`[System Update] Updating to version ${versionInfo.version} initiated by ${req.user.username}`);
+
+    res.json({ 
+      success: true, 
+      message: 'Update process initiated. The server will restart when complete.',
+      version: versionInfo.version,
+      updateId
+    });
+
+    // Execute update in background
+    setTimeout(async () => {
+      try {
+        // Update status to in_progress
+        await db.run('UPDATE system_updates SET status = ? WHERE id = ?', ['in_progress', updateId]);
+
+        const updateScript = path.join(__dirname, 'scripts', 'update.sh');
+        const updateProcess = require('child_process').spawn('bash', [updateScript, backupDir], {
+          detached: true
+        });
+
+        let updateLog = '';
+        updateProcess.stdout.on('data', (data) => {
+          updateLog += data.toString();
+          db.run('UPDATE system_updates SET log = ? WHERE id = ?', [updateLog, updateId]);
+        });
+
+        updateProcess.stderr.on('data', (data) => {
+          updateLog += `[ERROR] ${data.toString()}`;
+          db.run('UPDATE system_updates SET log = ? WHERE id = ?', [updateLog, updateId]);
+        });
+
+        updateProcess.on('close', async (code) => {
+          if (code === 0) {
+            await db.run('UPDATE system_updates SET status = ? WHERE id = ?', ['completed', updateId]);
+            sendDiscordNotification(`[System Update] Successfully updated to version ${versionInfo.version}`);
+          } else {
+            await db.run(
+              'UPDATE system_updates SET status = ?, error = ? WHERE id = ?',
+              ['failed', `Update process exited with code ${code}`, updateId]
+            );
+            // Trigger rollback
+            const rollbackScript = path.join(__dirname, 'scripts', 'rollback.sh');
+            require('child_process').spawn('bash', [rollbackScript, backupDir], {
+              detached: true
+            });
+          }
+        });
+
+      } catch (err) {
+        await db.run(
+          'UPDATE system_updates SET status = ?, error = ? WHERE id = ?',
+          ['failed', err.message, updateId]
+        );
+        sendDiscordNotification(`[System Update] Failed to update to version ${versionInfo.version}: ${err.message}`);
+      }
+    }, 1000);
+
+  } catch (err) {
+    console.error('Update failed:', err);
+    res.status(500).json({ error: 'Update failed: ' + err.message });
+  }
+});
+
+// Admin rollback endpoint
+apiRouter.post('/admin/rollback/:updateId', requireAdmin, async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    const update = await db.get('SELECT * FROM system_updates WHERE id = ?', [updateId]);
+    
+    if (!update) {
+      return res.status(404).json({ error: 'Update not found' });
+    }
+    
+    if (!update.backup_path) {
+      return res.status(400).json({ error: 'No backup available for this update' });
+    }
+
+    // Log rollback attempt
+    await db.run(
+      'INSERT INTO activity_log (user_id, action, timestamp) VALUES (?, ?, ?)',
+      [req.user.id, `Initiated rollback of update ${updateId} (version ${update.version})`, new Date().toISOString()]
+    );
+
+    // Update status
+    await db.run('UPDATE system_updates SET status = ? WHERE id = ?', ['rolling_back', updateId]);
+
+    // Notify admins
+    const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+    for (const admin of admins) {
+      await db.run(
+        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+        [admin.username, `System rollback to previous version initiated by ${req.user.username}`, new Date().toISOString()]
+      );
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Rollback process initiated. The server will restart when complete.' 
+    });
+
+    // Execute rollback in background
+    setTimeout(() => {
+      const rollbackScript = path.join(__dirname, 'scripts', 'rollback.sh');
+      require('child_process').spawn('bash', [rollbackScript, update.backup_path], {
+        detached: true,
+        stdio: 'ignore'
+      }).unref();
+    }, 1000);
+
+  } catch (err) {
+    console.error('Rollback failed:', err);
+    res.status(500).json({ error: 'Rollback failed: ' + err.message });
+  }
+});
+
+// Get update status endpoint
+apiRouter.get('/admin/update/status/:updateId?', requireAdmin, async (req, res) => {
+  try {
+    const { updateId } = req.params;
+    if (updateId) {
+      // Get specific update status
+      const update = await db.get('SELECT * FROM system_updates WHERE id = ?', [updateId]);
+      if (!update) {
+        return res.status(404).json({ error: 'Update not found' });
+      }
+      res.json(update);
+    } else {
+      // Get latest update status
+      const update = await db.get('SELECT * FROM system_updates ORDER BY id DESC LIMIT 1');
+      res.json(update || { status: 'no_updates' });
+    }
+  } catch (err) {
+    console.error('Failed to fetch update status:', err);
+    res.status(500).json({ error: 'Failed to fetch update status' });
+  }
+});
+
+// Get update history endpoint
+apiRouter.get('/admin/update/history', requireAdmin, async (req, res) => {
+  try {
+    const updates = await db.all(`
+      SELECT 
+        su.*,
+        (SELECT COUNT(*) FROM update_checks 
+         WHERE check_time > su.update_time 
+         AND check_time < COALESCE(
+           (SELECT update_time FROM system_updates 
+            WHERE id > su.id ORDER BY id ASC LIMIT 1),
+           datetime('now')
+         )
+        ) as check_count
+      FROM system_updates su
+      ORDER BY update_time DESC
+    `);
+
+    // Get check history for each update
+    for (let update of updates) {
+      update.checks = await db.all(
+        'SELECT * FROM update_checks WHERE check_time > ? AND check_time < ? ORDER BY check_time DESC',
+        [
+          update.update_time,
+          updates[updates.indexOf(update) - 1]?.update_time || new Date().toISOString()
+        ]
+      );
+    }
+
+    res.json(updates);
+  } catch (err) {
+    console.error('Failed to fetch update history:', err);
+    res.status(500).json({ error: 'Failed to fetch update history' });
+  }
+});
+
+// Mount API router before static files
+app.use('/api', apiRouter);
 
 // Log activity helper
 function logActivity(username, action) {
@@ -357,17 +688,25 @@ app.post('/api/deck-requests', express.json(), auth, (req, res) => {
 
 // API: Get deck requests ordered by contribution
 app.get('/api/deck-requests', auth, (req, res) => {
-  db.all(`
-    SELECT r.*, IFNULL(c.count,0) as contribution, r.trinket
-    FROM deck_requests r
-    LEFT JOIN (
-      SELECT owner, COUNT(*) as count FROM cards GROUP BY owner
-    ) c ON r.username = c.owner
-    ORDER BY r.fulfilled ASC, contribution DESC, r.requested_at ASC
-  `, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: 'Failed to fetch deck requests.' });
-    res.json(rows);
-  });
+  try {
+    db.all(`
+      SELECT r.*, IFNULL(c.count,0) as contribution
+      FROM deck_requests r
+      LEFT JOIN (
+        SELECT owner, COUNT(*) as count FROM cards GROUP BY owner
+      ) c ON r.username = c.owner
+      ORDER BY r.fulfilled ASC, contribution DESC, r.requested_at ASC
+    `, [], (err, rows) => {
+      if (err) {
+        console.error('Error fetching deck requests:', err);
+        return res.status(500).json({ error: 'Failed to fetch deck requests.' });
+      }
+      res.json(rows || []);
+    });
+  } catch (err) {
+    console.error('Unexpected error in deck requests:', err);
+    return res.status(500).json({ error: 'Internal server error while fetching deck requests.' });
+  }
 });
 
 // API: Admin requests cards from users for a deck
@@ -575,9 +914,6 @@ app.get('/api/admin/notification-history', auth, (req, res) => {
     res.json(rows);
   });
 });
-
-// Serve static files from React build
-app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 // API: Remove deck request (admin or user)
 app.delete('/api/deck-requests/:id', express.json(), auth, (req, res) => {
@@ -810,11 +1146,193 @@ app.get('/api/admin/notification-stats', auth, (req, res) => {
   });
 });
 
-// Catch-all route to serve React index.html for non-API routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+// Schedule an update
+apiRouter.post('/admin/update/schedule', requireAdmin, async (req, res) => {
+  try {
+    const { scheduledTime, version } = req.body;
+    
+    if (!scheduledTime || !version) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Validate scheduled time is in the future
+    const scheduleDate = new Date(scheduledTime);
+    if (scheduleDate <= new Date()) {
+      return res.status(400).json({ error: 'Scheduled time must be in the future' });
+    }
+
+    // Create scheduled update
+    const result = await db.run(
+      'INSERT INTO scheduled_updates (version, scheduled_time, created_by, created_at, status) VALUES (?, ?, ?, ?, ?)',
+      [version, scheduledTime, req.user.username, new Date().toISOString(), 'pending']
+    );
+
+    // Schedule the update
+    const delay = scheduleDate.getTime() - Date.now();
+    setTimeout(async () => {
+      try {
+        await executeScheduledUpdate(result.lastID);
+      } catch (err) {
+        console.error('Failed to execute scheduled update:', err);
+      }
+    }, delay);
+
+    // Notify admins
+    const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+    for (const admin of admins) {
+      await db.run(
+        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+        [
+          admin.username,
+          `System update to version ${version} scheduled for ${new Date(scheduledTime).toLocaleString()} by ${req.user.username}`,
+          new Date().toISOString()
+        ]
+      );
+    }
+
+    res.json({
+      success: true,
+      id: result.lastID,
+      message: `Update scheduled for ${new Date(scheduledTime).toLocaleString()}`
+    });
+  } catch (err) {
+    console.error('Failed to schedule update:', err);
+    res.status(500).json({ error: 'Failed to schedule update' });
+  }
 });
 
+// Get scheduled updates
+apiRouter.get('/admin/update/scheduled', requireAdmin, async (req, res) => {
+  try {
+    const updates = await db.all(
+      'SELECT * FROM scheduled_updates WHERE status = ? ORDER BY scheduled_time ASC',
+      ['pending']
+    );
+    res.json(updates);
+  } catch (err) {
+    console.error('Failed to fetch scheduled updates:', err);
+    res.status(500).json({ error: 'Failed to fetch scheduled updates' });
+  }
+});
+
+// Cancel scheduled update
+apiRouter.delete('/admin/update/scheduled/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Get the scheduled update
+    const update = await db.get('SELECT * FROM scheduled_updates WHERE id = ?', [id]);
+    if (!update) {
+      return res.status(404).json({ error: 'Scheduled update not found' });
+    }
+    
+    if (update.status !== 'pending') {
+      return res.status(400).json({ error: 'Can only cancel pending updates' });
+    }
+
+    // Update status
+    await db.run(
+      'UPDATE scheduled_updates SET status = ?, completed_at = ? WHERE id = ?',
+      ['cancelled', new Date().toISOString(), id]
+    );
+
+    // Notify admins
+    const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+    for (const admin of admins) {
+      await db.run(
+        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+        [
+          admin.username,
+          `Scheduled update to version ${update.version} cancelled by ${req.user.username}`,
+          new Date().toISOString()
+        ]
+      );
+    }
+
+    res.json({ success: true, message: 'Update cancelled successfully' });
+  } catch (err) {
+    console.error('Failed to cancel scheduled update:', err);
+    res.status(500).json({ error: 'Failed to cancel scheduled update' });
+  }
+});
+
+// Helper function to execute scheduled update
+async function executeScheduledUpdate(scheduleId) {
+  try {
+    const schedule = await db.get('SELECT * FROM scheduled_updates WHERE id = ?', [scheduleId]);
+    if (!schedule || schedule.status !== 'pending') {
+      return;
+    }
+
+    // Create system update
+    const updateId = (await db.run(
+      'INSERT INTO system_updates (version, update_time, status, initiated_by) VALUES (?, ?, ?, ?)',
+      [schedule.version, new Date().toISOString(), 'pending', `Scheduled by ${schedule.created_by}`]
+    )).lastID;
+
+    // Create backup directory
+    const backupDir = path.join(__dirname, 'backups', `${new Date().toISOString()}_${schedule.version}`);
+    await new Promise((resolve, reject) => {
+      fs.mkdir(backupDir, { recursive: true }, err => err ? reject(err) : resolve());
+    });
+
+    // Update backup path
+    await db.run('UPDATE system_updates SET backup_path = ? WHERE id = ?', [backupDir, updateId]);
+
+    // Execute update script
+    const updateScript = path.join(__dirname, 'scripts', 'update.sh');
+    const updateProcess = require('child_process').spawn('bash', [updateScript, backupDir], {
+      detached: true
+    });
+
+    let updateLog = '';
+    updateProcess.stdout.on('data', (data) => {
+      updateLog += data.toString();
+      db.run('UPDATE system_updates SET log = ? WHERE id = ?', [updateLog, updateId]);
+    });
+
+    updateProcess.stderr.on('data', (data) => {
+      updateLog += `[ERROR] ${data.toString()}`;
+      db.run('UPDATE system_updates SET log = ? WHERE id = ?', [updateLog, updateId]);
+    });
+
+    updateProcess.on('close', async (code) => {
+      const now = new Date().toISOString();
+      if (code === 0) {
+        await db.run('UPDATE system_updates SET status = ? WHERE id = ?', ['completed', updateId]);
+        await db.run(
+          'UPDATE scheduled_updates SET status = ?, completed_at = ? WHERE id = ?',
+          ['completed', now, scheduleId]
+        );
+      } else {
+        const error = `Update process exited with code ${code}`;
+        await db.run(
+          'UPDATE system_updates SET status = ?, error = ? WHERE id = ?',
+          ['failed', error, updateId]
+        );
+        await db.run(
+          'UPDATE scheduled_updates SET status = ?, completed_at = ?, error = ? WHERE id = ?',
+          ['failed', now, error, scheduleId]
+        );
+      }
+    });
+
+  } catch (err) {
+    console.error('Failed to execute scheduled update:', err);
+    await db.run(
+      'UPDATE scheduled_updates SET status = ?, completed_at = ?, error = ? WHERE id = ?',
+      ['failed', new Date().toISOString(), err.message, scheduleId]
+    );
+  }
+}
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+// Serve static files from React build directory - MUST be after all API routes
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+// Catch all other routes and serve React app - MUST be last route
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });

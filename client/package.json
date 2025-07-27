@@ -1,6 +1,7 @@
 {
   "name": "mop-inscription-deck-tracker-client",
   "proxy": "http://localhost:5000",
+  "homepage": ".",
   "version": "1.0.4",
   "private": true,
   "dependencies": {

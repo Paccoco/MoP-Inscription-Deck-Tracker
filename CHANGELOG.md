@@ -5,6 +5,67 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-07-27
+
+### Added
+- Enhanced version checking system with GitHub repository integration
+- Support for pre-release versions (alpha, beta) detection and comparison
+- Automatic update checks every 24 hours
+- New admin panel features for system updates:
+  - Real-time update status monitoring
+  - Update history with detailed logs
+  - Scheduled updates with flexible timing
+  - Update cancellation capability
+  - Automatic rollback on failed updates
+- Version comparison showing changelog and release notes
+- Backup system for safe updates and rollbacks
+- Admin notifications for available updates and system changes
+- Discord webhook integration for update notifications
+- Database tracking for update history and scheduled updates
+- Comprehensive `HOWTOUPDATE.md` guide with:
+  - Automatic and manual update procedures
+  - Pre-update checklists and safety measures
+  - Rollback and recovery procedures
+  - Troubleshooting guides for common issues
+  - Version-specific upgrade notes
+  - Emergency procedures and health checks
+- **PM2 Process Management Integration:**
+  - Automated installation script (`install.sh`) with PM2 setup
+  - Smart update script (`update.sh`) with backup and rollback capabilities
+  - Enhanced startup script (`start-card-tracker.sh`) using PM2
+  - Systemd service integration for auto-start on boot
+  - PM2 ecosystem configuration for production deployment
+  - Process monitoring and automatic restart capabilities
+
+### Changed
+- Improved version endpoint to include remote version information
+- Enhanced logging system for update processes
+- Restructured backup system with organized directories
+- Updated admin interface to support new update features
+- Fixed database initialization issues with duplicate declarations
+- Improved error handling for deck requests API endpoint
+- Enhanced SQLite database connection with WAL mode and foreign keys
+- **Migration from manual process control to PM2:**
+  - Startup script now uses PM2 instead of nohup/background processes
+  - Installation process automatically configures PM2 and systemd
+  - Update procedures preserve PM2 configuration and process state
+  - Enhanced process reliability and monitoring capabilities
+
+### Fixed
+- Resolved database connection errors causing 500 responses on API endpoints
+- Fixed duplicate database declaration issues in server-auth.js
+- Corrected SQL query syntax error in deck requests endpoint (removed non-existent trinket field)
+- Improved error handling and logging for database operations
+- Fixed frontend build and static file serving issues
+- Resolved PM2 server restart problems
+- Fixed deck completion status calculation to count unique card types instead of total quantity (e.g., 3x "Eight of Serpent" + 1x "Two of Serpent" now correctly shows 2/8 instead of 4/8)
+
+### Security
+- Added backup verification before updates
+- Implemented automatic rollback for failed updates
+- Added admin-only restrictions for update management
+- Enhanced database security with proper foreign key constraints
+
 ## [1.0.4] - 2025-07-27
 
 ### Fixed
