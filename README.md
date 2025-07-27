@@ -15,6 +15,7 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 - **User Management:** Registration, approval, roles (Admin, Officer, User), and profile management
 - **Notification System:** Unified system for in-app, Discord webhook, and per-user Gotify notifications
 - **Admin Panel:** User approval, deck allocation, analytics, export/import, notification config
+- **Security Dashboard:** NPM vulnerability scanning, dependency status monitoring, and automated updates
 - **Activity Logging:** Transparent logging of all major actions
 - **Analytics:** Contributor leaderboard, deck fulfillment speed, card acquisition trends
 - **Export/Import:** CSV-based data portability for cards and decks (admin only)
@@ -28,6 +29,7 @@ For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG
 
 ### New Features & Critical Fixes
 - **Manual Version Check:** Added "Check for Updates" button in admin panel for on-demand update checking
+- **Dependency Update System:** Automated dependency management in Security Dashboard with real-time npm package updates
 - **Fixed Admin Panel:** Resolved "Failed to load admin data" error affecting admin dashboard
 - **Production-Ready Scripts:** All deployment scripts verified and updated with correct database schemas
 - **Enhanced Documentation:** Comprehensive production deployment guide and troubleshooting
