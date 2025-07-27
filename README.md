@@ -5,7 +5,7 @@
 ### Homepage
 ![Homepage](docs/screenshots/homepage.png)
 
-**Version: 1.1.3**
+**Version: 1.2.0**
 
 A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds to track Inscription Cards, complete decks, manage deck sales, payouts, and more. Built for transparency, sharing, and easy guild management.
 
@@ -25,7 +25,12 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 
 For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
 
-## � Latest Release: Version 1.1.3 (2025-07-27)
+## 🚀 Latest Release: Version 1.2.0 (2025-07-27)
+
+### Major Feature Completion
+- **Dependency Update System:** Complete automated dependency management with real-time npm integration
+- **Security Dashboard:** Enhanced with live dependency monitoring and one-click updates
+- **Production Ready:** All features tested, documented, and verified for production deployment
 
 ### New Features & Critical Fixes
 - **Manual Version Check:** Added "Check for Updates" button in admin panel for on-demand update checking

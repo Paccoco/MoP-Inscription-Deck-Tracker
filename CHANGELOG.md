@@ -5,6 +5,22 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-07-27
+
+### Added
+- **Complete Dependency Update System**: Fully functional automated dependency management
+  - Real-time dependency status monitoring with npm integration
+  - Automated package updates for both main and client dependencies
+  - Smart version constraint handling (major versions require manual intervention)
+  - One-click update button in Security Dashboard
+  - Comprehensive activity logging and Discord webhook notifications
+  - End-to-end testing and verification completed
+
+### Technical Improvements
+- Enhanced Security Dashboard with real dependency data integration
+- Improved admin panel functionality with complete feature set
+- All features documented and production-ready
+
 ## [1.1.3] - 2025-07-27
 
 ### Added
