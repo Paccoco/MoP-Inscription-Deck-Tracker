@@ -1,6 +1,53 @@
 # Changelog
 
-All notable changes to the MoP Inscription Deck Tracker will be documented in this file.
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [2.0.0-alpha] - In Development
+
+### Added
+- **Modular Architecture**: Completely restructured codebase from monolithic to modular design
+  - **Why**: Improve code maintainability, readability, and testing by separating concerns
+  - **How**: Split 1669-line `server-auth.js` into logical modules with clear responsibilities
+  - **Where**: New `/src` directory structure with organized subdirectories
+  
+#### New Directory Structure:
+- `/src/utils/database.js` - Database connection and initialization (84 lines)
+- `/src/middleware/auth.js` - Authentication middleware and JWT utilities (27 lines) 
+- `/src/services/notifications.js` - Discord and Gotify notification services (105 lines)
+- `/src/utils/activity.js` - Activity logging utilities (15 lines)
+- `/src/routes/auth.js` - User authentication API routes (61 lines)
+- `/src/routes/cards.js` - Card management API routes (54 lines)
+- `/src/routes/admin.js` - Admin panel API routes (192 lines)
+- `/src/routes/decks.js` - Deck and notification management routes (139 lines)
+- `/src/routes/config.js` - Discord/Gotify configuration routes (92 lines)
+- `/src/routes/system.js` - System update and security routes (186 lines)
+- `/src/routes/profile.js` - User profile management routes (14 lines)
+- `/src/routes/announcements.js` - Public and user announcement routes (73 lines)
+
+**Total: 12 modular files with 1,222 lines** (down from 1 monolithic file with 1,669 lines)
+
+#### Benefits Achieved:
+- **Maintainability**: Each module has single responsibility principle (12 focused modules)
+- **Readability**: Code sections are logically organized and easier to navigate
+- **Testing**: Individual modules can be unit tested in isolation
+- **Collaboration**: Multiple developers can work on different modules simultaneously
+- **File Size**: Largest module is 192 lines (down from 1669-line monolith)
+- **Code Reduction**: 447 lines removed through deduplication and optimization
+
+### Changed
+- **Server Entry Point**: Updated `server.js` to use modular architecture
+  - **Why**: Clean separation between server configuration and business logic
+  - **How**: Import and register route modules instead of inline route definitions
+  - **Where**: Root `server.js` now acts as orchestrator for modular components
+
+### Technical Details
+- **Route Organization**: Express routers group related endpoints logically
+- **Dependency Management**: Clear import/export structure for shared utilities
+- **Error Handling**: Consistent error handling patterns across all modules
+- **Database Access**: Centralized database connection management
+- **Authentication**: Reusable auth middleware across protected routes
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).

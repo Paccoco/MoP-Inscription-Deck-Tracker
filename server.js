@@ -1,79 +1,61 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+
+// Import utilities and services
+const { initializeDatabase, ensureAdminExists } = require('./src/utils/database');
+const { initializeDiscordWebhook } = require('./src/services/notifications');
+
+// Import route modules
+const authRoutes = require('./src/routes/auth');
+const cardRoutes = require('./src/routes/cards');
+const adminRoutes = require('./src/routes/admin');
+const deckRoutes = require('./src/routes/decks');
+const configRoutes = require('./src/routes/config');
+const systemRoutes = require('./src/routes/system');
+const profileRoutes = require('./src/routes/profile');
+const announcementRoutes = require('./src/routes/announcements');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Enable CORS for development
+// Initialize database connection
+initializeDatabase();
+
+// Initialize services
+initializeDiscordWebhook();
+
+// Ensure admin user exists on startup
+ensureAdminExists();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// SQLite database setup
-const dbPath = path.join(__dirname, 'cards.db');
-const db = new sqlite3.Database(dbPath);
+// Serve static files from React build directory
+app.use(express.static(path.join(__dirname, 'client/build')));
 
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS cards (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    card_name TEXT NOT NULL,
-    owner TEXT NOT NULL,
-    deck TEXT NOT NULL
-  )`);
-});
+// API Routes
+app.use('/api', authRoutes);
+app.use('/api', adminRoutes);
+app.use('/api', deckRoutes);
+app.use('/api', configRoutes);
+app.use('/api', systemRoutes);
+app.use('/api', profileRoutes);
+app.use('/api', announcementRoutes);
+app.use('/api/cards', cardRoutes);
 
-// API route: Get all cards
-app.get('/api/cards', (req, res) => {
-  db.all('SELECT * FROM cards', [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
-});
-
-// API route: Add a card
-app.post('/api/cards', (req, res) => {
-  const { card_name, owner, deck } = req.body;
-  if (!card_name || !owner || !deck) {
-    return res.status(400).json({ error: 'Missing fields' });
+// Catch-all handler for React routing - MUST be last
+app.get('*', (req, res, next) => {
+  // Skip API routes
+  if (req.originalUrl.startsWith('/api')) {
+    return next();
   }
-  db.run(
-    'INSERT INTO cards (card_name, owner, deck) VALUES (?, ?, ?)',
-    [card_name, owner, deck],
-    function (err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      res.json({ id: this.lastID, card_name, owner, deck });
-    }
-  );
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
 });
 
-// API route: Delete a card
-app.delete('/api/cards/:id', (req, res) => {
-  const { id } = req.params;
-  db.run('DELETE FROM cards WHERE id = ?', [id], function (err) {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json({ deleted: this.changes });
-  });
-});
-
-// Serve React static files
-app.use(express.static(path.join(__dirname, 'client', 'build')));
-
-// Fallback to React for any non-API route
-app.use((req, res, next) => {
-  if (!req.path.startsWith('/api')) {
-    res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
-  } else {
-    next();
-  }
-});
-
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`MoP Card Tracker Server v2.0.0-alpha running on port ${PORT}`);
 });
