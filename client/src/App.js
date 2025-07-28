@@ -68,7 +68,7 @@ function ActivityLog({ isAdmin, setShowPage }) {
         setLoading(false);
       })
       .catch(() => {
-        setError('Failed to load activity log from server.');
+        setErrorMsg('Failed to load activity log from server.');
         setLoading(false);
       });
   }, [isAdmin]);

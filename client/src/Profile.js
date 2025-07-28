@@ -37,7 +37,7 @@ function Profile({ setShowPage }) {
   }, [selectedTheme]);
 
   if (loading || autoLoading) return <div>Loading profile...</div>;
-  if (error || autoError) return <div className="error">{error || autoError}</div>;
+  if (autoError) return <div className="error">{autoError}</div>;
   if (sessionExpired) {
     const handleLogin = () => {
       localStorage.removeItem('token');
