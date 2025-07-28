@@ -149,3 +149,23 @@
     - Confirmation dialog before proceeding with updates
     - Automatic refresh of dependency status after successful updates
     - Comprehensive error handling and user feedback
+
+- ✅ **Database Corruption Resolution and Documentation Cleanup (2025-07-28)**
+  - **Database Recovery:** Resolved critical SQLite corruption causing admin panel failures
+    - Fixed "SQLITE_CORRUPT: database disk image is malformed" error
+    - Restored database from backup (cards.db.backup.20250727_235025)
+    - Implemented proper file permissions (paccoco:mop-tracker with 664/775)
+    - Resolved readonly database access issues
+  - **Server Restoration:** Successfully restored server functionality
+    - Fixed PM2 startup failures with fallback to nohup
+    - Verified admin panel loading and database operations
+    - Server now running on port 5000 with full functionality
+  - **Documentation Generalization:** Updated all documentation to remove server-specific details
+    - CHANGELOG.md: Removed specific backup filenames and user references
+    - HOWTOUPDATE.md: Generalized all paths (/opt/mop-card-tracker → /path/to/app)
+    - README.md: Updated production management with generic placeholders
+    - Removed redundant power-restart.sh script
+    - Enhanced troubleshooting procedures for production environments
+  - **Version Control:** Committed and pushed v1.2.5 changes to main branch
+    - Fixed git email configuration for GitHub privacy compliance
+    - All fixes and documentation updates successfully deployed
