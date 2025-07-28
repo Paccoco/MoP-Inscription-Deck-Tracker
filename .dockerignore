@@ -1,0 +1,113 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Client dependencies and build artifacts (will be built in Docker)
+client/node_modules/
+client/build/
+client/npm-debug.log*
+
+# Environment files (use Docker environment variables instead)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
+nohup.out
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Database files (will be in volumes)
+*.db
+*.db-shm
+*.db-wal
+database/
+data/
+
+# Backup files
+*.backup
+backups/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+docs/
+*.md
+CHANGELOG.md
+PLANNING.md
+
+# CI/CD
+.github/
+.travis.yml
+.jenkins/
+.circleci/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Temporary files
+.tmp/
+.cache/
+.sass-cache/
+
+# Security and configuration files that should not be in containers
+*.pem
+*.key
+*.cert
+*.crt
+security-scan.json
+
+# Scripts and utilities not needed in production
+scripts/
+update-admin-password.js
+power-restart.sh
+start-card-tracker.sh
+
+# Docker files (not needed inside the container)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Test files
+tests/
+test/
+*.test.js
+*.spec.js
+
+# Development configuration
+eslint.config.*
+jest.config.*
+babel.config.*

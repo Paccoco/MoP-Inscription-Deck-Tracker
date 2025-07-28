@@ -54,6 +54,38 @@ app.use(sanitizeInput);
 // Serve static files from React build directory
 app.use(express.static(path.join(__dirname, 'client/build')));
 
+// Health check endpoint for Docker
+app.get('/api/health', (req, res) => {
+  // Check database connection
+  const { db } = require('./src/utils/database-adapter');
+  
+  db.get('SELECT 1 as health', [], (err, row) => {
+    if (err) {
+      log.error('Health check failed - database error', { error: err.message });
+      return res.status(503).json({ 
+        status: 'unhealthy', 
+        error: 'Database connection failed',
+        timestamp: new Date().toISOString() 
+      });
+    }
+    
+    if (row && row.health === 1) {
+      res.status(200).json({ 
+        status: 'healthy', 
+        database: 'connected',
+        version: '2.0.0-alpha.1',
+        timestamp: new Date().toISOString() 
+      });
+    } else {
+      res.status(503).json({ 
+        status: 'unhealthy', 
+        error: 'Database query failed',
+        timestamp: new Date().toISOString() 
+      });
+    }
+  });
+});
+
 // API Routes with specific rate limiting
 app.use('/api/auth', rateLimits.auth, authRoutes);
 app.use('/api/admin', rateLimits.admin, adminRoutes);

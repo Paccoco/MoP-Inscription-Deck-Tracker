@@ -17,6 +17,19 @@ client/build/
 # Logs
 *.log
 server.log
+logs/
+app.log
+error.log
+
+# Docker volumes and runtime data
+postgres_data/
+app_logs/
+app_backups/
+
+# Backup files
+backups/*.sql
+backups/*.tar.gz
+*.backup
 
 # OS files
 .DS_Store
