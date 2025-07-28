@@ -4,6 +4,11 @@ const cors = require('cors');
 const path = require('path');
 const log = require('./src/utils/logger');
 
+// Import security middleware
+const { securityHeaders, corsOptions, corsOptionsDev } = require('./src/middleware/security');
+const rateLimits = require('./src/middleware/rateLimiting');
+const { sanitizeInput } = require('./src/middleware/validation');
+
 // Import utilities and services
 const { initializeDatabase, ensureAdminExists } = require('./src/utils/database-adapter');
 const { initializeDiscordWebhook } = require('./src/services/notifications');
@@ -21,31 +26,43 @@ const announcementRoutes = require('./src/routes/announcements');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize database connection
+// Initialize database connection FIRST
 initializeDatabase();
 
-// Initialize services
+// Initialize services AFTER database is ready
 initializeDiscordWebhook();
 
 // Ensure admin user exists on startup
 ensureAdminExists();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Security middleware - MUST be first
+app.use(securityHeaders);
+
+// CORS configuration - environment dependent
+const corsConfig = process.env.NODE_ENV === 'production' ? corsOptions : corsOptionsDev;
+app.use(cors(corsConfig));
+
+// General rate limiting for all requests
+app.use(rateLimits.general);
+
+// Body parsing middleware
+app.use(express.json({ limit: '10mb' })); // Limit payload size
+
+// Input sanitization middleware
+app.use(sanitizeInput);
 
 // Serve static files from React build directory
 app.use(express.static(path.join(__dirname, 'client/build')));
 
-// API Routes
-app.use('/api', authRoutes);
-app.use('/api', adminRoutes);
-app.use('/api', deckRoutes);
-app.use('/api', configRoutes);
-app.use('/api', systemRoutes);
-app.use('/api', profileRoutes);
-app.use('/api', announcementRoutes);
-app.use('/api/cards', cardRoutes);
+// API Routes with specific rate limiting
+app.use('/api/auth', rateLimits.auth, authRoutes);
+app.use('/api/admin', rateLimits.admin, adminRoutes);
+app.use('/api/decks', rateLimits.api, deckRoutes);
+app.use('/api/config', rateLimits.admin, configRoutes);
+app.use('/api/system', rateLimits.api, systemRoutes);
+app.use('/api/profile', rateLimits.api, profileRoutes);
+app.use('/api/announcements', rateLimits.api, announcementRoutes);
+app.use('/api/cards', rateLimits.api, cardRoutes);
 
 // Catch-all handler for React routing - MUST be last
 app.get('*', (req, res, next) => {

@@ -1,14 +1,19 @@
 const fetch = require('node-fetch');
-const db = require('../utils/database-adapter');
 const log = require('../utils/logger');
 
 // Discord webhook configuration
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';
 let discordWebhookUrl = DISCORD_WEBHOOK_URL;
+let dbAdapter;
 
 // Initialize Discord webhook table - PostgreSQL compatible
 async function initializeDiscordWebhook() {
   try {
+    // Import database adapter only when needed to avoid circular dependencies
+    if (!dbAdapter) {
+      dbAdapter = require('../utils/database-adapter');
+    }
+    
     // Check if using PostgreSQL (which already has discord_config table) or SQLite
     const dbType = process.env.DB_TYPE || 'sqlite';
     
@@ -17,37 +22,43 @@ async function initializeDiscordWebhook() {
       await loadDiscordWebhookUrl();
     } else {
       // SQLite fallback - create table if needed
-      await db.run(`CREATE TABLE IF NOT EXISTS discord_webhook (
+      await dbAdapter.db.run(`CREATE TABLE IF NOT EXISTS discord_webhook (
         id INTEGER PRIMARY KEY CHECK (id = 1),
         url TEXT
       )`);
       await loadDiscordWebhookUrl();
     }
   } catch (err) {
-    log.error('Error initializing Discord webhook', err);
+    log.error('Error initializing Discord webhook', { error: err.message });
   }
 }
 
 // Load webhook from database - adapter compatible
 async function loadDiscordWebhookUrl() {
   try {
+    if (!dbAdapter) {
+      dbAdapter = require('../utils/database-adapter');
+    }
+    
     const dbType = process.env.DB_TYPE || 'sqlite';
     
     if (dbType === 'postgresql') {
       // Use PostgreSQL discord_config table
-      const rows = await db.query('SELECT webhook_url FROM discord_config WHERE enabled = true LIMIT 1');
+      const rows = await dbAdapter.query('SELECT webhook_url FROM discord_config WHERE enabled = true LIMIT 1');
       if (rows.length > 0 && rows[0].webhook_url) {
         discordWebhookUrl = rows[0].webhook_url;
       }
     } else {
       // Use SQLite discord_webhook table
-      const row = await db.get('SELECT url FROM discord_webhook WHERE id = 1');
-      if (row && row.url) {
-        discordWebhookUrl = row.url;
-      }
+      dbAdapter.db.get('SELECT url FROM discord_webhook WHERE id = 1', [], (err, row) => {
+        if (!err && row && row.url) {
+          discordWebhookUrl = row.url;
+          log.info('Discord webhook URL loaded from database');
+        }
+      });
     }
   } catch (err) {
-    log.error('Error loading Discord webhook URL', err);
+    log.error('Error loading Discord webhook URL', { error: err.message });
   }
 }
 

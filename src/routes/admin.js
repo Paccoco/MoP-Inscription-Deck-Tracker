@@ -4,77 +4,231 @@ const { auth, requireAdmin } = require('../middleware/auth');
 const { db, query } = require('../utils/database-adapter');
 const { logActivity } = require('../utils/activity');
 const { sendDiscordNotification } = require('../services/notifications');
+const { validate, schemas } = require('../middleware/validation');
+const rateLimits = require('../middleware/rateLimiting');
 const log = require('../utils/logger');
 
 const router = express.Router();
 
 // Admin endpoint to approve users
-router.post('/admin/approve', auth, requireAdmin, (req, res) => {
-  const { userId } = req.body;
-  db.run('UPDATE users SET approved = 1 WHERE id = ?', [userId], function (err) {
-    if (err) return res.status(500).json({ error: 'Failed to approve user.' });
-    logActivity(req.user.username, `Approved user ID: ${userId}`, new Date().toISOString());
-    res.json({ success: true });
-  });
-});
+router.post('/admin/approve', 
+  auth, 
+  requireAdmin, 
+  validate(schemas.approveUser, 'body'),
+  (req, res) => {
+    const { userId } = req.body;
+    
+    log.info('User approval attempt', { 
+      targetUserId: userId, 
+      adminId: req.user.id, 
+      adminUsername: req.user.username,
+      ip: req.ip 
+    });
+    
+    db.run('UPDATE users SET approved = 1 WHERE id = ?', [userId], function (err) {
+      if (err) {
+        log.error('Failed to approve user', { 
+          error: err.message, 
+          targetUserId: userId, 
+          adminUsername: req.user.username 
+        });
+        return res.status(500).json({ error: 'Failed to approve user.' });
+      }
+      
+      log.info('User approved successfully', { 
+        targetUserId: userId, 
+        adminUsername: req.user.username,
+        changesCount: this.changes 
+      });
+      
+      logActivity(req.user.username, `Approved user ID: ${userId}`, new Date().toISOString());
+      res.json({ success: true });
+    });
+  }
+);
 
 // Admin endpoint to list pending users
 router.get('/admin/pending', auth, requireAdmin, (req, res) => {
+  log.info('Pending users list requested', { 
+    adminUsername: req.user.username,
+    ip: req.ip 
+  });
+  
   db.all('SELECT id, username FROM users WHERE approved = 0', [], (err, rows) => {
-    if (err) return res.status(500).json({ error: 'Failed to fetch pending users.' });
+    if (err) {
+      log.error('Failed to fetch pending users', { error: err.message });
+      return res.status(500).json({ error: 'Failed to fetch pending users.' });
+    }
     res.json(rows);
   });
 });
 
 // Admin endpoint to list all users
 router.get('/admin/users', auth, requireAdmin, (req, res) => {
+  log.info('All users list requested', { 
+    adminUsername: req.user.username,
+    ip: req.ip 
+  });
+  
   db.all('SELECT * FROM users', [], (err, rows) => {
-    if (err) return res.status(500).json({ error: 'Failed to fetch users.' });
+    if (err) {
+      log.error('Failed to fetch users', { error: err.message });
+      return res.status(500).json({ error: 'Failed to fetch users.' });
+    }
     res.json(rows);
   });
 });
 
 // Admin: Role management endpoints
-router.post('/admin/roles', auth, requireAdmin, (req, res) => {
-  const { userId, isAdmin } = req.body;
-  if (typeof isAdmin !== 'boolean') {
-    return res.status(400).json({ error: 'isAdmin must be a boolean value.' });
-  }
-  db.run('UPDATE users SET is_admin = ? WHERE id = ?', [isAdmin ? 1 : 0, userId], function (err) {
-    if (err) return res.status(500).json({ error: 'Failed to update user role.' });
-    logActivity(req.user.username, `Updated user ${userId} admin status to: ${isAdmin}`, new Date().toISOString());
-    res.json({ success: true });
-  });
-});
-
-// Admin: Delete user
-router.delete('/admin/users/:userId', auth, requireAdmin, (req, res) => {
-  const { userId } = req.params;
-  db.run('DELETE FROM users WHERE id = ?', [userId], function (err) {
-    if (err) return res.status(500).json({ error: 'Failed to delete user.' });
-    logActivity(req.user.username, `Deleted user ID: ${userId}`, new Date().toISOString());
-    res.json({ success: true });
-  });
-});
-
-// Admin: Reset user password
-router.post('/admin/reset-password', auth, requireAdmin, async (req, res) => {
-  const { userId, newPassword } = req.body;
-  if (!newPassword || newPassword.length < 6) {
-    return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
-  }
-  
-  try {
-    const hash = await bcrypt.hash(newPassword, 10);
-    db.run('UPDATE users SET password = ? WHERE id = ?', [hash, userId], function (err) {
-      if (err) return res.status(500).json({ error: 'Failed to reset password.' });
-      logActivity(req.user.username, `Reset password for user ID: ${userId}`, new Date().toISOString());
+router.post('/admin/roles', 
+  auth, 
+  requireAdmin, 
+  validate(schemas.updateUserRole, 'body'),
+  (req, res) => {
+    const { userId, isAdmin } = req.body;
+    
+    log.info('User role update attempt', { 
+      targetUserId: userId, 
+      newAdminStatus: isAdmin, 
+      adminUsername: req.user.username,
+      ip: req.ip 
+    });
+    
+    db.run('UPDATE users SET is_admin = ? WHERE id = ?', [isAdmin ? 1 : 0, userId], function (err) {
+      if (err) {
+        log.error('Failed to update user role', { 
+          error: err.message, 
+          targetUserId: userId, 
+          adminUsername: req.user.username 
+        });
+        return res.status(500).json({ error: 'Failed to update user role.' });
+      }
+      
+      log.info('User role updated successfully', { 
+        targetUserId: userId, 
+        newAdminStatus: isAdmin, 
+        adminUsername: req.user.username,
+        changesCount: this.changes 
+      });
+      
+      logActivity(req.user.username, `Updated user ${userId} admin status to: ${isAdmin}`, new Date().toISOString());
       res.json({ success: true });
     });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to hash password.' });
   }
-});
+);
+
+// Admin: Delete user
+router.delete('/admin/users/:userId', 
+  auth, 
+  requireAdmin, 
+  validate(schemas.userIdParam, 'params'),
+  (req, res) => {
+    const { userId } = req.params;
+    
+    log.warn('User deletion attempt', { 
+      targetUserId: userId, 
+      adminUsername: req.user.username,
+      ip: req.ip 
+    });
+    
+    // Prevent deletion of the last admin user
+    db.get('SELECT COUNT(*) as adminCount FROM users WHERE is_admin = 1', [], (err, result) => {
+      if (err) {
+        log.error('Failed to check admin count', { error: err.message });
+        return res.status(500).json({ error: 'Database error occurred.' });
+      }
+      
+      // Check if the user being deleted is an admin
+      db.get('SELECT is_admin FROM users WHERE id = ?', [userId], (err, user) => {
+        if (err) {
+          log.error('Failed to check user admin status', { error: err.message, targetUserId: userId });
+          return res.status(500).json({ error: 'Database error occurred.' });
+        }
+        
+        if (!user) {
+          log.warn('Attempt to delete non-existent user', { targetUserId: userId, adminUsername: req.user.username });
+          return res.status(404).json({ error: 'User not found.' });
+        }
+        
+        // Prevent deletion of last admin
+        if (user.is_admin && result.adminCount <= 1) {
+          log.warn('Attempt to delete last admin user', { 
+            targetUserId: userId, 
+            adminUsername: req.user.username 
+          });
+          return res.status(400).json({ error: 'Cannot delete the last admin user.' });
+        }
+        
+        db.run('DELETE FROM users WHERE id = ?', [userId], function (err) {
+          if (err) {
+            log.error('Failed to delete user', { 
+              error: err.message, 
+              targetUserId: userId, 
+              adminUsername: req.user.username 
+            });
+            return res.status(500).json({ error: 'Failed to delete user.' });
+          }
+          
+          log.warn('User deleted successfully', { 
+            targetUserId: userId, 
+            adminUsername: req.user.username,
+            changesCount: this.changes 
+          });
+          
+          logActivity(req.user.username, `Deleted user ID: ${userId}`, new Date().toISOString());
+          res.json({ success: true });
+        });
+      });
+    });
+  }
+);
+
+// Admin: Reset user password
+router.post('/admin/reset-password', 
+  auth, 
+  requireAdmin, 
+  rateLimits.passwordReset,
+  validate(schemas.resetPassword, 'body'),
+  async (req, res) => {
+    const { userId, newPassword } = req.body;
+    
+    log.warn('Password reset attempt', { 
+      targetUserId: userId, 
+      adminUsername: req.user.username,
+      ip: req.ip 
+    });
+    
+    try {
+      const hash = await bcrypt.hash(newPassword, 10);
+      db.run('UPDATE users SET password = ? WHERE id = ?', [hash, userId], function (err) {
+        if (err) {
+          log.error('Failed to reset password', { 
+            error: err.message, 
+            targetUserId: userId, 
+            adminUsername: req.user.username 
+          });
+          return res.status(500).json({ error: 'Failed to reset password.' });
+        }
+        
+        log.warn('Password reset successfully', { 
+          targetUserId: userId, 
+          adminUsername: req.user.username,
+          changesCount: this.changes 
+        });
+        
+        logActivity(req.user.username, `Reset password for user ID: ${userId}`, new Date().toISOString());
+        res.json({ success: true });
+      });
+    } catch (err) {
+      log.error('Failed to hash password during reset', { 
+        error: err.message, 
+        targetUserId: userId, 
+        adminUsername: req.user.username 
+      });
+      res.status(500).json({ error: 'Failed to hash password.' });
+    }
+  }
+);
 
 // Admin: Announcement management
 router.get('/admin/announcement', auth, requireAdmin, async (req, res) => {
