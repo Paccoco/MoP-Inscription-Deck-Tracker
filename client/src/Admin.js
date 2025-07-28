@@ -4,6 +4,9 @@ import DiscordWebhookConfig from './DiscordWebhookConfig';
 import ExportImport from './ExportImport';
 import { useAutoRefresh } from './hooks';
 import AdminAnnouncement from './AdminAnnouncement';
+import UserManagement from './components/UserManagement';
+import DeckManagement from './components/DeckManagement';
+import SecurityDashboard from './components/SecurityDashboard';
 
 function Admin({ setShowPage }) {
   const [users, setUsers] = useState([]);
@@ -351,182 +354,35 @@ function Admin({ setShowPage }) {
           )}
         </div>
       )}
-      <div className="table-card">
-        <h3>Pending Users</h3>
-        <ul>
-          {pending.length === 0 && <li>No pending users.</li>}
-          {pending.map(u => (
-            <li key={u.id}>
-              {u.username} <button onClick={() => approveUser(u.id)}>Approve</button>
-            </li>
-          ))}
-        </ul>
-        <h3>All Users</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Username</th>
-              <th>Admin</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map(u => (
-              <tr key={u.id}>
-                <td>{u.id}</td>
-                <td>{u.username}</td>
-                <td>{u.is_admin ? 'Yes' : 'No'}</td>
-                <td>
-                  <button onClick={() => handleRemoveUser(u.username)} style={{ color: 'red' }}>Remove</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <h3>Complete Deck</h3>
-        <form onSubmit={handleCompleteDeck}>
-          <select value={selectedDeckId} onChange={e => setSelectedDeckId(e.target.value)} required>
-            <option value="">Select Completed Deck</option>
-            {completedDecks.map(deck => (
-              <option key={deck.id} value={deck.id}>
-                {deck.deck} (Completed: {new Date(deck.completed_at).toLocaleDateString()})
-              </option>
-            ))}
-          </select>
-          <select value={disposition} onChange={e => setDisposition(e.target.value)} required>
-            <option value="fulfilled">Fulfill Deck Request</option>
-            <option value="sold">Sell Deck</option>
-          </select>
-          {disposition === 'sold' && (
-            <>
-              <input type="number" placeholder="Sale Price" value={salePrice} onChange={e => setSalePrice(e.target.value)} required />
-              <input placeholder="Recipient (buyer)" value={recipient} onChange={e => setRecipient(e.target.value)} />
-            </>
-          )}
-          <button type="submit">Complete Deck</button>
-        </form>
-        {payouts && (
-          <div>
-            <h4>Payouts</h4>
-            <ul>
-              {payouts.map(p => (
-                <li key={p.owner}>{p.owner}: {p.payout} gold</li>
-              ))}
-            </ul>
-            <div>Guild Cut: {guildCut} gold</div>
-          </div>
-        )}
-        <h3>Completed Decks</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Deck</th>
-              <th>Contributors</th>
-              <th>Completed At</th>
-              <th>Disposition</th>
-              <th>Recipient</th>
-            </tr>
-          </thead>
-          <tbody>
-            {completedDecks.length === 0 ? (
-              <tr><td colSpan="5">No completed decks found.</td></tr>
-            ) : completedDecks.map(deck => (
-              <tr key={deck.id}>
-                <td>{deck.deck}</td>
-                <td>{JSON.parse(deck.contributors).map(c => c.owner).join(', ')}</td>
-                <td>{new Date(deck.completed_at).toLocaleString()}</td>
-                <td>{deck.disposition}</td>
-                <td>{deck.recipient || 'N/A'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="security-dashboard" style={{ margin: '2em 0', padding: '1em', border: '1px solid #ccc', borderRadius: 8 }}>
-        <h2>Security Dashboard</h2>
-        {securityError && <div className="error">{securityError}</div>}
-        <div>
-          <h3>Security Scan Results</h3>
-          {securityScan ? (
-            <div>
-              <div><strong>npm audit:</strong> {securityScan.npm_audit.summary.total_issues} issues found <span style={{ color: '#888' }}>({new Date(securityScan.npm_audit.date).toLocaleString()})</span></div>
-              <div><strong>ggshield:</strong> {securityScan.ggshield.summary.total_issues} issues found <span style={{ color: '#888' }}>({new Date(securityScan.ggshield.date).toLocaleString()})</span></div>
-              <button onClick={() => window.open('/security-scan.json', '_blank')}>Export Security Scan JSON</button>
-              <a href="https://github.com/Paccoco/MoP-Inscription-Deck-Tracker/actions?query=workflow%3A%22Security+%26+Dependency+Audit%22" target="_blank" rel="noopener noreferrer" style={{ marginLeft: 16 }}>View CI Logs</a>
-            </div>
-          ) : <div>Loading security scan...</div>}
-        </div>
-        <div>
-          <h3>Dependency Status</h3>
-          {dependencyStatus ? (
-            <div>
-              <div><strong>Total Dependencies:</strong> {dependencyStatus.total_dependencies}</div>
-              <div><strong>Outdated:</strong> {dependencyStatus.outdated}</div>
-              <div><strong>Up to Date:</strong> {dependencyStatus.up_to_date}</div>
-              {dependencyStatus.details && dependencyStatus.details.length > 0 && (
-                <ul>
-                  {dependencyStatus.details.map((dep, i) => (
-                    <li key={i}>
-                      {dep.package}: {dep.current_version} → {dep.latest_version} ({dep.status})
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {dependencyStatus.outdated > 0 && (
-                <div style={{ marginTop: '1em' }}>
-                  <button 
-                    onClick={handleUpdateDependencies} 
-                    disabled={dependencyUpdateLoading}
-                    style={{ 
-                      backgroundColor: '#ff6b35', 
-                      color: 'white', 
-                      border: 'none', 
-                      padding: '10px 15px', 
-                      borderRadius: 4, 
-                      cursor: dependencyUpdateLoading ? 'not-allowed' : 'pointer',
-                      marginRight: '10px'
-                    }}
-                  >
-                    {dependencyUpdateLoading ? 'Updating Dependencies...' : `Update ${dependencyStatus.outdated} Outdated Package${dependencyStatus.outdated !== 1 ? 's' : ''}`}
-                  </button>
-                  {dependencyUpdateResult && (
-                    <span style={{ 
-                      color: dependencyUpdateResult.success ? 'green' : 'red',
-                      fontSize: '0.9em'
-                    }}>
-                      {dependencyUpdateResult.success ? '✅ Update completed!' : `❌ ${dependencyUpdateResult.error}`}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : <div>Loading dependency status...</div>}
-        </div>
-        <div>
-          <h3>Security & System Notification History</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th>Message</th>
-                <th>User</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {notificationHistory.length === 0 ? (
-                <tr><td colSpan={3}>No notifications found.</td></tr>
-              ) : notificationHistory.map((n, i) => (
-                <tr key={i}>
-                  <td>{n.message}</td>
-                  <td>{n.username}</td>
-                  <td>{n.created_at ? new Date(n.created_at).toLocaleString() : 'Unknown date'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <UserManagement
+        pending={pending}
+        users={users}
+        onApproveUser={approveUser}
+        onRemoveUser={handleRemoveUser}
+      />
+      <DeckManagement
+        completedDecks={completedDecks}
+        selectedDeckId={selectedDeckId}
+        setSelectedDeckId={setSelectedDeckId}
+        disposition={disposition}
+        setDisposition={setDisposition}
+        salePrice={salePrice}
+        setSalePrice={setSalePrice}
+        recipient={recipient}
+        setRecipient={setRecipient}
+        payouts={payouts}
+        guildCut={guildCut}
+        onCompleteDeck={handleCompleteDeck}
+      />
+      <SecurityDashboard
+        securityScan={securityScan}
+        dependencyStatus={dependencyStatus}
+        securityError={securityError}
+        dependencyUpdateLoading={dependencyUpdateLoading}
+        dependencyUpdateResult={dependencyUpdateResult}
+        handleUpdateDependencies={handleUpdateDependencies}
+        notificationHistory={notificationHistory}
+      />
       <div className="action-buttons">
         <h3>Discord Integration</h3>
         <DiscordWebhookConfig />

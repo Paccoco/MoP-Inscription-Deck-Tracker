@@ -1,11 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useAutoRefresh } from './hooks';
 
 function DeckRequests({ setShowPage }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const intervalRef = useRef();
 
   const fetchRequests = async () => {
     const res = await fetch('/api/deck-requests', {
@@ -13,7 +11,7 @@ function DeckRequests({ setShowPage }) {
     });
     if (res.status === 401) {
       localStorage.removeItem('token');
-      throw { response: { status: 401 } };
+      throw new Error('Session expired');
     }
     const data = await res.json();
     setRequests(Array.isArray(data) ? data : []);
@@ -38,8 +36,8 @@ function DeckRequests({ setShowPage }) {
       <h2>Deck Requests</h2>
       {loading || autoLoading ? (
         <p>Loading...</p>
-      ) : error || autoError ? (
-        <p style={{ color: 'red' }}>{error || autoError}</p>
+      ) : autoError ? (
+        <p style={{ color: 'red' }}>{autoError}</p>
       ) : requests.length === 0 ? (
         <p>No deck requests found.</p>
       ) : (

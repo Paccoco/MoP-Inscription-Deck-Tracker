@@ -9,104 +9,13 @@ import Notifications from './Notifications';
 import './Notifications.css';
 import { useAutoRefresh } from './hooks';
 import AnnouncementModal from './AnnouncementModal';
+import OnboardingModal from './OnboardingModal';
+import ActivityLog from './ActivityLog';
+import CompletedDecks from './CompletedDecks';
+import DeckRequests from './DeckRequests';
+import CardTracker from './components/CardTracker';
+import { CARD_NAMES, DECK_NAMES } from './constants/gameData';
 import { jwtDecode } from 'jwt-decode';
-
-function OnboardingModal({ show, onClose }) {
-  if (!show) return null;
-  return (
-    <div className="onboarding-modal" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9999 }}>
-      <div style={{ background: '#23272f', color: '#c9e7c9', maxWidth: 400, margin: '80px auto', padding: 32, borderRadius: 12, boxShadow: '0 2px 16px #0008' }}>
-        <h2>Welcome to MoP Card Tracker!</h2>
-        <ul>
-          <li>Track your cards and decks</li>
-          <li>Request decks and get notified</li>
-          <li>Export/import your collection</li>
-          <li>Customize your theme</li>
-          <li>Check analytics and history</li>
-        </ul>
-        <button onClick={onClose} style={{ marginTop: 16 }}>Got it!</button>
-      </div>
-    </div>
-  );
-}
-
-// Mist of Pandaria Inscription Card Names
-const CARD_NAMES = [
-  'Ace of Crane', 'Two of Crane', 'Three of Crane', 'Four of Crane', 'Five of Crane', 'Six of Crane', 'Seven of Crane', 'Eight of Crane',
-  'Ace of Ox', 'Two of Ox', 'Three of Ox', 'Four of Ox', 'Five of Ox', 'Six of Ox', 'Seven of Ox', 'Eight of Ox',
-  'Ace of Serpent', 'Two of Serpent', 'Three of Serpent', 'Four of Serpent', 'Five of Serpent', 'Six of Serpent', 'Seven of Serpent', 'Eight of Serpent',
-  'Ace of Tiger', 'Two of Tiger', 'Three of Tiger', 'Four of Tiger', 'Five of Tiger', 'Six of Tiger', 'Seven of Tiger', 'Eight of Tiger'
-];
-
-// Mist of Pandaria Decks
-const DECK_NAMES = ['Crane Deck', 'Ox Deck', 'Serpent Deck', 'Tiger Deck'];
-
-// MoP Classic trinket IDs
-const deckTrinketClassicMap = {
-  'Crane Deck': { name: "Relic of Chi Ji", id: 79330 },
-  'Ox Deck': { name: "Relic of Niuzao", id: 79329 },
-  'Serpent Deck': { name: "Relic of Yu'lon", id: 79331 },
-  'Tiger Deck': { name: "Relic of Xuen", id: 79328 }
-};
-
-function ActivityLog({ isAdmin, setShowPage }) {
-  const [log, setLog] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const endpoint = isAdmin ? '/api/activity/all' : '/api/activity';
-    const token = localStorage.getItem('token');
-    axios.get(endpoint, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => {
-        // Defensive: only set log if response is an array
-        if (Array.isArray(res.data)) {
-          setLog(res.data);
-        } else {
-          setLog([]);
-          console.error('No activity data received.');
-        }
-        setLoading(false);
-      })
-      .catch(() => {
-        setErrorMsg('Failed to load activity log from server.');
-        setLoading(false);
-      });
-  }, [isAdmin]);
-
-  if (loading) return <div>Loading activity log...</div>;
-  if (!Array.isArray(log) || log.length === 0) return <div>No activity to display.</div>;
-  return (
-    <div className="activity-log">
-      <h2>Activity Log {isAdmin ? '(All Users)' : ''}</h2>
-      <table className="activity-table">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Action</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          {log.map((entry, i) => {
-            let dateStr = entry.timestamp || entry.created_at;
-            let dateDisplay = '-';
-            if (dateStr) {
-              const dateObj = new Date(dateStr);
-              dateDisplay = isNaN(dateObj.getTime()) ? '-' : dateObj.toLocaleString();
-            }
-            return (
-              <tr key={i}>
-                <td>{entry.username || entry.user || '-'}</td>
-                <td>{entry.action || entry.message}</td>
-                <td>{dateDisplay}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 function App() {
   // All hooks at the top level
@@ -300,19 +209,7 @@ function App() {
     });
     return deckStatus;
   }
-  function getDeckCardCounts(cards) {
-    // Returns: { deck: { cardName: count } }
-    const result = {};
-    DECK_NAMES.forEach(deck => {
-      result[deck] = {};
-      const prefix = deck.split(' ')[0];
-      for (let i = 0; i < 8; i++) {
-        const cardName = CARD_NAMES.filter(name => name.includes(prefix))[i];
-        result[deck][cardName] = cards.filter(card => card.deck === deck && card.card_name === cardName).length;
-      }
-    });
-    return result;
-  }
+  
   const deckStatus = getDeckStatus(cards);
   // Note: deckCardCounts available if needed for future features
   // const deckCardCounts = getDeckCardCounts(cards);
@@ -375,83 +272,13 @@ function App() {
         <button onClick={() => setShowPage('activity')}>Activity Log</button>
       </nav>
       {showPage === 'main' && (
-        <div className="dashboard-card">
-          <h1 className="section-header">Inscription Card Tracker</h1>
-          <nav style={{ marginBottom: 16 }}>
-            <button onClick={() => setShowPage('mycards')}>My Cards</button>
-            <button onClick={() => setShowPage('allcards')}>All Cards</button>
-            <button onClick={() => setShowPage('completeddecks')}>Completed Decks</button>
-            <button onClick={() => setShowPage('requestdeck')}>Request Deck</button>
-            <button onClick={() => setShowPage('deckrequests')}>Deck Requests</button>
-            <button onClick={() => setShowPage('profile')}>Profile</button>
-            <button onClick={handleLogout}>Logout</button>
-            {auth.isAdmin && <button onClick={() => setShowPage('admin')}>Admin</button>}
-          </nav>
-          <h2>Deck Completion Status</h2>
-          <table style={{ margin: '16px auto', minWidth: 400 }}>
-            <thead>
-              <tr>
-                <th>Deck</th>
-                <th>Cards Owned</th>
-                <th>Missing Cards</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {DECK_NAMES.map(deck => (
-                <tr key={deck}>
-                  <td>
-                    <a
-                      href={`https://www.wowhead.com/mop-classic/item=${deckTrinketClassicMap[deck].id}`}
-                      data-wowhead={`item=${deckTrinketClassicMap[deck].id}&domain=mop-classic`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: '#c9e7c9', textDecoration: 'underline', cursor: 'pointer' }}
-                    >
-                      {deck}
-                    </a>
-                  </td>
-                  <td>{deckStatus[deck]?.owned || 0}/8</td>
-                  <td>{deckStatus[deck]?.missing?.join(', ') || '-'}</td>
-                  <td>{deckStatus[deck]?.complete ? 'Complete' : 'Incomplete'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {/* Improved grid layout for each deck showing card counts */}
-          <h2 style={{ marginTop: 32 }}>Your Cards by Deck</h2>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center', alignItems: 'flex-start' }}>
-            {DECK_NAMES.map(deck => {
-              const deckCards = CARD_NAMES.filter(name => name.includes(deck.split(' ')[0]));
-              return (
-                <div key={deck} style={{ border: '1px solid #444', borderRadius: 8, padding: 16, minWidth: 220, background: '#23272f', boxShadow: '0 2px 8px #0006', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <h3 style={{ textAlign: 'center', marginBottom: 12 }}>{deck}</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', width: '100%' }}>
-                    {deckCards.map(cardName => {
-                      const count = cards.filter(card => card.deck === deck && card.card_name === cardName).length;
-                      return (
-                        <div key={cardName} style={{
-                          padding: '8px 10px',
-                          borderRadius: 6,
-                          background: count > 0 ? '#145c2c' : '#444',
-                          color: count > 0 ? '#c9e7c9' : '#bbb',
-                          fontWeight: count > 0 ? 'bold' : 'normal',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          minWidth: 90
-                        }}>
-                          <span>{cardName}</span>
-                          <span style={{ marginLeft: 8, fontSize: '1.1em', fontWeight: 'bold' }}>{count > 0 ? count : 0}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <CardTracker 
+          cards={cards} 
+          deckStatus={deckStatus} 
+          setShowPage={setShowPage} 
+          handleLogout={handleLogout} 
+          auth={auth} 
+        />
       )}
       {showPage === 'admin' && (auth.isAdmin ? <Admin setShowPage={setShowPage} /> : <div>Admin access only.</div>)}
       {showPage === 'mycards' && (
@@ -553,54 +380,7 @@ function App() {
           </table>
         </div>
       )}
-      {showPage === 'completeddecks' && (
-        <div style={{ maxWidth: 700, margin: 'auto', padding: 20 }}>
-          <h1>Completed Decks</h1>
-          <nav style={{ marginBottom: 16 }}>
-            <button onClick={() => setShowPage('main')}>Home</button>
-            <button onClick={() => setShowPage('mycards')}>My Cards</button>
-            <button onClick={() => setShowPage('allcards')}>All Cards</button>
-            <button onClick={handleLogout}>Logout</button>
-          </nav>
-          {completedDecks.length === 0 ? <p>No completed decks yet.</p> : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Deck</th>
-                  <th>Contributors</th>
-                  <th>Disposition</th>
-                  <th>Recipient</th>
-                  <th>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {completedDecks.map(deck => {
-                  const total = deck.contributors.length;
-                  const byOwner = {};
-                  deck.contributors.forEach(c => {
-                    byOwner[c.owner] = (byOwner[c.owner] || 0) + 1;
-                  });
-                  return (
-                    <tr key={deck.id}>
-                      <td>{deck.deck}</td>
-                      <td>
-                        <div>
-                          {Object.entries(byOwner).map(([owner, count]) => (
-                            <div key={owner}>{owner}: {count} card(s) ({((count/total)*100).toFixed(0)}%)</div>
-                          ))}
-                        </div>
-                      </td>
-                      <td>{deck.disposition}</td>
-                      <td>{deck.recipient || '-'}</td>
-                      <td>{new Date(deck.completed_at).toLocaleString()}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </div>
-      )}
+      {showPage === 'completeddecks' && <CompletedDecks setShowPage={setShowPage} />}
       {showPage === 'requestdeck' && (
         <div style={{ maxWidth: 500, margin: 'auto', padding: 20 }}>
           <h1>Request a Deck</h1>
@@ -667,45 +447,7 @@ function App() {
           )}
         </div>
       )}
-      {showPage === 'deckrequests' && (
-        <div style={{ maxWidth: 700, margin: 'auto', padding: 20 }}>
-          <h1>Deck Requests</h1>
-          <nav style={{ marginBottom: 16 }}>
-            <button onClick={() => setShowPage('main')}>Home</button>
-            <button onClick={() => setShowPage('requestdeck')}>Request Deck</button>
-            <button onClick={handleLogout}>Logout</button>
-          </nav>
-          {console.log('deckRequests', deckRequests)}
-          <table>
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Deck</th>
-                <th>Cards Contributed</th>
-                <th>Requested At</th>
-                <th>Status</th>
-                {auth.isAdmin && <th>Action</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {deckRequests.length === 0 ? (
-                <tr><td colSpan={auth.isAdmin ? 6 : 5} style={{ textAlign: 'center', color: '#888', fontStyle: 'italic' }}>No deck requests found.</td></tr>
-              ) : (
-                deckRequests.map(req => (
-                  <tr key={req.id}>
-                    <td>{req.username}</td>
-                    <td>{req.deck}{req.trinket ? ` (${req.trinket})` : ''}</td>
-                    <td>{req.contribution || '-'}</td>
-                    <td>{req.requested_at ? new Date(req.requested_at).toLocaleString() : '-'}</td>
-                    <td>{req.fulfilled ? `Fulfilled${req.fulfilled_at ? ' (' + new Date(req.fulfilled_at).toLocaleString() + ')' : ''}` : 'Pending'}</td>
-                    {auth.isAdmin && <td>-</td>}
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {showPage === 'deckrequests' && <DeckRequests setShowPage={setShowPage} />}
       {showPage === 'profile' && <Profile setShowPage={setShowPage} />}
       {showPage === 'notifications' && <Notifications setShowPage={setShowPage} />}
       {showPage === 'activity' && <ActivityLog isAdmin={auth.isAdmin} setShowPage={setShowPage} />}

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useAutoRefresh } from './hooks';
 
 function OnboardingModal({ setShowPage }) {
-  const [show, setShow] = useState(false);
   const [user, setUser] = useState(null);
 
   const fetchProfile = async () => {
@@ -12,17 +11,19 @@ function OnboardingModal({ setShowPage }) {
     });
     if (res.status === 401) {
       localStorage.removeItem('token');
-      throw { response: { status: 401 } };
+      throw new Error('Session expired');
     }
     const data = await res.json();
     setUser(data);
     return data;
   };
 
-  const { sessionExpired, loading, error } = useAutoRefresh(fetchProfile, 30000);
+  const { sessionExpired } = useAutoRefresh(fetchProfile, 30000);
 
   useEffect(() => {
-    if (user && user.showOnboarding) setShow(true);
+    if (user && user.showOnboarding) {
+      // Show onboarding logic can be added here
+    }
   }, [user]);
 
   if (sessionExpired) {

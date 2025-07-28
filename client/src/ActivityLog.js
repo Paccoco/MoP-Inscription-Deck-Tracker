@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAutoRefresh } from './hooks';
 
 function ActivityLog({ setShowPage }) {
@@ -11,7 +11,7 @@ function ActivityLog({ setShowPage }) {
     });
     if (res.status === 401) {
       localStorage.removeItem('token');
-      throw { response: { status: 401 } };
+      throw new Error('Session expired');
     }
     const data = await res.json();
     setActivity(Array.isArray(data) ? data : []);

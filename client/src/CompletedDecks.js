@@ -3,18 +3,25 @@ import { useAutoRefresh } from './hooks';
 
 function CompletedDecks() {
   const [decks, setDecks] = useState([]);
+  const [error, setError] = useState('');
   const fetchDecks = async () => {
-    const token = localStorage.getItem('token');
-    const res = await fetch('/api/completed-decks', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.status === 401) {
-      localStorage.removeItem('token');
-      throw new Error('Session expired');
+    try {
+      setError('');
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/completed-decks', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.status === 401) {
+        localStorage.removeItem('token');
+        throw new Error('Session expired');
+      }
+      const data = await res.json();
+      setDecks(Array.isArray(data) ? data : []);
+      return data;
+    } catch (err) {
+      setError(err.message);
+      throw err;
     }
-    const data = await res.json();
-    setDecks(Array.isArray(data) ? data : []);
-    return data;
   };
   const { sessionExpired } = useAutoRefresh(fetchDecks, 30000);
   if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
