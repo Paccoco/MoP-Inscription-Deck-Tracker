@@ -43,12 +43,33 @@ async function initializeDatabase() {
       throw new Error('Unable to connect to PostgreSQL database');
     }
 
+    // Check if database is already initialized
+    try {
+      const result = await pool.query("SELECT to_regclass('users') as exists");
+      if (result.rows[0].exists) {
+        console.log('✅ Database schema already exists, skipping initialization');
+        return pool;
+      }
+    } catch (err) {
+      // If query fails, database likely needs initialization
+      console.log('🔄 Database schema check failed, proceeding with initialization...');
+    }
+
     // Read and execute schema file
     const schemaPath = path.join(__dirname, '../../postgresql-schema.sql');
     if (fs.existsSync(schemaPath)) {
-      const schema = fs.readFileSync(schemaPath, 'utf8');
-      await pool.query(schema);
-      console.log('✅ Database schema initialized successfully');
+      try {
+        const schema = fs.readFileSync(schemaPath, 'utf8');
+        await pool.query(schema);
+        console.log('✅ Database schema initialized successfully');
+      } catch (err) {
+        // Handle "already exists" errors gracefully
+        if (err.code === '42710' || err.code === '42P07') {
+          console.log('✅ Database schema components already exist, continuing...');
+        } else {
+          throw err;
+        }
+      }
     } else {
       console.warn('⚠️ PostgreSQL schema file not found, skipping schema initialization');
     }
@@ -109,7 +130,11 @@ async function closeDatabase() {
 // Export the pool instance and utility functions
 module.exports = {
   db: pool,
-  query: (text, params) => pool.query(text, params),
+  query: async (text, params) => {
+    const result = await pool.query(text, params);
+    return result.rows; // Return just the rows array for consistency with SQLite
+  },
+  close: () => pool.end(), // Add close method for consistency
   initializeDatabase,
   ensureAdminExists,
   testConnection,

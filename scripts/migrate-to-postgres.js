@@ -3,6 +3,35 @@ require('dotenv').config();
 const sqlite3 = require('sqlite3').verbose();
 const { Pool } = require('pg');
 const path = require('path');
+const fs = require('fs');
+
+// Get command line arguments
+const args = process.argv.slice(2);
+const sourceDbArg = args.find(arg => arg.startsWith('--source='));
+const sourceDb = sourceDbArg ? sourceDbArg.split('=')[1] : 'cards.db';
+
+// Available databases
+const availableDatabases = {
+  'cards.db': './cards.db',
+  'cards.old.db': './cards.old.db', 
+  'client': './client/cards.db'
+};
+
+// Validate source database
+if (!availableDatabases[sourceDb] && !fs.existsSync(sourceDb)) {
+  console.error('❌ Invalid source database. Available options:');
+  Object.keys(availableDatabases).forEach(db => {
+    const dbPath = availableDatabases[db];
+    const exists = fs.existsSync(dbPath);
+    console.log(`  - ${db} (${dbPath}) ${exists ? '✅' : '❌ not found'}`);
+  });
+  console.log('\nUsage: node migrate-to-postgres.js --source=cards.db');
+  process.exit(1);
+}
+
+// Resolve database path
+const sqliteDbPath = availableDatabases[sourceDb] || sourceDb;
+console.log(`🔄 Using source database: ${sqliteDbPath}`);
 
 // PostgreSQL connection
 const pgPool = new Pool({
@@ -14,7 +43,6 @@ const pgPool = new Pool({
 });
 
 // SQLite connection
-const sqliteDbPath = path.join(__dirname, '../cards.db');
 const sqliteDb = new sqlite3.Database(sqliteDbPath);
 
 // Migration utilities
@@ -22,14 +50,82 @@ const util = require('util');
 const sqliteGet = util.promisify(sqliteDb.get.bind(sqliteDb));
 const sqliteAll = util.promisify(sqliteDb.all.bind(sqliteDb));
 
-async function migrateTables() {
-  console.log('🔄 Starting migration from SQLite to PostgreSQL...');
+// Function to check if table exists in SQLite
+async function tableExists(tableName) {
+  try {
+    const result = await sqliteGet(
+      "SELECT name FROM sqlite_master WHERE type='table' AND name=?", 
+      [tableName]
+    );
+    return !!result;
+  } catch (err) {
+    return false;
+  }
+}
+
+// Function to analyze source database
+async function analyzeDatabase() {
+  console.log('🔍 Analyzing source database...');
   
   try {
-    // Test PostgreSQL connection
-    const pgClient = await pgPool.connect();
-    console.log('✅ Connected to PostgreSQL');
-    pgClient.release();
+    // Get all tables
+    const tables = await sqliteAll("SELECT name FROM sqlite_master WHERE type='table'");
+    console.log(`📊 Found ${tables.length} tables: ${tables.map(t => t.name).join(', ')}`);
+    
+    // Count rows in main tables
+    const mainTables = ['users', 'cards', 'completed_decks', 'notifications', 'announcements'];
+    for (const table of mainTables) {
+      if (await tableExists(table)) {
+        const count = await sqliteGet(`SELECT COUNT(*) as count FROM ${table}`);
+        console.log(`   - ${table}: ${count.count} rows`);
+      }
+    }
+    
+    return tables.map(t => t.name);
+  } catch (err) {
+    console.error('❌ Error analyzing database:', err);
+    throw err;
+  }
+}
+
+// Improved table migration with existence checking
+async function migrateTable(tableName, uuidMap) {
+  try {
+    switch (tableName) {
+      case 'cards':
+        await migrateCards(uuidMap);
+        break;
+      case 'completed_decks':
+        await migrateCompletedDecks(uuidMap);
+        break;
+      case 'notifications':
+        await migrateNotifications(uuidMap);
+        break;
+      case 'announcements':
+        await migrateAnnouncements(uuidMap);
+        break;
+      case 'discord_webhook_configs':
+        await migrateDiscordConfigs(uuidMap);
+        break;
+      case 'gotify_configs':
+        await migrateGotifyConfigs(uuidMap);
+        break;
+      case 'deck_requests':
+        await migrateDeckRequests(uuidMap);
+        break;
+      case 'card_history':
+      case 'deck_history':
+      case 'deck_value_history':
+        console.log(`⚠️  Skipping history table ${tableName} - manual review needed`);
+        break;
+      default:
+        console.log(`⚠️  Unknown table ${tableName} - skipping`);
+    }
+  } catch (err) {
+    console.error(`❌ Error migrating ${tableName}:`, err.message);
+    throw err;
+  }
+}
 
     // 1. Migrate Users
     console.log('📦 Migrating users...');
