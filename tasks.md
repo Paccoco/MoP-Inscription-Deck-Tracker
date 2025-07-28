@@ -48,6 +48,18 @@
   - **Test Users:** Created testadmin/testadmin123 (admin) and testuser/testuser123 (regular user) for debugging
   - **Production Ready:** Database initialization script ready for production deployment
   - **Database Safety System:** Added comprehensive production database protection
+
+## 7. Fix Server Startup Failures
+- Investigate and resolve dependency issues causing server startup failures.
+- Fix database permission issues, especially with WAL mode files.
+- Update documentation and scripts to prevent similar issues in the future.
+- ✅ **RESOLVED: Server startup issues fixed (2025-07-28)**
+  - **Root Cause:** Missing dependencies (dotenv, iconv-lite) and database file permission issues
+  - **Solution:** Added dependency verification and database permission fixes to scripts
+  - **File Permissions:** Added proper handling for SQLite WAL mode files (cards.db-shm, cards.db-wal)
+  - **Documentation:** Updated HOWTOUPDATE.md and PRODUCTION-DEPLOYMENT.md with troubleshooting steps
+  - **Production Configuration:** Updated production server with proper JWT_SECRET and path configurations
+  - **Scripts:** Enhanced update.sh and install.sh with fix_database_permissions and verify_dependencies functions
     - Production-safe initialization script (`init-production-database.js`)
     - Database safety checker (`check-database-safety.sh`) 
     - Environment-aware initialization (no test users in production)

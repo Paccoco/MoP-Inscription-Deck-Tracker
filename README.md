@@ -381,9 +381,9 @@ journalctl -u cardtracker -f
 For production deployments using `deploy-production.sh`:
 ```bash
 # Application management (as the app user)
-sudo -u mop-tracker pm2 status
-sudo -u mop-tracker pm2 logs mop-card-tracker
-sudo -u mop-tracker pm2 restart mop-card-tracker
+sudo -u [app-user] pm2 status
+sudo -u [app-user] pm2 logs mop-card-tracker
+sudo -u [app-user] pm2 restart mop-card-tracker
 
 # Nginx management
 sudo systemctl status nginx
@@ -399,10 +399,10 @@ sudo ufw status                  # Check firewall status
 sudo ufw allow from [IP]         # Allow specific IP
 
 # Health monitoring
-sudo tail -f /opt/mop-card-tracker/logs/health.log
+sudo tail -f /path/to/app/logs/health.log
 
 # View admin credentials
-sudo cat /opt/mop-card-tracker/.env
+sudo cat /path/to/app/.env
 ```
 
 ## Discord & Gotify Integration
