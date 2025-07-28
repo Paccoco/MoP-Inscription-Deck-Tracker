@@ -4,9 +4,10 @@ const { auth } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Get all cards
+// Get all cards - optimized query with specific columns
 router.get('/', (req, res) => {
-  db.all('SELECT * FROM cards', [], (err, rows) => {
+  // Only select the columns we actually need
+  db.all('SELECT id, card_name, owner, deck FROM cards', [], (err, rows) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to fetch cards.' });
     }

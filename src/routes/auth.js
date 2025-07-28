@@ -14,7 +14,8 @@ router.post('/register', (req, res) => {
     return res.status(400).json({ error: 'Missing username or password.' });
   }
   
-  db.get('SELECT * FROM users WHERE username = ?', [username], (err, user) => {
+  // Check if user already exists - optimized query
+  db.get('SELECT id, username FROM users WHERE username = ?', [username], (err, user) => {
     if (user) {
       return res.status(409).json({ error: 'Username already exists.' });
     }

@@ -11,7 +11,8 @@ router.get('/announcement', async (req, res) => {
   try {
     // API endpoint logging removed for production
     const announcement = await new Promise((resolve, reject) => {
-      db.get('SELECT * FROM announcement WHERE active = 1 ORDER BY id DESC LIMIT 1', [], (err, row) => {
+      // Only select columns needed for announcement display
+      db.get('SELECT id, message, expiry, links, active FROM announcement WHERE active = 1 ORDER BY id DESC LIMIT 1', [], (err, row) => {
         if (err) reject(err);
         else resolve(row);
       });
@@ -33,9 +34,10 @@ router.get('/announcement', async (req, res) => {
   }
 });
 
-// User API: Get announcements (authenticated)
+// User API: Get announcements (authenticated) - optimized query
 router.get('/announcements', auth, (req, res) => {
-  db.all('SELECT * FROM announcement WHERE active = 1 ORDER BY id DESC', [], (err, rows) => {
+  // Only select columns needed for announcements display
+  db.all('SELECT id, message, expiry, links, active FROM announcement WHERE active = 1 ORDER BY id DESC', [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch announcements.' });
     const announcements = rows.map(announcement => {
       if (announcement.links) {

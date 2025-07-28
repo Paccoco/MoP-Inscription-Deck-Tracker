@@ -31,9 +31,10 @@ router.post('/completed-decks', auth, (req, res) => {
   );
 });
 
-// API: Get completed decks
+// API: Get completed decks - optimized query
 router.get('/completed-decks', auth, (req, res) => {
-  db.all('SELECT * FROM completed_decks ORDER BY completed_at DESC', [], (err, rows) => {
+  // Only select the columns we need for completed decks display
+  db.all('SELECT id, deck, contributors, completed_at, disposition, recipient FROM completed_decks ORDER BY completed_at DESC', [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch completed decks.' });
     // Parse contributors JSON
     const decks = rows.map(deck => ({
@@ -53,10 +54,11 @@ router.delete('/completed-decks/:id', auth, (req, res) => {
   });
 });
 
-// API: Get user notifications
+// API: Get user notifications - optimized query
 router.get('/notifications', auth, (req, res) => {
+  // Only select columns needed for notification display
   db.all(
-    'SELECT * FROM notifications WHERE username = ? OR username = "system" ORDER BY created_at DESC LIMIT 50',
+    'SELECT id, username, message, created_at, read FROM notifications WHERE username = ? OR username = "system" ORDER BY created_at DESC LIMIT 50',
     [req.user.username],
     (err, rows) => {
       if (err) return res.status(500).json({ error: 'Failed to fetch notifications.' });
@@ -99,11 +101,12 @@ router.delete('/notifications', auth, (req, res) => {
   });
 });
 
-// API: Get activity log
+// API: Get activity log - optimized query
 router.get('/activity', auth, (req, res) => {
   const limit = req.query.limit ? parseInt(req.query.limit) : 100;
+  // Only select columns needed for activity display
   db.all(
-    'SELECT * FROM activity ORDER BY timestamp DESC LIMIT ?',
+    'SELECT id, username, action, timestamp FROM activity ORDER BY timestamp DESC LIMIT ?',
     [limit],
     (err, rows) => {
       if (err) return res.status(500).json({ error: 'Failed to fetch activity log.' });
@@ -112,12 +115,13 @@ router.get('/activity', auth, (req, res) => {
   );
 });
 
-// API: Get activity for all users (admin only)
+// API: Get activity for all users (admin only) - optimized query
 router.get('/activity/all', auth, (req, res) => {
   // This should be admin-only in practice
   const limit = req.query.limit ? parseInt(req.query.limit) : 100;
+  // Only select columns needed for activity display
   db.all(
-    'SELECT * FROM activity ORDER BY timestamp DESC LIMIT ?',
+    'SELECT id, username, action, timestamp FROM activity ORDER BY timestamp DESC LIMIT ?',
     [limit],
     (err, rows) => {
       if (err) return res.status(500).json({ error: 'Failed to fetch activity log.' });
@@ -147,9 +151,10 @@ router.post('/deck-requests', auth, (req, res) => {
   );
 });
 
-// API: Get deck requests
+// API: Get deck requests - optimized query
 router.get('/deck-requests', auth, (req, res) => {
-  db.all('SELECT * FROM deck_requests ORDER BY requested_at DESC', [], (err, rows) => {
+  // Only select columns needed for deck requests display
+  db.all('SELECT id, username, deck, requested_at, fulfilled, cards FROM deck_requests ORDER BY requested_at DESC', [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch deck requests.' });
     // Parse cards JSON
     const requests = rows.map(request => ({
@@ -160,9 +165,10 @@ router.get('/deck-requests', auth, (req, res) => {
   });
 });
 
-// API: Export cards
+// API: Export cards - optimized query
 router.get('/export/cards', auth, (req, res) => {
-  db.all('SELECT * FROM cards', [], (err, rows) => {
+  // For export, we want all columns for data completeness
+  db.all('SELECT id, card_name, owner, deck FROM cards', [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Failed to export cards.' });
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', 'attachment; filename="cards-export.json"');
@@ -170,9 +176,10 @@ router.get('/export/cards', auth, (req, res) => {
   });
 });
 
-// API: Export decks
+// API: Export decks - optimized query
 router.get('/export/decks', auth, (req, res) => {
-  db.all('SELECT * FROM completed_decks', [], (err, rows) => {
+  // For export, we want all columns for data completeness
+  db.all('SELECT id, deck, contributors, completed_at, disposition, recipient FROM completed_decks', [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Failed to export decks.' });
     const decks = rows.map(deck => ({
       ...deck,
@@ -184,19 +191,21 @@ router.get('/export/decks', auth, (req, res) => {
   });
 });
 
-// API: Get card history
+// API: Get card history - optimized query
 router.get('/cards/:id/history', auth, (req, res) => {
   const { id } = req.params;
-  db.all('SELECT * FROM card_history WHERE card_id = ? ORDER BY timestamp DESC', [id], (err, rows) => {
+  // Only select columns needed for card history display
+  db.all('SELECT id, card_id, action, timestamp, user_id FROM card_history WHERE card_id = ? ORDER BY timestamp DESC', [id], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch card history.' });
     res.json(rows);
   });
 });
 
-// API: Get deck history  
+// API: Get deck history - optimized query
 router.get('/decks/:id/history', auth, (req, res) => {
   const { id } = req.params;
-  db.all('SELECT * FROM deck_history WHERE deck_id = ? ORDER BY timestamp DESC', [id], (err, rows) => {
+  // Only select columns needed for deck history display
+  db.all('SELECT id, deck_id, action, timestamp, user_id FROM deck_history WHERE deck_id = ? ORDER BY timestamp DESC', [id], (err, rows) => {
     if (err) return res.status(500).json({ error: 'Failed to fetch deck history.' });
     res.json(rows);
   });
