@@ -206,12 +206,18 @@ async function checkForUpdates() {
 
     if (remoteInfo && compareVersions(localVersion, remoteInfo.version) < 0) {
       // Notify admins of available update
-      const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
-      for (const admin of admins) {
-        await db.run(
-          'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
-          [admin.username, `New version ${remoteInfo.version} is available for installation`, new Date().toISOString()]
-        );
+      try {
+        const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+        if (admins && Array.isArray(admins)) {
+          for (const admin of admins) {
+            await db.run(
+              'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+              [admin.username, `New version ${remoteInfo.version} is available for installation`, new Date().toISOString()]
+            );
+          }
+        }
+      } catch (adminNotifyError) {
+        console.error('Failed to notify admins of update:', adminNotifyError);
       }
     }
   } catch (err) {
@@ -250,12 +256,18 @@ apiRouter.post('/admin/update', requireAdmin, async (req, res) => {
     await db.run('UPDATE system_updates SET backup_path = ? WHERE id = ?', [backupDir, updateId]);
 
     // Notify admins and send Discord notification
-    const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
-    for (const admin of admins) {
-      await db.run(
-        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
-        [admin.username, `System update to version ${versionInfo.version} initiated by ${req.user.username}`, new Date().toISOString()]
-      );
+    try {
+      const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+      if (admins && Array.isArray(admins)) {
+        for (const admin of admins) {
+          await db.run(
+            'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+            [admin.username, `System update to version ${versionInfo.version} initiated by ${req.user.username}`, new Date().toISOString()]
+          );
+        }
+      }
+    } catch (adminNotifyError) {
+      console.error('Failed to notify admins of update:', adminNotifyError);
     }
 
     sendDiscordNotification(`[System Update] Updating to version ${versionInfo.version} initiated by ${req.user.username}`);
@@ -390,12 +402,18 @@ apiRouter.post('/admin/rollback/:updateId', requireAdmin, async (req, res) => {
     await db.run('UPDATE system_updates SET status = ? WHERE id = ?', ['rolling_back', updateId]);
 
     // Notify admins
-    const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
-    for (const admin of admins) {
-      await db.run(
-        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
-        [admin.username, `System rollback to previous version initiated by ${req.user.username}`, new Date().toISOString()]
-      );
+    try {
+      const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+      if (admins && Array.isArray(admins)) {
+        for (const admin of admins) {
+          await db.run(
+            'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+            [admin.username, `System rollback to previous version initiated by ${req.user.username}`, new Date().toISOString()]
+          );
+        }
+      }
+    } catch (adminNotifyError) {
+      console.error('Failed to notify admins of rollback:', adminNotifyError);
     }
 
     res.json({ 
@@ -499,12 +517,18 @@ apiRouter.post('/admin/version-check', auth, requireAdmin, async (req, res) => {
     
     if (updateAvailable) {
       // Notify admins of available update
-      const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
-      for (const admin of admins) {
-        await db.run(
-          'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
-          [admin.username, `Manual version check: New version ${remoteInfo.version} is available for installation`, new Date().toISOString()]
-        );
+      try {
+        const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+        if (admins && Array.isArray(admins)) {
+          for (const admin of admins) {
+            await db.run(
+              'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+              [admin.username, `Manual version check: New version ${remoteInfo.version} is available for installation`, new Date().toISOString()]
+            );
+          }
+        }
+      } catch (adminNotifyError) {
+        console.error('Failed to notify admins of manual version check:', adminNotifyError);
       }
     }
 
@@ -1473,16 +1497,22 @@ apiRouter.post('/admin/update/schedule', requireAdmin, async (req, res) => {
     }, delay);
 
     // Notify admins
-    const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
-    for (const admin of admins) {
-      await db.run(
-        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
-        [
-          admin.username,
-          `System update to version ${version} scheduled for ${new Date(scheduledTime).toLocaleString()} by ${req.user.username}`,
-          new Date().toISOString()
-        ]
-      );
+    try {
+      const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+      if (admins && Array.isArray(admins)) {
+        for (const admin of admins) {
+          await db.run(
+            'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+            [
+              admin.username,
+              `System update to version ${version} scheduled for ${new Date(scheduledTime).toLocaleString()} by ${req.user.username}`,
+              new Date().toISOString()
+            ]
+          );
+        }
+      }
+    } catch (adminNotifyError) {
+      console.error('Failed to notify admins of scheduled update:', adminNotifyError);
     }
 
     res.json({
@@ -1532,16 +1562,22 @@ apiRouter.delete('/admin/update/scheduled/:id', requireAdmin, async (req, res) =
     );
 
     // Notify admins
-    const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
-    for (const admin of admins) {
-      await db.run(
-        'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
-        [
-          admin.username,
-          `Scheduled update to version ${update.version} cancelled by ${req.user.username}`,
-          new Date().toISOString()
-        ]
-      );
+    try {
+      const admins = await db.all('SELECT username FROM users WHERE is_admin = 1');
+      if (admins && Array.isArray(admins)) {
+        for (const admin of admins) {
+          await db.run(
+            'INSERT INTO notifications (username, message, created_at) VALUES (?, ?, ?)',
+            [
+              admin.username,
+              `Scheduled update to version ${update.version} cancelled by ${req.user.username}`,
+              new Date().toISOString()
+            ]
+          );
+        }
+      }
+    } catch (adminNotifyError) {
+      console.error('Failed to notify admins of cancelled update:', adminNotifyError);
     }
 
     res.json({ success: true, message: 'Update cancelled successfully' });

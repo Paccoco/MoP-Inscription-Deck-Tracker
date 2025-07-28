@@ -5,6 +5,16 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] - 2025-07-28
+
+### Fixed
+- **CRITICAL: Production Update Error**: Fixed "admins is not iterable" error causing update failures
+  - Added proper null checks and error handling for admin notification queries
+  - Wrapped all admin database queries in try-catch blocks to prevent crashes
+  - Fixed issue where missing/failed database queries would cause server crashes during updates
+  - Enhanced error logging for better debugging of notification failures
+  - Production servers can now safely update without database-related iteration errors
+
 ## [1.2.4] - 2025-07-28
 
 ### Fixed
@@ -28,25 +38,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Fixed React hooks dependency warnings with proper useCallback usage
   - Corrected error object throwing patterns for better error handling
   - Clean builds without warnings for better production deployment experience
-
-## [1.2.4] - 2025-07-28
-
-### Fixed
-- **Production Update Issues**: Enhanced update scripts to handle common production server problems
-  - Improved verification process with longer startup time and multiple retry attempts
-  - Enhanced rollback functionality with better backup detection and recovery
-  - Fixed force-update script with proper emergency backup and error handling
-  - Added comprehensive health check script for debugging application issues
-  - Better error handling and logging during update process
-
-### Enhanced
-- **ESLint Warnings**: Cleaned up React code to eliminate build warnings
-  - Removed unused variables in Admin.js, App.js, CompletedDecks.js, GotifyConfig.js, and Profile.js
-  - Fixed React hooks dependency warnings
-  - Improved error handling consistency across components
-- **Developer Experience**: Added health-check.sh script for quick system diagnostics
-  - Comprehensive application, database, and system resource checks
-  - Helpful debugging information and common solution suggestions
 
 ## [1.2.3] - 2025-07-27
 
