@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 WorkingDirectory=/home/paccoco/MoP-Inscription-Deck-Tracker
-ExecStart=/usr/bin/node /home/paccoco/MoP-Inscription-Deck-Tracker/server-auth.js
+ExecStart=/usr/bin/node /home/paccoco/MoP-Inscription-Deck-Tracker/server.js
 Restart=always
 RestartSec=5
 OnFailure=cardtracker-notify@%n.service

@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'mop-card-tracker',
-    script: 'server-auth.js',
+    script: 'server.js',
     watch: false,
     instances: 1,
     autorestart: true,

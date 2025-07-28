@@ -79,10 +79,10 @@ fi
 
 # Test the Node.js production script syntax
 if node -c scripts/init-production-database.js; then
-    echo -e "${GREEN}✅${NC} init-production-database.js syntax is valid"
+    echo -e "${GREEN}✅${NC} scripts/init-production-database.js syntax is valid"
     ((success_count++))
 else
-    echo -e "${RED}❌${NC} init-production-database.js has syntax errors"
+    echo -e "${RED}❌${NC} scripts/init-production-database.js has syntax errors"
     ((error_count++))
 fi
 
@@ -121,11 +121,11 @@ else
 fi
 
 # Check for main server file
-if [ -f "server.js" ]; then
-    echo -e "${GREEN}✅${NC} server.js exists"
+if [ -f "server-auth.js" ]; then
+    echo -e "${GREEN}✅${NC} server-auth.js exists"
     ((success_count++))
 else
-    echo -e "${RED}❌${NC} server.js missing"
+    echo -e "${RED}❌${NC} server-auth.js missing"
     ((error_count++))
 fi
 

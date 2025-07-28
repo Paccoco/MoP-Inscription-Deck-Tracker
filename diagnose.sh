@@ -20,8 +20,8 @@ else
     echo "  ❌ package.json not found"
 fi
 
-if [ -f "server-auth.js" ]; then
-    echo "  ✅ server-auth.js found"
+if [ -f "server.js" ]; then
+    echo "  ✅ server.js found"
 else
     echo "  ❌ server-auth.js not found"
 fi
