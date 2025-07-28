@@ -1,0 +1,44 @@
+# Development Dockerfile for MoP Inscription Deck Tracker
+# Optimized for development with hot reloading and debugging tools
+
+FROM node:18-alpine
+
+# Install system dependencies and development tools
+RUN apk add --no-cache \
+    postgresql-client \
+    curl \
+    git \
+    && rm -rf /var/cache/apk/*
+
+# Create development user
+RUN addgroup -g 1001 -S moptracker && \
+    adduser -S moptracker -u 1001 -G moptracker
+
+# Set working directory
+WORKDIR /app
+
+# Install nodemon globally for hot reloading
+RUN npm install -g nodemon
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (including dev dependencies)
+RUN npm install
+
+# Create necessary directories
+RUN mkdir -p logs database && \
+    chown -R moptracker:moptracker logs database
+
+# Switch to non-root user
+USER moptracker
+
+# Expose application port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:5000/api/health || exit 1
+
+# Development command with hot reloading
+CMD ["nodemon", "--inspect=0.0.0.0:9229", "server-auth.js"]

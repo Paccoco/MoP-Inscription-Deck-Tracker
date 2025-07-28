@@ -108,8 +108,9 @@ git pull origin master
 ## Tech Stack
 - Node.js + Express.js (backend)
 - React (frontend)
-- SQLite (database)
+- PostgreSQL (database)
 - Chart.js (analytics)
+- Docker + Docker Compose (containerization)
 
 ## System Requirements
 - **OS**: Ubuntu 20.04+ or Debian 11+ (script supports APT package manager)
@@ -119,7 +120,28 @@ git pull origin master
 
 ## Setup & Installation
 
-### Quick Install (Recommended)
+### 🐳 Docker Deployment (Recommended)
+**One-command setup with PostgreSQL, auto-scaling, and production-ready configuration:**
+
+```bash
+git clone https://github.com/Paccoco/MoP-Inscription-Deck-Tracker.git
+cd MoP-Inscription-Deck-Tracker
+./docker/scripts/setup.sh
+```
+
+**Access your application at:** `http://localhost:5000`
+
+**Docker Benefits:**
+- ✅ **One-Command Setup**: Complete stack deployment in minutes
+- ✅ **PostgreSQL Included**: Enterprise database with optimized configuration
+- ✅ **Isolated Environment**: No conflicts with host system
+- ✅ **Easy Backups**: Volume snapshots and automated database dumps
+- ✅ **Production Ready**: SSL, health monitoring, and auto-restart
+- ✅ **Platform Independent**: Runs on Linux, macOS, Windows
+
+**For detailed Docker setup, configuration, and management, see [DOCKER.md](DOCKER.md)**
+
+### Quick Install (Traditional)
 ```bash
 git clone https://github.com/Paccoco/MoP-Inscription-Deck-Tracker.git
 cd MoP-Inscription-Deck-Tracker

@@ -1,0 +1,147 @@
+version: '3.8'
+
+# Development Docker Compose Configuration
+# Optimized for development with hot reloading and debugging
+
+services:
+  #============================================================================
+  # PostgreSQL Database (same as production)
+  #============================================================================
+  database:
+    image: postgres:15-alpine
+    container_name: mop-tracker-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mop_card_tracker_dev
+      POSTGRES_USER: mop_tracker_dev
+      POSTGRES_PASSWORD: dev_password_123
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./postgresql-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    networks:
+      - mop-tracker-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mop_tracker_dev -d mop_card_tracker_dev"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  #============================================================================
+  # Development Web Application (with hot reload)
+  #============================================================================
+  web-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: mop-tracker-web-dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      
+      # Database Configuration
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: mop_card_tracker_dev
+      DB_USER: mop_tracker_dev
+      DB_PASSWORD: dev_password_123
+      DB_POOL_SIZE: 10
+      
+      # JWT Configuration (dev keys)
+      JWT_SECRET: dev-jwt-secret-not-for-production
+      JWT_REFRESH_SECRET: dev-refresh-secret-not-for-production
+      JWT_EXPIRATION: 24h
+      JWT_REFRESH_EXPIRATION: 7d
+      
+      # Security Configuration (relaxed for dev)
+      BCRYPT_ROUNDS: 8
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX_REQUESTS: 1000
+      
+      # Performance Configuration
+      CACHE_TTL: 60
+      ENABLE_PERFORMANCE_MONITORING: false
+      LOG_LEVEL: debug
+      
+    ports:
+      - "5001:5000"  # Different port for dev
+    volumes:
+      # Mount source code for hot reloading
+      - .:/app:cached
+      - /app/node_modules  # Prevent overwriting container node_modules
+      - /app/client/node_modules
+      - dev_logs:/app/logs
+    networks:
+      - mop-tracker-dev-network
+    depends_on:
+      database:
+        condition: service_healthy
+    command: npm run dev
+
+  #============================================================================
+  # React Development Server (separate for hot reloading)
+  #============================================================================
+  react-dev:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    container_name: mop-tracker-react-dev
+    restart: unless-stopped
+    environment:
+      REACT_APP_API_URL: http://localhost:5001
+      REACT_APP_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app:cached
+      - /app/node_modules
+    networks:
+      - mop-tracker-dev-network
+    command: npm start
+
+  #============================================================================
+  # Database Admin Interface (pgAdmin)
+  #============================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: mop-tracker-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@moptracker.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - mop-tracker-dev-network
+    depends_on:
+      - database
+    profiles:
+      - pgadmin  # Only start if explicitly requested
+
+#==============================================================================
+# Networks
+#==============================================================================
+networks:
+  mop-tracker-dev-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+
+#==============================================================================
+# Volumes for Development Data
+#==============================================================================
+volumes:
+  postgres_data_dev:
+    driver: local
+  dev_logs:
+    driver: local
+  pgadmin_data:
+    driver: local

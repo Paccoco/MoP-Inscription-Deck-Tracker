@@ -1,80 +1,169 @@
 # Mist of Pandaria Card Tracker — Planning Document
 
-## Project Vision
-A full-stack, self-hosted web application for World of Warcraft: Mist of Pandaria Classic guilds to transparently track Inscription Cards, deck completions, sales, payouts, and notifications. The goal is to empower guilds with collaborative tools, automated notifications, and robust admin controls, all tailored for MoP Classic.
+## 🎯 Project Vision
+A full-stack, self-hosted web application for World of Warcraft: Mist of Pandaria Classic guilds to transparently track Inscription Cards, deck completions, sales, payouts, and notifications. The goal is to empower guilds with collaborative tools, automated notifications, and robust admin controls, all tailored for MoP Classic transparency and collaboration.
 
-## High-Level Scope
-- **Card & Deck Tracking:** Track all MoP Inscription cards, deck completion status, contributors, and disposition (sold/given).
-- **User Management:** Registration, approval, roles (Admin, Officer, User), and profile management.
-- **Notifications:** Unified system for in-app, Discord webhook, and per-user Gotify notifications. No email support.
-- **Admin Panel:** User approval, deck allocation, analytics, export/import, notification config, and activity log.
-- **Activity Log:** Persistent, transparent logging of all major actions.
-- **Analytics:** Contributor leaderboard, deck fulfillment speed, card acquisition trends, payout history, and deck value history.
-- **Export/Import:** CSV-based data portability for cards and decks (admin only).
-- **Responsive UI:** Mobile-friendly, MoP-themed visuals, dark mode, and customizable themes.
+## 📊 Current Status (v1.2.5)
+### ✅ **Implemented Features**
+- **Core Functionality**: Card/deck tracking, user management, JWT authentication
+- **Admin Panel**: User approval, deck allocation, analytics dashboard, export/import
+- **Notification System**: In-app notifications, Discord webhooks, per-user Gotify integration
+- **Security**: Automated dependency updates, manual version checking, rollback capabilities
+- **Database**: SQLite with WAL mode, comprehensive schema, automated initialization
+- **Production Ready**: Deployment scripts, backup systems, monitoring tools
+- **UI/UX**: Responsive design, MoP theming, mobile-friendly interface
 
-## Technical Architecture
-- **Frontend:** React (SPA), custom CSS for MoP/dark theme, Chart.js for analytics, REST API integration.
-- **Backend:** Node.js + Express.js, RESTful endpoints, JWT authentication, notification logic, SQLite database.
-- **Database:** SQLite for persistent storage of cards, decks, users, notifications, config, and activity log.
-- **Notifications:**
-  - In-app: Real-time updates and notification center.
-  - Discord: Automated webhook for deck completions, sales, requests.
-  - Gotify: Per-user server/token/type config, sent via Gotify API.
-- **Security:**
-  - JWT-based authentication for all protected endpoints.
-  - Admin-only actions for user approval, deck allocation, export/import, and analytics.
-  - Automated security checks (npm audit, ggshield) with Gotify alerts.
+### 🚧 **Active Development Areas**
+- **Code Quality**: File modularization (500-line limit enforcement)
+- **Performance**: Database optimization, React component optimization
+- **Security**: Input validation, rate limiting, CSRF protection
+- **Testing**: Comprehensive test coverage, integration testing
+- **Documentation**: Enhanced developer guides, API documentation
 
-## Key Features & Milestones
-1. **Core Card/Deck Tracking**
-   - Add/remove cards, view deck status, contributors, and disposition.
-2. **User Authentication & Roles**
-   - Registration, approval, login, JWT, role-based UI and API access.
-3. **Notification System**
-   - Unified delivery logic, config UI, Discord/Gotify integration, notification center.
-4. **Admin Dashboard**
-   - User approval, deck allocation, analytics, export/import, notification config, activity log.
-5. **Activity Log & Transparency**
-   - Persistent logging, user-facing log UI, admin view for all users.
-6. **Analytics & Reporting**
-   - Contributor leaderboard, deck fulfillment speed, payout history, deck value history.
-7. **Export/Import**
-   - CSV-based data export/import for cards and decks (admin only).
-8. **Responsive UI & Theming**
-   - Mobile-friendly layout, MoP/dark theme, theme customization.
-9. **Security & Validation**
-   - Automated security checks, debug logging, session expiration handling.
+## 🏗️ Technical Architecture
 
-## Integration Points
-- **Discord:** Automated notifications for deck completions, sales, requests.
-- **Gotify:** Per-user server/token/type config, notification delivery via Gotify API.
-- **Chart.js:** Analytics dashboard (future expansion).
+### **Stack Overview**
+- **Frontend**: React 18 (SPA) + Custom CSS + Chart.js analytics
+- **Backend**: Node.js + Express.js + JWT authentication + SQLite
+- **Database**: SQLite with WAL mode, foreign keys, automated backups
+- **Deployment**: PM2 + Nginx + Ubuntu/Debian servers
+- **Integrations**: Discord webhooks + Gotify notifications
 
-## Development Workflow
-- **Frontend:**
-  - Build: `cd client && npm run build`
-  - Debug: Browser console, token sent for API calls.
-- **Backend:**
-  - Start: `nohup node server-auth.js > server.log 2>&1 &`
-  - Debug: `server.log` (notification delivery, JWT validation).
-- **Dependencies:**
-  - Install: `npm install && cd client && npm install`
-- **Deployment:**
-  - Access: `http://localhost:5000`
-  - Power restart: `./power-restart.sh`
+### **Core Components**
+- **`server-auth.js`**: Main backend API, authentication, notifications
+- **`client/src/App.js`**: Main React application shell
+- **`client/src/Admin.js`**: Admin dashboard and controls
+- **Database Schema**: 15+ tables for users, cards, decks, notifications, activity
+- **Notification Engine**: Unified delivery system for all alert types
 
-## Future Directions
-- **Advanced Analytics:** Expand Chart.js integration for deeper insights.
-- **Role Management:** More granular permissions (Officer, Contributor).
-- **Guild Bank:** Shared card/deck management for guild-owned assets.
-- **API Expansion:** More endpoints for automation and integrations.
-- **UI/UX Enhancements:** More onboarding, help, and customization options.
+### **Security Architecture**
+- **Authentication**: JWT tokens with configurable expiration
+- **Authorization**: Role-based access (Admin, Officer, User)
+- **Input Validation**: Parameterized queries, sanitization (needs enhancement)
+- **Rate Limiting**: Basic protection (needs expansion)
+- **Security Monitoring**: Automated dependency scanning, update alerts
 
-## Out of Scope
-- Email notifications (explicitly unsupported).
-- Support for non-MoP Classic regions/items.
-- Non-guild use cases (focus is on guild collaboration).
+## 🎯 Development Standards
+
+### **Code Quality Requirements**
+- **File Size Limit**: Maximum 500 lines per file - split immediately when exceeded
+- **Testing Coverage**: Minimum 3 test cases per feature (happy path, edge case, error case)
+- **Error Handling**: Comprehensive try-catch blocks, user-friendly error messages
+- **Documentation**: JSDoc comments for complex functions, inline explanations
+- **Performance**: React.memo, useMemo, useCallback for optimization
+
+### **Security Standards**
+- **Input Validation**: All `req.body`, `req.params`, `req.query` must be validated
+- **Database Safety**: Parameterized queries only, no `SELECT *` statements
+- **Authentication**: JWT verification on all protected endpoints
+- **Environment Security**: All secrets in environment variables
+- **Audit Trail**: Complete activity logging for administrative actions
+
+### **Database Standards**
+- **Query Optimization**: Specific column selection, proper indexing
+- **Transaction Safety**: Multi-step operations in transactions
+- **Backup Strategy**: Automated backups before schema changes
+- **Performance**: WAL mode, foreign key constraints, proper indexes
+- **Monitoring**: Query performance tracking, error logging
+
+## 🚀 Development Workflow
+
+### **Git Strategy**
+- **Main Branch**: `master` - production-ready code only
+- **Development**: `dev-branch` - active development and testing
+- **Feature Branches**: For major features, merge to dev-branch first
+- **Hotfixes**: Direct to master for critical production issues
+
+### **Testing Procedures**
+- **Unit Tests**: Jest for backend logic, React Testing Library for components
+- **Integration Tests**: Full workflow testing (login, card management, notifications)
+- **Manual Testing**: Browser testing for UI changes, mobile responsiveness
+- **Production Testing**: Staging environment validation before deployment
+
+### **Development Setup**
+```bash
+# Initial setup
+npm install && cd client && npm install
+
+# Development
+npm run dev          # Backend with nodemon
+cd client && npm start  # Frontend development server
+
+# Testing
+npm test 2>&1 | head -50  # Backend tests (limited output)
+cd client && npm test     # Frontend tests
+
+# Production build
+cd client && npm run build
+```
+
+### **Code Review Standards**
+- **Automated Checks**: ESLint, security scanning, test execution
+- **Manual Review**: Architecture compliance, security considerations
+- **Performance Review**: Database query efficiency, React optimization
+- **Documentation Review**: Comments, README updates, CHANGELOG entries
+
+## 🔮 Roadmap & Future Directions
+
+### **Phase 1: Code Quality & Performance (Current)**
+- **File Modularization**: Split large files into focused modules
+- **Security Hardening**: Input validation, rate limiting, CSRF protection
+- **Performance Optimization**: Database indexing, React optimizations
+- **Test Coverage**: Comprehensive testing suite implementation
+
+### **Phase 2: Enhanced Features**
+- **Advanced Analytics**: Expanded Chart.js integration, trend analysis
+- **Role Management**: Granular permissions (Officer, Contributor roles)
+- **API Expansion**: REST API documentation, webhook endpoints
+- **Mobile App**: React Native companion app
+
+### **Phase 3: Scalability & Enterprise**
+- **Multi-Guild Support**: Tenant isolation, guild-specific configs
+- **Microservices**: Service separation for larger deployments
+- **Real-time Features**: WebSocket notifications, live updates
+- **Advanced Integrations**: More game integration points
+
+## 📋 Integration Points
+
+### **External Services**
+- **Discord**: Automated notifications for deck completions, sales, requests
+- **Gotify**: Per-user notification servers with custom configurations
+- **GitHub**: Automated version checking and update management
+- **npm Registry**: Dependency monitoring and security scanning
+
+### **Internal Integrations**
+- **Activity System**: Transparent logging across all components
+- **Notification Engine**: Unified delivery system for all alert types
+- **Authentication**: JWT-based security across frontend and backend
+- **Analytics**: Chart.js integration for data visualization
+
+## 🎯 Maintenance Guidelines
+
+### **Document Updates**
+- **Feature Changes**: Update PLANNING.md when adding major features
+- **Architecture Changes**: Document significant technical modifications
+- **Security Updates**: Record new security measures and requirements
+- **Version Updates**: Align with CHANGELOG.md for major releases
+
+### **Decision Criteria for New Features**
+- **Guild Focus**: Must serve MoP Classic guild collaboration needs
+- **Security First**: Cannot compromise existing security posture
+- **Performance Impact**: Must not degrade current performance
+- **Maintenance Burden**: Consider long-term support requirements
+- **User Value**: Clear benefit to guild members or administrators
+
+### **Scope Boundaries**
+- **✅ In Scope**: Guild collaboration, MoP Classic content, transparency tools
+- **❌ Out of Scope**: Email notifications, non-MoP content, individual player tools
+- **🤔 Consider**: Features that enhance guild coordination without complexity
+
+## 📈 Success Metrics
+- **Performance**: <200ms API response times, <3s page loads
+- **Security**: Zero security incidents, up-to-date dependencies
+- **Quality**: >80% test coverage, <500 lines per file
+- **Usability**: Mobile-friendly, <3 clicks for common actions
+- **Reliability**: 99.9% uptime, automated backup verification
 
 ---
-This planning document sets the high-level direction, scope, and technical foundation for the Mist of Pandaria Card Tracker project. All features and workflows are designed for transparency, collaboration, and ease of use for MoP Classic guilds.
+
+**This planning document serves as the authoritative guide for project direction, technical standards, and development practices. All development decisions should align with these principles and standards.**
