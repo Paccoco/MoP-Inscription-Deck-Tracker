@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'cards.db');
+const dbPath = path.join(__dirname, '../cards.db');
 
 console.log('🏭 Production Database Initialization');
 console.log('=====================================');
@@ -9,7 +9,7 @@ console.log('=====================================');
 // Safety check for production
 if (process.env.NODE_ENV !== 'production') {
   console.log('⚠️  WARNING: This script is designed for production environments.');
-  console.log('   For development, use: node init-database.js');
+  console.log('   For development, use: node scripts/init-database.js');
   process.exit(1);
 }
 

@@ -2,6 +2,7 @@ require('dotenv').config();
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcrypt');
+const log = require('./logger');
 
 // Initialize SQLite database
 let db;
@@ -11,17 +12,17 @@ function initializeDatabase() {
   try {
     db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
-        console.error('Error connecting to database:', err);
-        process.exit(1);
+        log.error('Error connecting to database:', err);
+        throw err;
       }
-      console.log('Connected to SQLite database at', dbPath);
+      log.database('Connected to SQLite database', dbPath);
     });
     
     // Enable foreign keys and WAL mode for better performance
     db.run('PRAGMA foreign_keys = ON');
     db.run('PRAGMA journal_mode = WAL');
   } catch (err) {
-    console.error('Failed to initialize database:', err);
+    log.error('Failed to initialize database:', err);
     process.exit(1);
   }
   
@@ -51,7 +52,7 @@ async function ensureAdminExists() {
   const adminPassword = process.env.ADMIN_PASSWORD;
   
   if (!adminUsername || !adminPassword) {
-    console.warn('Admin credentials not found in environment variables');
+    log.warn('Admin credentials not found in environment variables');
     return;
   }
 
@@ -59,7 +60,7 @@ async function ensureAdminExists() {
     const hash = await bcrypt.hash(adminPassword, 10);
     db.get('SELECT * FROM users WHERE username = ?', [adminUsername], (err, user) => {
       if (err) {
-        console.error('Error checking admin user:', err);
+        log.error('Error checking admin user:', err);
         return;
       }
 
@@ -69,8 +70,8 @@ async function ensureAdminExists() {
           'UPDATE users SET password = ?, is_admin = 1, approved = 1 WHERE username = ?',
           [hash, adminUsername],
           (err) => {
-            if (err) console.error('Error updating admin user:', err);
-            else console.log('Admin user updated successfully');
+            if (err) log.error('Error updating admin user:', err);
+            else log.admin(adminUsername, 'Admin user updated successfully');
           }
         );
       } else {
@@ -79,14 +80,14 @@ async function ensureAdminExists() {
           'INSERT INTO users (username, password, is_admin, approved) VALUES (?, ?, 1, 1)',
           [adminUsername, hash],
           (err) => {
-            if (err) console.error('Error creating admin user:', err);
-            else console.log('Admin user created successfully');
+            if (err) log.error('Error creating admin user:', err);
+            else log.admin(adminUsername, 'Admin user created successfully');
           }
         );
       }
     });
   } catch (err) {
-    console.error('Error ensuring admin exists:', err);
+    log.error('Error ensuring admin exists:', err);
   }
 }
 

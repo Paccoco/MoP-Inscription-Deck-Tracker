@@ -182,7 +182,7 @@ function App() {
       setDeckRequests(res.data);
       setErrorMsg('');
     } catch (err) {
-      console.error('fetchDeckRequests error:', err);
+      // Error logging handled by error boundaries
       setDeckRequests([]);
       setErrorMsg('Error fetching deck requests');
     }
@@ -190,7 +190,7 @@ function App() {
   
   // Add fetchAnnouncements function
   const fetchAnnouncements = async () => {
-    console.log('Fetching announcements...');
+    // Debug logging removed for production
     try {
       const res = await axios.get('/api/announcement', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -223,19 +223,19 @@ function App() {
             const announcement = unreadAnnouncements[0];
             console.log('Setting announcement:', announcement);
             setAnnouncement(announcement);
-            console.log('Setting showAnnouncement to true');
+            // Debug logging removed for production
             setShowAnnouncement(true);
           } else {
-            console.log('No unread announcements found after filtering dismissed');
+            // Debug logging removed for production
           }
         } else {
-          console.log('No active announcements found after filtering');
+          // Debug logging removed for production
         }
       } else {
-        console.log('No announcements returned from API');
+        // Debug logging removed for production
       }
     } catch (err) {
-      console.error('Error fetching announcements:', err);
+      // Error logging handled by error boundaries
     }
   };
   

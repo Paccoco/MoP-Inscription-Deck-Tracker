@@ -46,34 +46,34 @@ echo "📋 Checking critical production scripts:"
 echo
 
 # Check for existence of critical scripts
-check_file "init-database.sh"
-check_file "install.sh"
-check_file "update.sh"
-check_file "deploy-production.sh"
+check_file "../init-database.sh"
+check_file "../install.sh"
+check_file "../update.sh"
+check_file "../deploy-production.sh"
 check_file "init-production-database.js"
-check_file "check-database-safety.sh"
+check_file "../check-database-safety.sh"
 
 echo
 echo "🔧 Checking script permissions:"
 echo
 
 # Check if scripts are executable
-check_executable "init-database.sh"
-check_executable "install.sh"
-check_executable "update.sh"
-check_executable "deploy-production.sh"
-check_executable "check-database-safety.sh"
+check_executable "../init-database.sh"
+check_executable "../install.sh"
+check_executable "../update.sh"
+check_executable "../deploy-production.sh"
+check_executable "../check-database-safety.sh"
 
 echo
 echo "📊 Testing database initialization script:"
 echo
 
 # Test the database initialization script syntax
-if bash -n init-database.sh; then
-    echo -e "${GREEN}✅${NC} init-database.sh syntax is valid"
+if bash -n ../init-database.sh; then
+    echo -e "${GREEN}✅${NC} ../init-database.sh syntax is valid"
     ((success_count++))
 else
-    echo -e "${RED}❌${NC} init-database.sh has syntax errors"
+    echo -e "${RED}❌${NC} ../init-database.sh has syntax errors"
     ((error_count++))
 fi
 
@@ -91,13 +91,13 @@ echo "🗂️ Checking package.json and dependencies:"
 echo
 
 # Check package.json exists and is valid
-if [ -f "package.json" ]; then
-    if node -e "require('./package.json')" 2>/dev/null; then
+if [ -f "../package.json" ]; then
+    if node -e "require('../package.json')" 2>/dev/null; then
         echo -e "${GREEN}✅${NC} package.json is valid"
         ((success_count++))
         
         # Check version
-        version=$(node -e "console.log(require('./package.json').version)")
+        version=$(node -e "console.log(require('../package.json').version)")
         echo -e "${GREEN}📦${NC} Current version: $version"
     else
         echo -e "${RED}❌${NC} package.json is invalid"
@@ -113,7 +113,7 @@ echo "📁 Checking required directories and files:"
 echo
 
 # Check for client build directory
-if [ -d "client/build" ]; then
+if [ -d "../client/build" ]; then
     echo -e "${GREEN}✅${NC} client/build directory exists"
     ((success_count++))
 else
@@ -121,7 +121,7 @@ else
 fi
 
 # Check for main server file
-if [ -f "server-auth.js" ]; then
+if [ -f "../server-auth.js" ]; then
     echo -e "${GREEN}✅${NC} server-auth.js exists"
     ((success_count++))
 else
@@ -134,14 +134,14 @@ echo "🔐 Checking environment configuration:"
 echo
 
 # Check for environment files
-if [ -f ".env.example" ]; then
+if [ -f "../.env.example" ]; then
     echo -e "${GREEN}✅${NC} .env.example exists"
     ((success_count++))
 else
     echo -e "${YELLOW}⚠️${NC} .env.example missing"
 fi
 
-if [ -f ".env" ]; then
+if [ -f "../.env" ]; then
     echo -e "${GREEN}✅${NC} .env exists"
     ((success_count++))
 else

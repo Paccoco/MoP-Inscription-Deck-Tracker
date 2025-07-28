@@ -5,6 +5,7 @@ const { auth, requireAdmin } = require('../middleware/auth');
 const { db, query } = require('../utils/database-adapter');
 const { logActivity } = require('../utils/activity');
 const { sendDiscordNotification } = require('../services/notifications');
+const log = require('../utils/logger');
 
 const router = express.Router();
 
@@ -20,7 +21,7 @@ async function getRemoteVersionInfo() {
       release_notes: data.body
     };
   } catch (error) {
-    console.error('Failed to fetch version info:', error);
+    log.error('Failed to fetch version info', error);
     return null;
   }
 }
@@ -59,7 +60,7 @@ router.get('/admin/check-updates', auth, requireAdmin, async (req, res) => {
       release_notes: remoteInfo.release_notes
     });
   } catch (err) {
-    console.error('Update check failed:', err);
+    log.error('Update check failed', err);
     res.status(500).json({ error: 'Failed to check for updates.' });
   }
 });
@@ -153,7 +154,7 @@ router.get('/admin/dependency-status', auth, requireAdmin, async (req, res) => {
     
     res.json(status);
   } catch (err) {
-    console.error('Error checking dependency status:', err);
+    log.error('Error checking dependency status', err);
     // Fallback to simulated data if real check fails
     const status = {
       total_dependencies: 42,
@@ -176,7 +177,7 @@ router.post('/admin/update-dependencies', auth, requireAdmin, async (req, res) =
     const util = require('util');
     const execPromise = util.promisify(exec);
     
-    console.log('Admin dependency update requested by:', req.user.username);
+    log.admin(req.user.username, 'Dependency update requested');
     
     // Log the action
     const timestamp = new Date().toISOString();
@@ -185,11 +186,11 @@ router.post('/admin/update-dependencies', auth, requireAdmin, async (req, res) =
     // Update dependencies in background
     try {
       // Update main package dependencies
-      console.log('Updating main package dependencies...');
+      log.info('Updating main package dependencies...');
       const { stdout: mainUpdate, stderr: mainError } = await execPromise('npm update');
       
       // Update client package dependencies  
-      console.log('Updating client package dependencies...');
+      log.info('Updating client package dependencies...');
       const { stdout: clientUpdate, stderr: clientError } = await execPromise('cd client && npm update');
       
       // Get updated dependency status
@@ -218,7 +219,7 @@ router.post('/admin/update-dependencies', auth, requireAdmin, async (req, res) =
         }
       });
     } catch (updateErr) {
-      console.error('Dependency update failed:', updateErr);
+      log.error('Dependency update failed', updateErr);
       logActivity(req.user.username, `Dependency update failed: ${updateErr.message}`, timestamp);
       res.status(500).json({ 
         error: 'Dependency update failed', 
@@ -226,7 +227,7 @@ router.post('/admin/update-dependencies', auth, requireAdmin, async (req, res) =
       });
     }
   } catch (err) {
-    console.error('Failed to initiate dependency update:', err);
+    log.error('Failed to initiate dependency update', err);
     res.status(500).json({ error: 'Failed to initiate dependency update' });
   }
 });

@@ -4,6 +4,7 @@ const { auth, requireAdmin } = require('../middleware/auth');
 const { db, query } = require('../utils/database-adapter');
 const { logActivity } = require('../utils/activity');
 const { sendDiscordNotification } = require('../services/notifications');
+const log = require('../utils/logger');
 
 const router = express.Router();
 
@@ -87,7 +88,7 @@ router.get('/admin/announcement', auth, requireAdmin, async (req, res) => {
     
     res.json(announcement || null);
   } catch (err) {
-    console.error('Failed to fetch announcement:', err);
+    log.error('Failed to fetch announcement', err);
     res.status(500).json({ error: 'Failed to fetch announcement.' });
   }
 });
@@ -121,7 +122,7 @@ router.post('/admin/announcement', auth, requireAdmin, async (req, res) => {
     logActivity(req.user.username, `Created announcement: "${message.substring(0, 30)}${message.length > 30 ? '...' : ''}"`, new Date().toISOString());
     res.json({ success: true });
   } catch (err) {
-    console.error('Failed to create announcement:', err);
+    log.error('Failed to create announcement', err);
     res.status(500).json({ error: 'Failed to create announcement.' });
   }
 });
@@ -138,7 +139,7 @@ router.delete('/admin/announcement', auth, requireAdmin, async (req, res) => {
     logActivity(req.user.username, 'Cleared all active announcements', new Date().toISOString());
     res.json({ success: true });
   } catch (err) {
-    console.error('Failed to clear announcements:', err);
+    log.error('Failed to clear announcements', err);
     res.status(500).json({ error: 'Failed to clear announcements.' });
   }
 });

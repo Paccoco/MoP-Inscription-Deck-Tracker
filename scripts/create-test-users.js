@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 
-const db = new sqlite3.Database('./cards.db');
+const db = new sqlite3.Database('../cards.db');
 
 // Hash passwords
 const adminHash = bcrypt.hashSync('testadmin123', 10);

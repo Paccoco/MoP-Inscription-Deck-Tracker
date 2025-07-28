@@ -3,7 +3,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 
-const dbPath = path.join(__dirname, 'cards.db');
+const dbPath = path.join(__dirname, '../cards.db');
 
 // Safety check: Warn if database already exists with data
 if (fs.existsSync(dbPath)) {

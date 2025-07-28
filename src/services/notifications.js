@@ -1,5 +1,6 @@
 const fetch = require('node-fetch');
 const db = require('../utils/database-adapter');
+const log = require('../utils/logger');
 
 // Discord webhook configuration
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';
@@ -23,7 +24,7 @@ async function initializeDiscordWebhook() {
       await loadDiscordWebhookUrl();
     }
   } catch (err) {
-    console.error('Error initializing Discord webhook:', err);
+    log.error('Error initializing Discord webhook', err);
   }
 }
 
@@ -46,7 +47,7 @@ async function loadDiscordWebhookUrl() {
       }
     }
   } catch (err) {
-    console.error('Error loading Discord webhook URL:', err);
+    log.error('Error loading Discord webhook URL', err);
   }
 }
 
@@ -75,7 +76,7 @@ async function saveDiscordWebhookUrl(webhookUrl, callback) {
     
     if (callback) callback(null);
   } catch (err) {
-    console.error('Error saving Discord webhook URL:', err);
+    log.error('Error saving Discord webhook URL', err);
     if (callback) callback(err);
   }
 }
@@ -109,10 +110,10 @@ async function sendGotifyNotification(username, type, message) {
     });
     
     if (!response.ok) {
-      console.error('Gotify notification failed:', response.statusText);
+      log.error(`Gotify notification failed: ${response.statusText}`);
     }
   } catch (err) {
-    console.error('Gotify notification error:', err);
+    log.error('Gotify notification error', err);
   }
 }
 
@@ -127,11 +128,11 @@ function sendDiscordNotification(message) {
   })
     .then(res => {
       if (!res.ok) {
-        console.error('Discord notification failed:', res.statusText);
+        log.error(`Discord notification failed: ${res.statusText}`);
       }
     })
     .catch(err => {
-      console.error('Discord notification error:', err);
+      log.error('Discord notification error', err);
     });
 }
 

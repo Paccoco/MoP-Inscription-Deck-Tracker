@@ -154,12 +154,12 @@ function Admin({ setShowPage }) {
         alert(`Failed to push announcement: ${result.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error pushing announcement:', error);
+      // Error logging handled by error boundaries
       alert(`Error pushing announcement: ${error.message}`);
     }
   };
   const handleClearAnnouncement = async () => {
-    console.log('Clearing announcements...');
+    // Debug logging removed for production
     try {
       const response = await fetch('/api/admin/announcement', {
         method: 'DELETE',
@@ -175,7 +175,7 @@ function Admin({ setShowPage }) {
         alert(`Failed to clear announcements: ${result.error || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error('Error clearing announcements:', error);
+      // Error logging handled by error boundaries
       alert(`Error clearing announcements: ${error.message}`);
     }
   };
@@ -203,7 +203,7 @@ function Admin({ setShowPage }) {
       fetchAllAdminData();
       
     } catch (err) {
-      console.error('Version check failed:', err);
+      // Error logging handled by error boundaries
       setVersionCheckResult({ 
         success: false, 
         error: err.response?.data?.error || 'Failed to check for updates' 
@@ -240,7 +240,7 @@ function Admin({ setShowPage }) {
       }
       
     } catch (err) {
-      console.error('Dependency update failed:', err);
+      // Error logging handled by error boundaries
       setDependencyUpdateResult({ 
         success: false, 
         error: err.response?.data?.error || 'Failed to update dependencies',

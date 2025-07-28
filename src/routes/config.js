@@ -2,6 +2,7 @@ const express = require('express');
 const { auth, requireAdmin } = require('../middleware/auth');
 const { db, query } = require('../utils/database-adapter');
 const { updateDiscordWebhookUrl, getDiscordWebhookUrl } = require('../services/notifications');
+const log = require('../utils/logger');
 
 const router = express.Router();
 
@@ -19,7 +20,7 @@ router.post('/discord/webhook', auth, requireAdmin, (req, res) => {
   updateDiscordWebhookUrl(webhookUrl);
   db.run('INSERT OR REPLACE INTO discord_webhook (id, url) VALUES (1, ?)', [webhookUrl], function (err) {
     if (err) {
-      console.error('Error saving Discord webhook URL:', err);
+      log.error('Error saving Discord webhook URL', err);
       return res.status(500).json({ error: 'Failed to save webhook URL.' });
     }
     res.json({ success: true });

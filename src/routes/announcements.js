@@ -2,13 +2,14 @@ const express = require('express');
 const { auth, requireAdmin } = require('../middleware/auth');
 const { db, query } = require('../utils/database-adapter');
 const { logActivity } = require('../utils/activity');
+const log = require('../utils/logger');
 
 const router = express.Router();
 
 // Public API: Get current active announcement (no auth required)
 router.get('/announcement', async (req, res) => {
   try {
-    console.log('API endpoint /api/announcement called');
+    // API endpoint logging removed for production
     const announcement = await new Promise((resolve, reject) => {
       db.get('SELECT * FROM announcement WHERE active = 1 ORDER BY id DESC LIMIT 1', [], (err, row) => {
         if (err) reject(err);
@@ -20,14 +21,14 @@ router.get('/announcement', async (req, res) => {
       try {
         announcement.links = JSON.parse(announcement.links);
       } catch (parseErr) {
-        console.error('Failed to parse announcement links:', parseErr);
+        log.error('Failed to parse announcement links', parseErr);
         announcement.links = [];
       }
     }
     
     res.json(announcement || null);
   } catch (err) {
-    console.error('Failed to fetch announcement:', err);
+    log.error('Failed to fetch announcement', err);
     res.status(500).json({ error: 'Failed to fetch announcement.' });
   }
 });

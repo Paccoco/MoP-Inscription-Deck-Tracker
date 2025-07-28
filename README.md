@@ -301,8 +301,8 @@ The application includes comprehensive safeguards to protect production database
 - **Environment-aware initialization** - Test users only created in development
 
 ### Database Initialization Scripts
-- `init-database.js` - Development/testing with optional test users
-- `init-production-database.js` - Production-safe initialization (tables only)
+- `scripts/init-database.js` - Development/testing with optional test users
+- `scripts/init-production-database.js` - Production-safe initialization (tables only)
 - `check-database-safety.sh` - Pre-update safety verification
 
 ### Update Safety Features
@@ -314,7 +314,7 @@ The application includes comprehensive safeguards to protect production database
 ./check-database-safety.sh
 
 # Production-safe database initialization
-NODE_ENV=production node init-production-database.js
+NODE_ENV=production node scripts/init-production-database.js
 ```
 
 **Key Safety Guarantees:**

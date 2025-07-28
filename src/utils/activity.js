@@ -1,4 +1,5 @@
 const { db } = require('./database-adapter');
+const log = require('./logger');
 
 // Log user activity to database
 function logActivity(username, action) {
@@ -7,7 +8,7 @@ function logActivity(username, action) {
     [username, action, new Date().toISOString()],
     function (err) {
       if (err) {
-        console.error('Activity log error:', err);
+        log.error('Activity log error', err);
       }
     }
   );

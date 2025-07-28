@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
+const log = require('./logger');
 
 // PostgreSQL connection configuration
 const poolConfig = {
@@ -23,11 +24,11 @@ const pool = new Pool(poolConfig);
 async function testConnection() {
   try {
     const client = await pool.connect();
-    console.log('✅ Connected to PostgreSQL database successfully');
+    log.database('Connected to PostgreSQL database successfully');
     client.release();
     return true;
   } catch (err) {
-    console.error('❌ Failed to connect to PostgreSQL database:', err.message);
+    log.error('Failed to connect to PostgreSQL database', err);
     return false;
   }
 }
@@ -35,7 +36,7 @@ async function testConnection() {
 // Initialize database schema
 async function initializeDatabase() {
   try {
-    console.log('🔄 Initializing PostgreSQL database schema...');
+    log.database('Initializing PostgreSQL database schema...');
     
     // Test connection first
     const isConnected = await testConnection();
@@ -47,12 +48,12 @@ async function initializeDatabase() {
     try {
       const result = await pool.query("SELECT to_regclass('users') as exists");
       if (result.rows[0].exists) {
-        console.log('✅ Database schema already exists, skipping initialization');
+        log.database('Database schema already exists, skipping initialization');
         return pool;
       }
     } catch (err) {
       // If query fails, database likely needs initialization
-      console.log('🔄 Database schema check failed, proceeding with initialization...');
+      log.database('Database schema check failed, proceeding with initialization...');
     }
 
     // Read and execute schema file
@@ -61,22 +62,22 @@ async function initializeDatabase() {
       try {
         const schema = fs.readFileSync(schemaPath, 'utf8');
         await pool.query(schema);
-        console.log('✅ Database schema initialized successfully');
+        log.database('Database schema initialized successfully');
       } catch (err) {
         // Handle "already exists" errors gracefully
         if (err.code === '42710' || err.code === '42P07') {
-          console.log('✅ Database schema components already exist, continuing...');
+          log.database('Database schema components already exist, continuing...');
         } else {
           throw err;
         }
       }
     } else {
-      console.warn('⚠️ PostgreSQL schema file not found, skipping schema initialization');
+      log.warn('PostgreSQL schema file not found, skipping schema initialization');
     }
 
     return pool;
   } catch (err) {
-    console.error('❌ Failed to initialize PostgreSQL database:', err);
+    log.error('Failed to initialize PostgreSQL database', err);
     throw err;
   }
 }
@@ -87,7 +88,7 @@ async function ensureAdminExists() {
   const adminPassword = process.env.ADMIN_PASSWORD;
   
   if (!adminUsername || !adminPassword) {
-    console.warn('⚠️ Admin credentials not found in environment variables');
+    log.warn('Admin credentials not found in environment variables');
     return;
   }
 
@@ -103,17 +104,17 @@ async function ensureAdminExists() {
         'UPDATE users SET password_hash = $1, role = $2, approved = $3, updated_at = NOW() WHERE username = $4',
         [hash, 'admin', true, adminUsername]
       );
-      console.log(`✅ Admin user '${adminUsername}' updated successfully`);
+      log.admin(adminUsername, 'Admin user updated successfully');
     } else {
       // Create new admin user
       await pool.query(
         'INSERT INTO users (username, password_hash, role, approved, created_at) VALUES ($1, $2, $3, $4, NOW())',
         [adminUsername, hash, 'admin', true]
       );
-      console.log(`✅ Admin user '${adminUsername}' created successfully`);
+      log.admin(adminUsername, 'Admin user created successfully');
     }
   } catch (err) {
-    console.error('❌ Error ensuring admin user exists:', err);
+    log.error('Error ensuring admin user exists', err);
   }
 }
 
@@ -121,9 +122,9 @@ async function ensureAdminExists() {
 async function closeDatabase() {
   try {
     await pool.end();
-    console.log('✅ PostgreSQL connection pool closed');
+    log.database('PostgreSQL connection pool closed');
   } catch (err) {
-    console.error('❌ Error closing PostgreSQL connection pool:', err);
+    log.error('Error closing PostgreSQL connection pool', err);
   }
 }
 

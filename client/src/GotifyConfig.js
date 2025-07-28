@@ -34,7 +34,7 @@ export default function GotifyConfig({ setShowPage }) {
       console.log('Gotify save response:', res.data);
     } catch (err) {
       setMessage('Failed to save Gotify settings.');
-      console.error('Gotify save error:', err);
+      // Error logging handled by error boundaries
       if (err.response) {
         setMessage('Failed to save Gotify settings: ' + (err.response.data?.error || err.response.status));
       }

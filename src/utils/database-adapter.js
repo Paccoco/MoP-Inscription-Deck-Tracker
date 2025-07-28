@@ -1,17 +1,13 @@
 require('dotenv').config();
+const log = require('./logger');
 
-// Database adapter that switches between SQLite and PostgreSQL
-const DB_TYPE = process.env.DB_TYPE || 'sqlite'; // 'sqlite' or 'postgresql'
+// Choose database implementation based on environment
+const dbType = process.env.DB_TYPE || 'sqlite';
 
-let dbModule;
-
-if (DB_TYPE === 'postgresql') {
-  console.log('🐘 Using PostgreSQL database');
-  dbModule = require('./database-postgres');
+if (dbType === 'postgresql') {
+  log.database('Using PostgreSQL database');
+  module.exports = require('./database-postgres');
 } else {
-  console.log('🗄️ Using SQLite database');
-  dbModule = require('./database');
+  log.database('Using SQLite database');
+  module.exports = require('./database');
 }
-
-// Export the appropriate database module
-module.exports = dbModule;

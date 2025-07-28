@@ -12,9 +12,9 @@ const sourceDb = sourceDbArg ? sourceDbArg.split('=')[1] : 'cards.db';
 
 // Available databases
 const availableDatabases = {
-  'cards.db': './cards.db',
+  'cards.db': '../cards.db',
   'cards.old.db': './cards.old.db', 
-  'client': './client/cards.db'
+  'client': '../client/cards.db'
 };
 
 // Validate source database

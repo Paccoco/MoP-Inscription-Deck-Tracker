@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const log = require('./src/utils/logger');
 
 // Import utilities and services
 const { initializeDatabase, ensureAdminExists } = require('./src/utils/database-adapter');
@@ -57,5 +58,5 @@ app.get('*', (req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`MoP Card Tracker Server v2.0.0-alpha running on port ${PORT}`);
+  log.info(`MoP Card Tracker Server v2.0.0-alpha running on port ${PORT}`);
 });

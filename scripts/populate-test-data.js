@@ -2,7 +2,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bcrypt = require('bcrypt');
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'cards.db');
+const dbPath = path.join(__dirname, '../cards.db');
 const db = new sqlite3.Database(dbPath);
 
 async function populateTestData() {

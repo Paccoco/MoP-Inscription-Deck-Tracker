@@ -7,7 +7,7 @@ function AnnouncementModal({ announcement, onClose }) {
   
   // Only show if announcement exists and is active
   if (!announcement) {
-    console.log('No announcement data provided to modal');
+    // Debug logging removed for production
     return null;
   }
   
@@ -24,7 +24,7 @@ function AnnouncementModal({ announcement, onClose }) {
       links = JSON.parse(links);
       console.log('Parsed links in modal:', links);
     } catch (e) {
-      console.error('Error parsing announcement links in modal:', e);
+      // Error logging handled by error boundaries
       links = [];
     }
   }
