@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enhanced error logging for better debugging of notification failures
   - Production servers can now safely update without database-related iteration errors
 
+### Enhanced
+- **Force Update Script**: Improved handling of package-lock.json conflicts during updates
+  - Auto-cleanup of problematic auto-generated files before stash operations
+  - Better conflict resolution during emergency backup restore
+  - Enhanced error recovery with automatic conflict resolution
+  - Improved .gitignore to prevent future package-lock conflicts
+  - Force update now handles production server file conflicts more reliably
+
 ## [1.2.4] - 2025-07-28
 
 ### Fixed

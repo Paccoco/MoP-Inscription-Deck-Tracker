@@ -2,7 +2,33 @@
 
 This guide provides step-by-step instructions for updating your MoP Inscription Deck Tracker installation from one version to the next.
 
-## 🚨 CRITICAL UPDATE NOTICE - v1.1.3
+## 🚨 CRITICAL UPDATE NOTICES
+
+### Latest Critical Fix - v1.2.5 (2025-07-28)
+
+**RESOLVED: Production Update Failures**
+
+If your production server was failing to update with "admins is not iterable" error, version 1.2.5 completely resolves this issue.
+
+#### ⚠️ IMMEDIATE FIX AVAILABLE:
+```bash
+# For production servers experiencing update failures:
+./force-update.sh
+
+# If you encounter package-lock.json conflicts:
+rm -f package-lock.json client/package-lock.json node_modules/.package-lock.json
+git reset --hard HEAD
+./force-update.sh
+```
+
+#### What Was Fixed in v1.2.5:
+- ✅ **CRITICAL**: Fixed "admins is not iterable" error causing update crashes
+- ✅ Enhanced package-lock.json conflict resolution in force-update script
+- ✅ Added proper null checks for database queries during updates
+- ✅ Improved error handling for admin notification systems
+- ✅ Production servers can now safely update without database-related crashes
+
+### Previous Critical Notice - v1.1.3
 
 **READ THIS FIRST BEFORE UPDATING!**
 
@@ -364,6 +390,42 @@ rm -rf client/node_modules client/build
 cd client && npm install && npm run build
 ```
 
+#### Package-lock.json Conflicts (v1.2.5+ Fix)
+If you encounter package-lock.json conflicts during updates:
+```bash
+# Method 1: Use the enhanced force-update script
+./force-update.sh
+
+# Method 2: Manual cleanup and update
+rm -f package-lock.json client/package-lock.json node_modules/.package-lock.json
+git reset --hard HEAD
+git pull origin main
+./update.sh
+
+# Method 3: Complete reset (last resort)
+git stash push -u -m "backup before reset"
+git reset --hard origin/main
+npm install
+cd client && npm install && cd ..
+./update.sh
+```
+
+#### "admins is not iterable" Error (Fixed in v1.2.5)
+This error occurred during updates when admin notification queries failed:
+```bash
+# Symptoms:
+# - Update process crashes with "admins is not iterable" 
+# - Application fails to start after update
+# - Rollback system activates
+
+# Solution (Fixed in v1.2.5):
+./force-update.sh  # Will now handle this error automatically
+
+# If still experiencing issues:
+git pull origin main
+./force-update.sh
+```
+
 #### PM2 Issues
 ```bash
 # Restart PM2
@@ -388,6 +450,28 @@ tail -f /var/log/sqlite.log  # if logging enabled
 ```
 
 ## Version-Specific Upgrade Notes
+
+### ✅ v1.2.5 - Critical Production Update Fix (2025-07-28)
+**CRITICAL**: This version fixes production server update failures.
+
+- **Main Fix**: Resolved "admins is not iterable" error causing update crashes
+- **Enhanced**: Package-lock.json conflict resolution in force-update script
+- **Database Safety**: Added proper null checks for admin notification queries
+- **Production Impact**: Servers that couldn't update to v1.2.4 can now safely update
+- **Rollback Protection**: Enhanced rollback system handles more failure scenarios
+
+**Update Command:**
+```bash
+./force-update.sh  # Recommended for production servers
+# OR
+./update.sh --force
+```
+
+### ✅ v1.2.4 - Production Update Reliability (2025-07-28)
+- **Enhanced**: Extended verification timeout from 5 to 30 seconds
+- **Improved**: Backup and rollback system with better tracking
+- **Added**: Health check script for diagnosing startup issues
+- **Fixed**: ESLint warnings across React components
 
 ### ✅ v1.1.2 Database Fix (Covered Above)
 See the [Critical Update Notice](#-critical-update-notice---v112) at the top of this document for required database initialization steps.

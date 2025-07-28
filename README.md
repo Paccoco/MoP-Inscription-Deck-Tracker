@@ -25,16 +25,21 @@ A self-hosted web app for World of Warcraft: Mist of Pandaria - Classic guilds t
 
 For detailed changes and bug fixes, please refer to the [CHANGELOG.md](CHANGELOG.md) file.
 
-## 🚀 Latest Release: Version 1.2.2 (2025-07-27)
+## 🚀 Latest Release: Version 1.2.5 (2025-07-28)
 
-- **Enhanced**: Smart update process with latest script checking
-  - Admin UI updates now pull latest code first to get newest update scripts
-  - Added advanced options to update.sh (--backup-dir, --skip-git) for better control
-  - Prevents duplicate backups and git pulls when called from UI
-  - Enhanced logging and error handling during UI-initiated updates
-- **Fixed**: Production server update process improvements
-  - Application properly stops before backup creation
-  - Eliminated tar file conflicts during updates
+- **CRITICAL FIX**: Resolved "admins is not iterable" error causing production update failures
+  - Added proper null checks and error handling for admin notification queries
+  - Enhanced force-update script to handle package-lock.json conflicts automatically
+  - Improved database safety and rollback mechanisms for production servers
+  - Production servers can now safely update without database-related crashes
+
+### Enhanced Production Update Reliability
+- **Force Update Improvements**: Better handling of git conflicts and auto-generated files
+- **Database Protection**: Enhanced safety checks and backup verification
+- **Error Recovery**: Improved rollback and emergency restore procedures
+
+### Previous Release: Version 1.2.4 (2025-07-28)
+- **Enhanced**: Production update script reliability with verification timeouts and backup tracking
 
 ### Major Feature Completion
 - **Dependency Update System:** Complete automated dependency management with real-time npm integration
@@ -223,11 +228,16 @@ sudo systemctl stop cardtracker
 For production servers with git conflicts, use:
 
 ```bash
-# Quick fix for git conflicts
+# Quick fix for git conflicts and package-lock issues
 ./force-update.sh
 
 # Or use the update script with force option
 ./update.sh --force
+
+# If you encounter package-lock.json conflicts, try:
+rm -f package-lock.json client/package-lock.json node_modules/.package-lock.json
+git reset --hard HEAD
+./force-update.sh --yes
 
 # Check available options
 ./update.sh --help

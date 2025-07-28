@@ -8,6 +8,9 @@
 node_modules/
 client/node_modules/
 
+# Package lock files that might cause conflicts on production
+node_modules/.package-lock.json
+
 # Build output
 client/build/
 

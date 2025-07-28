@@ -40,6 +40,7 @@
 - **Update documentation:**
   - **README.md:** Only update for major features, API changes, or setup modifications. Keep it focused on what users need to know.
   - **CHANGELOG.md:** Document all changes with version numbers, dates, and detailed descriptions categorized as "Added", "Changed", "Fixed", or "Removed".
+  - **HOWTOUPDATE.md:** ALWAYS check and update when making changes to update scripts, fixing production issues, or releasing new versions. Add version-specific upgrade notes and troubleshooting for any new issues.
   - **PRODUCTION-DEPLOYMENT.md:** For production server deployments, updates, and troubleshooting. Always reference this guide when helping with production environments.
 - **Comment non-obvious code** and ensure everything is understandable to a low-level developer.
 - When writing complex logic, **add an inline `# Reason:` comment** explaining the why, not just the what.

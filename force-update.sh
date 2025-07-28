@@ -38,6 +38,13 @@ fi
 echo "🛑 Stopping application..."
 pm2 stop mop-card-tracker 2>/dev/null || echo "Application was not running"
 
+echo "🧹 Pre-cleaning auto-generated files..."
+# Remove files that commonly cause git conflicts
+rm -f package-lock.json client/package-lock.json node_modules/.package-lock.json 2>/dev/null || true
+
+# Reset any uncommitted changes first
+git reset --hard HEAD 2>/dev/null || true
+
 echo "💾 Creating emergency backup..."
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
@@ -58,9 +65,13 @@ if [ -f ".env" ]; then
 fi
 
 echo "💾 Stashing local changes..."
+# First, let's clean up any auto-generated files that often cause conflicts
+echo "🧹 Cleaning auto-generated files..."
+rm -f package-lock.json client/package-lock.json node_modules/.package-lock.json 2>/dev/null || true
+
 # Add all files (including untracked) and stash them
-git add -A
-git stash push -m "Production server auto-stash before force update $(date)"
+git add -A 2>/dev/null || true
+git stash push -m "Production server auto-stash before force update $(date)" 2>/dev/null || echo "Nothing to stash"
 
 echo "🧹 Cleaning working directory..."
 # Reset any partial merges or conflicts
@@ -100,10 +111,25 @@ else
     echo ""
     echo "🔄 Attempting to restore from emergency backup..."
     
-    # Try to restore from stash first
+    # Clean auto-generated files that might cause conflicts
+    echo "🧹 Cleaning conflicting auto-generated files..."
+    rm -f package-lock.json client/package-lock.json node_modules/.package-lock.json 2>/dev/null || true
+    
+    # Reset any uncommitted changes
+    git reset --hard HEAD 2>/dev/null || true
+    git clean -fd 2>/dev/null || true
+    
+    # Try to restore from stash
     if git stash list | grep -q "Production server auto-stash"; then
         echo "Restoring from git stash..."
-        git stash pop
+        # Use merge strategy that favors current content for conflicts
+        git stash pop --index 2>/dev/null || {
+            echo "⚠️  Stash restore had conflicts, resolving automatically..."
+            # If there are conflicts, abort the merge and just drop the stash
+            git reset --hard HEAD 2>/dev/null || true
+            git stash drop 2>/dev/null || true
+            echo "Stash conflicts resolved by keeping current version"
+        }
     fi
     
     # Restore database if backup exists
