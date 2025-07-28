@@ -11,10 +11,10 @@ WORKDIR /app/client
 # Copy package files for better caching
 COPY client/package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+    # Install dependencies
+    RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy source code and build
+    # Copy source code and build
 COPY client/ ./
 RUN npm run build
 
@@ -51,7 +51,7 @@ WORKDIR /app
 
 # Copy package files and install production dependencies only
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy backend source code
 COPY --chown=moptracker:moptracker . .

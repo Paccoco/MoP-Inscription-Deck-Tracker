@@ -1,0 +1,117 @@
+require('dotenv').config();
+const { Pool } = require('pg');
+const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
+
+// PostgreSQL connection configuration
+const poolConfig = {
+  user: process.env.DB_USER || 'mop_user',
+  host: process.env.DB_HOST || 'localhost',
+  database: process.env.DB_NAME || 'mop_card_tracker',
+  password: process.env.DB_PASSWORD || 'mop_password',
+  port: process.env.DB_PORT || 5432,
+  max: 20, // Maximum number of clients in the pool
+  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
+  connectionTimeoutMillis: 2000, // How long to wait for a connection
+};
+
+// Create connection pool
+const pool = new Pool(poolConfig);
+
+// Test database connection
+async function testConnection() {
+  try {
+    const client = await pool.connect();
+    console.log('✅ Connected to PostgreSQL database successfully');
+    client.release();
+    return true;
+  } catch (err) {
+    console.error('❌ Failed to connect to PostgreSQL database:', err.message);
+    return false;
+  }
+}
+
+// Initialize database schema
+async function initializeDatabase() {
+  try {
+    console.log('🔄 Initializing PostgreSQL database schema...');
+    
+    // Test connection first
+    const isConnected = await testConnection();
+    if (!isConnected) {
+      throw new Error('Unable to connect to PostgreSQL database');
+    }
+
+    // Read and execute schema file
+    const schemaPath = path.join(__dirname, '../../postgresql-schema.sql');
+    if (fs.existsSync(schemaPath)) {
+      const schema = fs.readFileSync(schemaPath, 'utf8');
+      await pool.query(schema);
+      console.log('✅ Database schema initialized successfully');
+    } else {
+      console.warn('⚠️ PostgreSQL schema file not found, skipping schema initialization');
+    }
+
+    return pool;
+  } catch (err) {
+    console.error('❌ Failed to initialize PostgreSQL database:', err);
+    throw err;
+  }
+}
+
+// Ensure admin user exists
+async function ensureAdminExists() {
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  if (!adminUsername || !adminPassword) {
+    console.warn('⚠️ Admin credentials not found in environment variables');
+    return;
+  }
+
+  try {
+    // Check if admin user exists
+    const result = await pool.query('SELECT * FROM users WHERE username = $1', [adminUsername]);
+    
+    const hash = await bcrypt.hash(adminPassword, 10);
+    
+    if (result.rows.length > 0) {
+      // Update existing admin user
+      await pool.query(
+        'UPDATE users SET password_hash = $1, role = $2, approved = $3, updated_at = NOW() WHERE username = $4',
+        [hash, 'admin', true, adminUsername]
+      );
+      console.log(`✅ Admin user '${adminUsername}' updated successfully`);
+    } else {
+      // Create new admin user
+      await pool.query(
+        'INSERT INTO users (username, password_hash, role, approved, created_at) VALUES ($1, $2, $3, $4, NOW())',
+        [adminUsername, hash, 'admin', true]
+      );
+      console.log(`✅ Admin user '${adminUsername}' created successfully`);
+    }
+  } catch (err) {
+    console.error('❌ Error ensuring admin user exists:', err);
+  }
+}
+
+// Graceful shutdown
+async function closeDatabase() {
+  try {
+    await pool.end();
+    console.log('✅ PostgreSQL connection pool closed');
+  } catch (err) {
+    console.error('❌ Error closing PostgreSQL connection pool:', err);
+  }
+}
+
+// Export the pool instance and utility functions
+module.exports = {
+  db: pool,
+  query: (text, params) => pool.query(text, params),
+  initializeDatabase,
+  ensureAdminExists,
+  testConnection,
+  closeDatabase
+};

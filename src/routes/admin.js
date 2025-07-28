@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const { auth, requireAdmin } = require('../middleware/auth');
-const { db } = require('../utils/database');
+const { db, query } = require('../utils/database-adapter');
 const { logActivity } = require('../utils/activity');
 const { sendDiscordNotification } = require('../services/notifications');
 

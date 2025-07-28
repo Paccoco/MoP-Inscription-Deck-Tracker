@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 
 // Import utilities and services
-const { initializeDatabase, ensureAdminExists } = require('./src/utils/database');
+const { initializeDatabase, ensureAdminExists } = require('./src/utils/database-adapter');
 const { initializeDiscordWebhook } = require('./src/services/notifications');
 
 // Import route modules

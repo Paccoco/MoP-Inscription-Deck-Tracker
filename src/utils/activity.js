@@ -1,4 +1,4 @@
-const { db } = require('./database');
+const { db } = require('./database-adapter');
 
 // Log user activity to database
 function logActivity(username, action) {

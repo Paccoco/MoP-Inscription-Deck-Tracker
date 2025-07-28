@@ -28,6 +28,23 @@ function initializeDatabase() {
   return db;
 }
 
+// SQLite query wrapper to match PostgreSQL interface
+function query(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    if (sql.trim().toLowerCase().startsWith('select')) {
+      db.all(sql, params, (err, rows) => {
+        if (err) reject(err);
+        else resolve({ rows });
+      });
+    } else {
+      db.run(sql, params, function(err) {
+        if (err) reject(err);
+        else resolve({ rowCount: this.changes, lastID: this.lastID });
+      });
+    }
+  });
+}
+
 // Ensure admin user exists on startup
 async function ensureAdminExists() {
   const adminUsername = process.env.ADMIN_USERNAME;
@@ -80,6 +97,9 @@ if (!db) {
 
 module.exports = {
   db,
+  query,
   initializeDatabase,
-  ensureAdminExists
+  ensureAdminExists,
+  testConnection: () => Promise.resolve(true), // SQLite doesn't need connection testing
+  closeDatabase: () => Promise.resolve() // SQLite auto-closes
 };

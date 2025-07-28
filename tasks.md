@@ -22,8 +22,37 @@
 - Maintain existing functionality during refactoring
 - Add comprehensive tests for new modules
 
-### 2. Complete Docker Containerization
-**Priority: High** - Dockerize entire application stack for simplified deployment
+### 2. Comprehensive Code Error Checking
+**Priority: High** - Identify and fix potential runtime issues
+
+**Areas to check:**
+- ESLint/JSHint analysis for syntax errors and best practices
+- TypeScript-style type checking for JavaScript files
+- Unused variables and imports cleanup
+- Console.log statements removal for production
+- Error handling consistency across all files
+- Database query error handling and null checks
+- Frontend state management error boundaries
+
+### 3. Database Query Optimization & Security
+**Priority: High** - Improve database performance and security
+
+**Issues found:**
+- Multiple `SELECT *` queries should specify required columns only
+- Raw SQL queries without proper error handling in some places
+- Potential N+1 query problems in admin dashboard
+- Missing database indexes for frequently queried columns
+- Some database operations lack proper transaction handling
+
+**Sub-tasks:**
+- Replace `SELECT *` with specific column lists
+- Add database indexes for performance optimization
+- Implement proper transaction handling for multi-step operations
+- Add SQL injection protection validation
+- Optimize complex queries with JOINs instead of multiple round trips
+
+### 4. Complete Docker Containerization
+**Priority: Medium** - Dockerize entire application stack for simplified deployment
 
 **Benefits:**
 - **One-Command Deployment**: `docker-compose up` deploys entire stack (app + PostgreSQL)
@@ -43,7 +72,7 @@
 - **Development Mode**: Hot reload for development, production build for deployment
 
 **Sub-tasks:**
-- Create optimized Dockerfile for Node.js application (multi-stage build)
+- Complete optimized Dockerfile for Node.js application (multi-stage build)
 - Design docker-compose.yml with PostgreSQL, web app, and networking
 - Configure persistent volumes for PostgreSQL data and application logs
 - Add health checks for all containers with automatic restart policies
@@ -54,48 +83,8 @@
 - Add container monitoring and logging configuration
 - Update documentation for Docker-based deployment
 
-### 3. Database System Replacement: SQLite → PostgreSQL
-**Priority: High** - Replace SQLite with PostgreSQL for production scalability
-
-**Benefits:**
-- Better concurrent user support (50+ simultaneous connections)
-- Advanced features: JSON columns, full-text search, window functions
-- Enterprise-grade backup and recovery solutions
-- Superior performance for analytics and complex queries
-- Connection pooling and better resource management
-
-**Implementation Plan (Fresh Install - No Migration Needed):**
-- Design PostgreSQL schema with improved data types (UUID, JSONB, timestamps)
-- Update application code to use PostgreSQL connection pooling
-- Implement enhanced indexing strategy for better performance
-- Add advanced PostgreSQL features: full-text search, analytics queries
-- Create comprehensive backup and recovery procedures
-- **Note**: PostgreSQL will be containerized as part of Docker implementation
-
-**Sub-tasks:**
-- Design PostgreSQL schema with UUID primary keys and JSON columns
-- Create database initialization scripts for PostgreSQL
-- Update database abstraction layer for PostgreSQL compatibility
-- Implement connection pooling with proper error handling
-- Add advanced PostgreSQL features (full-text search, window functions)
-- Update backup scripts for PostgreSQL (pg_dump instead of file copy)
-- Create PostgreSQL Docker container configuration
-- Add database health checks and monitoring
-
-### 3. Comprehensive Code Error Checking
-**Priority: High** - Identify and fix potential runtime issues
-
-**Areas to check:**
-- ESLint/JSHint analysis for syntax errors and best practices
-- TypeScript-style type checking for JavaScript files
-- Unused variables and imports cleanup
-- Console.log statements removal for production
-- Error handling consistency across all files
-- Database query error handling and null checks
-- Frontend state management error boundaries
-
-### 4. Database Query Optimization & Security
-**Priority: High** - Improve database performance and security
+### 5. Database System Replacement: SQLite → PostgreSQL
+**Priority: Medium** - Replace SQLite with PostgreSQL for production scalability
 
 **Issues found:**
 - Multiple `SELECT *` queries should specify required columns only
@@ -111,7 +100,7 @@
 - Add SQL injection protection validation
 - Optimize complex queries with JOINs instead of multiple round trips
 
-### 5. Production Console Output Cleanup
+### 6. Production Console Output Cleanup
 **Priority: Medium** - Remove debug output for production readiness
 
 **Issues found:**
@@ -127,7 +116,7 @@
 - Add environment-based logging configuration
 - Preserve error logging while removing debug output
 
-### 6. Frontend Performance & Code Quality Issues  
+### 7. Frontend Performance & Code Quality Issues  
 **Priority: Medium** - Optimize React components and patterns
 
 **Issues found:**
@@ -145,7 +134,31 @@
 - Optimize re-rendering patterns with useMemo
 - Clean up event listeners and subscriptions in useEffect cleanup
 
-### 8. Security Vulnerabilities & Input Validation
+### 8. Legacy File System Cleanup
+**Priority: Medium** - Remove obsolete files and unused code after modularization
+
+**Cleanup needed:**
+- Original monolithic `server-auth.js` (1,669 lines) after modular migration is complete
+- Duplicate or obsolete script files that are no longer used
+- Unused configuration files from previous architecture
+- Deprecated deployment scripts replaced by Docker/modular approach
+- Old backup files and temporary development scripts
+- Unused dependencies in package.json (both server and client)
+- Legacy documentation files that no longer apply to 2.0 architecture
+
+**Sub-tasks:**
+- Archive or remove original `server-auth.js` once modular version is tested and deployed
+- Audit all script files in root directory for continued relevance
+- Remove unused npm dependencies using `npm-check-unused` or similar tools
+- Clean up old configuration files (check if still needed for compatibility)
+- Remove temporary files and old backup scripts
+- Update .gitignore to exclude generated/temporary files
+- Document which files were removed and why (for rollback reference)
+- Verify no hard-coded references to removed files exist in codebase
+
+**Note:** This task should be completed after major modularization and Docker work is done and tested in production.
+
+### 9. Security Vulnerabilities & Input Validation
 **Priority: High** - Secure all endpoints and user inputs
 
 **Areas requiring security review:**
@@ -165,7 +178,7 @@
 - Implement proper password strength requirements
 - Add security headers (helmet.js)
 
-### 9. Testing Coverage & Quality
+### 10. Testing Coverage & Quality
 **Priority: Medium** - Improve test coverage and reliability  
 
 **Current test status:**
@@ -184,7 +197,7 @@
 - Add CI/CD pipeline testing automation
 - Create performance benchmarks for critical operations
 
-### 10. Advanced Architecture & Scaling Improvements
+### 11. Advanced Architecture & Scaling Improvements
 **Priority: Low** - Advanced features for future growth
 
 **Potential improvements:**

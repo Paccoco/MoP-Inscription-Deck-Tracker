@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { db } = require('../utils/database');
+const { db } = require('../utils/database-adapter');
 
 // Discord webhook configuration
 const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || '';

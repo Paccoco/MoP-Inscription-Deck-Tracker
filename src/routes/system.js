@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { auth, requireAdmin } = require('../middleware/auth');
-const { db } = require('../utils/database');
+const { db, query } = require('../utils/database-adapter');
 const { logActivity } = require('../utils/activity');
 const { sendDiscordNotification } = require('../services/notifications');
 

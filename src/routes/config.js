@@ -1,6 +1,6 @@
 const express = require('express');
 const { auth, requireAdmin } = require('../middleware/auth');
-const { db } = require('../utils/database');
+const { db, query } = require('../utils/database-adapter');
 const { updateDiscordWebhookUrl, getDiscordWebhookUrl } = require('../services/notifications');
 
 const router = express.Router();
