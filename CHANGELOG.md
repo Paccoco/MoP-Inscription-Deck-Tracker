@@ -5,6 +5,49 @@ All notable changes to the MoP Inscription Deck Tracker will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2025-07-28
+
+### Fixed
+- **Production Update Issues**: Resolved application startup verification failures
+  - Extended verification timeout from 5 to 30 seconds with multiple retry attempts
+  - Enhanced backup and rollback system to handle missing backup scenarios
+  - Added backup tracking file to ensure proper restoration paths
+  - Improved error handling and debugging information during failed updates
+  - Fixed application not responding after PM2 restart by allowing proper startup time
+
+### Enhanced  
+- **Update Script Reliability**: Major improvements to production server update process
+  - Enhanced rollback function to search multiple backup locations
+  - Added comprehensive health check script for diagnosing startup issues
+  - Better error messages and recovery guidance for failed updates
+  - Improved backup creation with metadata tracking
+
+### Code Quality
+- **ESLint Warnings**: Fixed all React build warnings for cleaner builds
+  - Removed unused variables and imports across multiple components
+  - Fixed React hooks dependency warnings with proper useCallback usage
+  - Corrected error object throwing patterns for better error handling
+  - Clean builds without warnings for better production deployment experience
+
+## [1.2.4] - 2025-07-28
+
+### Fixed
+- **Production Update Issues**: Enhanced update scripts to handle common production server problems
+  - Improved verification process with longer startup time and multiple retry attempts
+  - Enhanced rollback functionality with better backup detection and recovery
+  - Fixed force-update script with proper emergency backup and error handling
+  - Added comprehensive health check script for debugging application issues
+  - Better error handling and logging during update process
+
+### Enhanced
+- **ESLint Warnings**: Cleaned up React code to eliminate build warnings
+  - Removed unused variables in Admin.js, App.js, CompletedDecks.js, GotifyConfig.js, and Profile.js
+  - Fixed React hooks dependency warnings
+  - Improved error handling consistency across components
+- **Developer Experience**: Added health-check.sh script for quick system diagnostics
+  - Comprehensive application, database, and system resource checks
+  - Helpful debugging information and common solution suggestions
+
 ## [1.2.3] - 2025-07-27
 
 ### Added

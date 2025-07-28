@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { useAutoRefresh } from './hooks';
 
 function CompletedDecks() {
@@ -11,13 +10,13 @@ function CompletedDecks() {
     });
     if (res.status === 401) {
       localStorage.removeItem('token');
-      throw { response: { status: 401 } };
+      throw new Error('Session expired');
     }
     const data = await res.json();
     setDecks(Array.isArray(data) ? data : []);
     return data;
   };
-  const { sessionExpired, loading, error } = useAutoRefresh(fetchDecks, 30000);
+  const { sessionExpired } = useAutoRefresh(fetchDecks, 30000);
   if (sessionExpired) return <div className="session-expired">Session expired. Please log in again.</div>;
 
   return (

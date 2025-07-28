@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 
 export function useFetchCards() {
@@ -47,32 +47,36 @@ export function useAutoRefresh(fetchFn, interval = 30000) {
   const [error, setError] = useState(null);
   const intervalRef = useRef();
 
-  const wrappedFetch = async () => {
-    if (sessionExpired) return null; // Stop fetching after session expired
-    setLoading(true);
+  const wrappedFetch = useCallback(async () => {
+    if (!fetchFn) {
+      setLoading(false);
+      return null;
+    }
+    
     try {
-      const result = await fetchFn();
       setError(null);
+      const result = await fetchFn();
       setLoading(false);
       return result;
     } catch (err) {
-      if (err.response && err.response.status === 401) {
+      if (err.response?.status === 401 || err.message === 'Session expired') {
         setSessionExpired(true);
-        localStorage.removeItem('token');
-        if (intervalRef.current) clearInterval(intervalRef.current); // Stop interval immediately
+        clearInterval(intervalRef.current);
       } else {
-        setError('Failed to fetch data.');
+        setError(err.message || 'An error occurred');
       }
       setLoading(false);
       return null;
     }
-  };
+  }, [fetchFn]);
 
   useEffect(() => {
+    if (!fetchFn) return;
+    
     wrappedFetch();
     intervalRef.current = setInterval(wrappedFetch, interval);
     return () => clearInterval(intervalRef.current);
-  }, []);
+  }, [interval, wrappedFetch, fetchFn]);
 
   return { sessionExpired, loading, error };
 }

@@ -4,7 +4,6 @@ import './App.css';
 import Register from './Register';
 import Login from './Login';
 import Admin from './Admin';
-import CompletedDecks from './CompletedDecks';
 import Profile from './Profile';
 import Notifications from './Notifications';
 import './Notifications.css';
@@ -53,7 +52,6 @@ const deckTrinketClassicMap = {
 function ActivityLog({ isAdmin, setShowPage }) {
   const [log, setLog] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const endpoint = isAdmin ? '/api/activity/all' : '/api/activity';
@@ -65,7 +63,7 @@ function ActivityLog({ isAdmin, setShowPage }) {
           setLog(res.data);
         } else {
           setLog([]);
-          setError('No activity data received.');
+          console.error('No activity data received.');
         }
         setLoading(false);
       })
@@ -316,18 +314,22 @@ function App() {
     return result;
   }
   const deckStatus = getDeckStatus(cards);
-  const deckCardCounts = getDeckCardCounts(cards);
+  // Note: deckCardCounts available if needed for future features
+  // const deckCardCounts = getDeckCardCounts(cards);
   const username = profile?.username || auth.username || '';
 
   // Custom hook (must be called at top level)
   const fetchProfile = async () => {
     const token = localStorage.getItem('token');
     const res = await fetch('/api/profile', { headers: { Authorization: `Bearer ${token}` } });
-    if (res.status === 401) { localStorage.removeItem('token'); throw { response: { status: 401 } }; }
+    if (res.status === 401) { 
+      localStorage.removeItem('token'); 
+      throw new Error('Session expired');
+    }
     const data = await res.json();
     setProfile(data); return data;
   };
-  const { sessionExpired, loading, error } = useAutoRefresh(token ? fetchProfile : null, 30000);
+  const { sessionExpired } = useAutoRefresh(token ? fetchProfile : null, 30000);
 
   // Early returns after all hooks
   if (!token && !auth.loggedIn) {

@@ -14,7 +14,6 @@ export default function GotifyConfig({ setShowPage }) {
   const [token, setToken] = useState('');
   const [types, setTypes] = useState([]);
   const [message, setMessage] = useState('');
-  const [config, setConfig] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -55,13 +54,15 @@ export default function GotifyConfig({ setShowPage }) {
     });
     if (res.status === 401) {
       localStorage.removeItem('token');
-      throw { response: { status: 401 } };
+      throw new Error('Session expired');
     }
     const data = await res.json();
-    setConfig(data);
+    setServer(data.server || '');
+    setToken(data.token || '');
+    setTypes(data.types || []);
     return data;
   };
-  const { sessionExpired, loading, error } = useAutoRefresh(fetchConfig, 30000);
+  const { sessionExpired } = useAutoRefresh(fetchConfig, 30000);
   if (sessionExpired) {
     const handleLogin = () => {
       localStorage.removeItem('token');

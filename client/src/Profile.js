@@ -13,7 +13,6 @@ const themes = [
 function Profile({ setShowPage }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedTheme, setSelectedTheme] = useState(localStorage.getItem('theme') || 'mop-green');
 
   const handleThemeChange = (e) => {

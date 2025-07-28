@@ -64,7 +64,7 @@ function Admin({ setShowPage }) {
     }
   };
 
-  const { sessionExpired, loading, error: autoError } = useAutoRefresh(fetchAllAdminData, 30000);
+  const { sessionExpired } = useAutoRefresh(fetchAllAdminData, 30000);
 
   useEffect(() => {
     fetchAllAdminData();

@@ -93,6 +93,11 @@ create_backup() {
         return 0
     fi
     
+    # Create backup info file to track backup details
+    echo "BACKUP_TIMESTAMP=$TIMESTAMP" > "$BACKUP_DIR/backup-info.txt"
+    echo "APP_DIR=$APP_DIR" >> "$BACKUP_DIR/backup-info.txt"
+    echo "BACKUP_DATE=$(date)" >> "$BACKUP_DIR/backup-info.txt"
+    
     # Backup database
     if [ -f "$APP_DIR/cards.db" ]; then
         cp "$APP_DIR/cards.db" "$BACKUP_DIR/cards.db.backup-$TIMESTAMP"
@@ -258,16 +263,34 @@ verify_update() {
         return 1
     fi
     
-    # Check if app responds
-    sleep 5
-    if curl -f http://localhost:5000/api/version >/dev/null 2>&1; then
-        echo "✅ Application is responding"
-    else
-        echo "❌ Application is not responding"
-        return 1
-    fi
+    # Wait longer for app to fully start and become responsive
+    echo "Waiting for application to fully start (30 seconds)..."
+    sleep 30
     
-    echo "Update verification successful!"
+    # Try multiple times to check if app responds
+    local retries=3
+    for i in $(seq 1 $retries); do
+        echo "Checking application response (attempt $i/$retries)..."
+        if curl -f --max-time 10 http://localhost:5000/api/version >/dev/null 2>&1; then
+            echo "✅ Application is responding"
+            echo "Update verification successful!"
+            return 0
+        else
+            echo "Application not responding on attempt $i/$retries"
+            if [ $i -lt $retries ]; then
+                echo "Waiting 10 seconds before next attempt..."
+                sleep 10
+            fi
+        fi
+    done
+    
+    echo "❌ Application is not responding after $retries attempts"
+    
+    # Show recent PM2 logs for debugging
+    echo "Recent PM2 logs:"
+    pm2 logs mop-card-tracker --lines 10 --nostream
+    
+    return 1
 }
 
 # Function to rollback if needed
@@ -277,20 +300,69 @@ rollback() {
     # Stop current application
     pm2 stop mop-card-tracker 2>/dev/null || true
     
-    # Restore from backup
-    if [ -f "$BACKUP_DIR/app-backup-$TIMESTAMP.tar.gz" ]; then
-        echo "Restoring from backup..."
+    # Find the latest backup in the backup directory
+    local latest_backup=""
+    local backup_timestamp=""
+    
+    # Try to get backup info from the current backup directory first
+    if [ -f "$BACKUP_DIR/backup-info.txt" ]; then
+        backup_timestamp=$(grep "BACKUP_TIMESTAMP=" "$BACKUP_DIR/backup-info.txt" | cut -d'=' -f2)
+        if [ -n "$backup_timestamp" ]; then
+            latest_backup="$BACKUP_DIR/app-backup-$backup_timestamp.tar.gz"
+        fi
+    fi
+    
+    # If no specific backup found, find the most recent one
+    if [ -z "$latest_backup" ] || [ ! -f "$latest_backup" ]; then
+        echo "Looking for latest backup in $BACKUP_DIR..."
+        latest_backup=$(find "$BACKUP_DIR" -name "app-backup-*.tar.gz" -type f -exec ls -t {} + | head -1)
+    fi
+    
+    # If still no backup, try the global backup directory
+    if [ -z "$latest_backup" ] || [ ! -f "$latest_backup" ]; then
+        echo "Looking for latest backup in $HOME/mop-backups..."
+        latest_backup=$(find "$HOME/mop-backups" -name "app-backup-*.tar.gz" -type f -exec ls -t {} + 2>/dev/null | head -1)
+    fi
+    
+    if [ -n "$latest_backup" ] && [ -f "$latest_backup" ]; then
+        echo "Restoring from backup: $latest_backup"
         cd "$(dirname "$APP_DIR")"
-        rm -rf "$APP_DIR"
-        tar -xzf "$BACKUP_DIR/app-backup-$TIMESTAMP.tar.gz"
+        
+        # Backup the current (failed) state
+        if [ -d "$APP_DIR" ]; then
+            mv "$APP_DIR" "${APP_DIR}.failed-$(date +%Y%m%d_%H%M%S)"
+        fi
+        
+        # Restore from backup
+        tar -xzf "$latest_backup"
+        
+        # Restore database if available
+        local db_backup=""
+        if [ -n "$backup_timestamp" ]; then
+            db_backup="$BACKUP_DIR/cards.db.backup-$backup_timestamp"
+        else
+            db_backup=$(find "$(dirname "$latest_backup")" -name "cards.db.backup-*" -type f -exec ls -t {} + | head -1)
+        fi
+        
+        if [ -n "$db_backup" ] && [ -f "$db_backup" ]; then
+            echo "Restoring database from: $db_backup"
+            cp "$db_backup" "$APP_DIR/cards.db"
+        fi
         
         # Start application
         cd "$APP_DIR"
         pm2 start ecosystem.config.js
         
-        echo "Rollback completed"
+        echo "✅ Rollback completed successfully"
+        echo "Failed application backed up to: ${APP_DIR}.failed-$(date +%Y%m%d_%H%M%S)"
     else
         echo "❌ No backup found for rollback!"
+        echo "Searched in:"
+        echo "  - $BACKUP_DIR"
+        echo "  - $HOME/mop-backups"
+        echo ""
+        echo "Available backups:"
+        find "$BACKUP_DIR" "$HOME/mop-backups" -name "app-backup-*.tar.gz" -type f 2>/dev/null || echo "  No backups found"
         exit 1
     fi
 }
