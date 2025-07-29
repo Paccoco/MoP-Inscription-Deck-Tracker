@@ -1,6 +1,6 @@
 import React from 'react';
 
-function DeckManagement({ 
+const DeckManagement = React.memo(function DeckManagement({ 
   completedDecks, 
   selectedDeckId, 
   setSelectedDeckId, 
@@ -95,6 +95,6 @@ function DeckManagement({
       </table>
     </div>
   );
-}
+});
 
 export default DeckManagement;

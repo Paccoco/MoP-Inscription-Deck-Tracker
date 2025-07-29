@@ -1,19 +1,64 @@
 # Changelog
 
-# Changelog
-
 All notable changes to this project will be documented in this file.
 
-## [2.0.0-alpha] - In Development
+## [2.0.0-alpha.1] - 2025-07-29
 
 ### Added
+- **LAN Access Configuration**: Configured both frontend and backend servers for network accessibility
+  - **Why**: Enable testing and access from multiple devices on the local network
+  - **How**: Modified server bindings to use 0.0.0.0 instead of localhost, added environment configuration
+  - **Where**: Backend server.js now binds to 0.0.0.0:5000, React dev server configured with HOST=0.0.0.0
+  - **Result**: Application accessible from any device on LAN at http://192.168.0.168:3000
+
+- **Database Interface Migration**: Completed SQLite to PostgreSQL syntax conversion for authentication and cards
+  - **Why**: Resolve runtime errors caused by incompatible database method calls between SQLite and PostgreSQL
+  - **How**: Converted db.all(), db.get(), db.run() calls to PostgreSQL query() with proper async/await and $1 parameters
+  - **Where**: Fixed auth.js login/registration endpoints and cards.js CRUD operations
+  - **Result**: Authentication and card management now fully operational with PostgreSQL backend
+
+- **Frontend API Configuration**: Implemented dynamic API base URL configuration for LAN access
+  - **Why**: React proxy only works for localhost, needed direct backend communication for LAN access
+  - **How**: Created apiConfig.js with environment-based API URL construction using REACT_APP_API_BASE_URL
+  - **Where**: Added client/.env with backend URL, updated Login.js to use dynamic API endpoints
+  - **Result**: Frontend can communicate with backend server across network
+
+### Fixed
+- **Runtime Errors**: Resolved React component errors blocking application startup
+  - **Why**: Application was crashing with null reference and lexical declaration errors
+  - **How**: Added null checks in ErrorBoundary component and fixed useEffect hook ordering
+  - **Where**: Fixed ErrorBoundary.js componentStack access and App.js useEffect dependency issues
+  - **Result**: Application starts cleanly without runtime errors
+
+- **Authentication Schema Mismatch**: Corrected password field reference in authentication
+  - **Why**: Database schema uses password_hash field but auth code was looking for password field
+  - **How**: Updated auth.js to reference user.password_hash instead of user.password in bcrypt comparison
+  - **Where**: Modified login and registration endpoints in src/routes/auth.js
+  - **Result**: User authentication now works correctly with proper password validation
+
+- **Admin Role Detection**: Fixed admin privilege assignment for user accounts
+  - **Why**: JWT tokens used is_admin field but database stores role enum ('admin'/'user')
+  - **How**: Updated login endpoint to check user.role === 'admin' and convert to boolean isAdmin
+  - **Where**: Modified JWT token creation in auth.js login function
+  - **Result**: Admin users now receive proper admin privileges in JWT tokens
+
+- **Database Schema Alignment**: Updated cards API to match actual PostgreSQL schema
+  - **Why**: Frontend was sending requests with fields that don't exist in database (owner, deck)
+  - **How**: Modified cards routes to use user_id instead of owner, removed deck references, added JOIN for username
+  - **Where**: Updated cards.js GET/POST/DELETE endpoints and App.js card creation
+  - **Result**: Card operations now work correctly with proper database schema
+
+### Changed
+- **Production Console Output Cleanup**: Completed comprehensive cleanup of debug output for production readiness
+  - **Why**: Remove debug console.log statements from production code for cleaner logs and better performance
+  - **How**: Replaced 33 console.log statements with proper Winston logging or removed entirely
+  - **Where**: Frontend React components and backend database modules cleaned up
+  - **Result**: Production-ready application with clean logging and no debug output clutter
+
 - **Modular Architecture**: Completely restructured codebase from monolithic to modular design
   - **Why**: Improve code maintainability, readability, and testing by separating concerns
   - **How**: Split 1669-line `server-auth.js` into logical modules with clear responsibilities
   - **Where**: New `/src` directory structure with organized subdirectories
-  
-- **PostgreSQL Database Support**: Added production-grade database system alongside SQLite
-  - **Why**: SQLite limitations with concurrent access and advanced features for production scaling
   - **How**: Created database adapter pattern allowing seamless switching between SQLite/PostgreSQL
   - **Where**: `/src/utils/database-postgres.js`, `/src/utils/database-adapter.js`, `/scripts/setup-postgresql.sh`
   - **Features**: UUID primary keys, JSONB columns, full-text search, connection pooling, advanced indexing
@@ -125,6 +170,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **How**: Created fresh installation procedures with data preservation and migration testing
   - **Where**: `/HOWTOUPDATE.md` - Complete rewrite focusing on fresh installation with data migration
 
+### Task #7 Completed - Frontend Performance & Code Quality Issues
+- **React Performance Optimization**: Added comprehensive React optimization patterns
+  - **Why**: Prevent unnecessary re-renders and improve app performance for better user experience
+  - **How**: Implemented React.memo, useCallback, and useMemo hooks throughout components
+  - **Where**: Main App.js component and child components optimized
+  - **React.memo**: Added to UserManagement and DeckManagement components
+  - **useCallback**: Wrapped event handlers (handleSubmit, handleChange, handleDelete, handleLogout)
+  - **useMemo**: Optimized expensive computations (deckStatus calculation, username derivation)
+  - **Result**: Significantly reduced unnecessary component re-renders and improved performance
+
+- **CSS Performance Optimization**: Replaced all inline styles with CSS classes
+  - **Why**: Inline styles cause performance issues and make styling maintenance difficult
+  - **How**: Extracted 40+ CSS classes from inline styles across React components
+  - **Where**: App.css extended with layout utilities, form controls, text styles, spacing classes
+  - **Components**: App.js, Admin.js, Notifications.js styling converted to CSS classes
+  - **Result**: Better performance, consistent styling, and maintainable CSS architecture
+
+- **Error Boundary Implementation**: Added production-grade error handling
+  - **Why**: Prevent application crashes and provide user-friendly error recovery
+  - **How**: Created ErrorBoundary component with graceful error UI and reload functionality
+  - **Where**: Wrapped main App component in ErrorBoundary with styled error display
+  - **Result**: Application stability with graceful error handling and user recovery options
+
+- **Build Optimization Verification**: React build successful with performance improvements
+  - **Result**: Production build passes with only minor ESLint warnings, app bundle optimized
+
 ### Technical Details
 - **Docker Benefits**: One-command deployment, PostgreSQL integration, isolated environment, easy backups
 - **PostgreSQL Features**: UUID primary keys, JSONB columns, full-text search, connection pooling, advanced analytics
@@ -135,3 +206,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Version History Archive
 
 *Previous versions (1.0.0 - 1.2.5) have been archived. This changelog now tracks changes for Version 2.0+ development.*
+
+### Task #8 Completed - Legacy File System Cleanup
+- **Database Standardization**: Unified database usage across all environments
+  - **Why**: Eliminate development/production discrepancies by using same database system
+  - **How**: Updated database-adapter.js to default to PostgreSQL instead of SQLite
+  - **Where**: Modified .env and .env.example configurations to show PostgreSQL as primary
+  - **Result**: Consistent PostgreSQL usage in development, staging, and production environments
+
+- **Legacy File Cleanup**: Comprehensive removal of obsolete files and dependencies
+  - **Why**: Clean project structure and eliminate potential security vulnerabilities from unused code
+  - **How**: Systematic analysis and removal of obsolete files, moving important ones to backups
+  - **Where**: Root directory cleaned, scripts directory organized, backups/legacy-files/ created
+  - **Files Archived**: 12 legacy files (server-auth.js backup, old databases, test files, configs)
+  - **Dependencies Removed**: 97 unused npm packages (chart.js, express-mongo-sanitize, etc.)
+  - **Result**: ~150MB space saved in node_modules, clean file structure for maintainability
+
+- **Reference Consistency**: Fixed all hard-coded references to legacy architecture
+  - **Why**: Ensure all scripts and documentation point to current modular architecture
+  - **How**: Updated test files, deployment scripts, health checks, and documentation
+  - **Where**: tests/api.test.js, power-restart.sh, health-check.sh, HOWTOUPDATE.md updated
+  - **Result**: No broken references, all systems properly integrated with modular server.js

@@ -23,7 +23,7 @@ npm run build
 cd ..
 
 # Start backend
-nohup node server-auth.js > server.log 2>&1 &
+nohup node server.js > server.log 2>&1 &
 BACKEND_PID=$!
 echo "Backend restarted (PID: $BACKEND_PID)"
 

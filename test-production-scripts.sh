@@ -121,11 +121,11 @@ else
 fi
 
 # Check for main server file
-if [ -f "server-auth.js" ]; then
-    echo -e "${GREEN}✅${NC} server-auth.js exists"
+if [ -f "server.js" ]; then
+    echo -e "${GREEN}✅${NC} server.js exists"
     ((success_count++))
 else
-    echo -e "${RED}❌${NC} server-auth.js missing"
+    echo -e "${RED}❌${NC} server.js missing"
     ((error_count++))
 fi
 

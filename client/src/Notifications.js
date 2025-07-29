@@ -91,25 +91,25 @@ export default function Notifications({ setShowPage }) {
   return (
     <div className="notifications-card">
       <h2>Notifications</h2>
-      <div style={{ marginBottom: 16 }}>
+      <div className="notification-filters">
         <input
           type="text"
           placeholder="Search notifications..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ marginRight: 8 }}
+          className="filter-select"
         />
-        <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ marginRight: 8 }}>
+        <select value={filterType} onChange={e => setFilterType(e.target.value)} className="filter-select">
           <option value="all">All Types</option>
           {types.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
-        <select value={filterRead} onChange={e => setFilterRead(e.target.value)} style={{ marginRight: 8 }}>
+        <select value={filterRead} onChange={e => setFilterRead(e.target.value)} className="filter-select">
           <option value="all">All</option>
           <option value="read">Read</option>
           <option value="unread">Unread</option>
         </select>
         <button disabled={selected.length === 0} onClick={bulkMarkRead}>Mark Selected as Read</button>
-        <button style={{ marginLeft: 8, background: '#c00', color: '#fff' }} onClick={deleteAllNotifications}>Delete All</button>
+        <button className="delete-all-button" onClick={deleteAllNotifications}>Delete All</button>
       </div>
       {loading ? (
         <div>Loading...</div>
@@ -130,23 +130,23 @@ export default function Notifications({ setShowPage }) {
                       ? [...selected, n.id]
                       : selected.filter(id => id !== n.id));
                   }}
-                  style={{ marginRight: 8 }}
+                  className="filter-select"
                 />
                 <span>{n.message}</span>
                 <span className="notification-date">
                   {n.created_at ? new Date(n.created_at).toLocaleString() : 'Unknown date'}
                 </span>
-                {!n.read && <button style={{ marginLeft: 8 }} onClick={() => markRead(n.id)}>Mark as read</button>}
+                {!n.read && <button className="mark-read-button" onClick={() => markRead(n.id)}>Mark as read</button>}
               </div>
               <div className="notification-actions">
-                <button style={{ background: '#c00', color: '#fff' }} onClick={() => deleteNotification(n.id)}>Delete</button>
+                <button className="delete-button" onClick={() => deleteNotification(n.id)}>Delete</button>
               </div>
             </li>
           ))}
         </ul>
       )}
       {totalPages > 1 && (
-        <div style={{ marginTop: 16 }}>
+        <div className="notification-list-footer">
           <button disabled={page === 1} onClick={() => setPage(page - 1)}>Prev</button>
           <span style={{ margin: '0 8px' }}>Page {page} of {totalPages}</span>
           <button disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</button>

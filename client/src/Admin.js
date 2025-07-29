@@ -137,7 +137,6 @@ function Admin({ setShowPage }) {
   };
 
   const handleSetAnnouncement = async (data) => {
-    console.log('Setting announcement with data:', data);
     try {
       const response = await fetch('/api/admin/announcement', {
         method: 'POST',
@@ -149,7 +148,6 @@ function Admin({ setShowPage }) {
       });
       
       const result = await response.json();
-      console.log('Announcement API response:', result);
       
       if (response.ok) {
         alert('Announcement pushed successfully!');
@@ -162,7 +160,6 @@ function Admin({ setShowPage }) {
     }
   };
   const handleClearAnnouncement = async () => {
-    // Debug logging removed for production
     try {
       const response = await fetch('/api/admin/announcement', {
         method: 'DELETE',
@@ -170,7 +167,6 @@ function Admin({ setShowPage }) {
       });
       
       const result = await response.json();
-      console.log('Clear announcement API response:', result);
       
       if (response.ok) {
         alert('Announcements cleared successfully!');
@@ -288,29 +284,21 @@ function Admin({ setShowPage }) {
 
   return (
     <div className="admin-card">
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1em', gap: '1em' }}>
+      <div className="flex-center-header">
         <button onClick={goHome}>Home</button>
-        <h2 style={{ margin: 0 }}>Admin Panel</h2>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '1em' }}>
-          <span style={{ fontWeight: 'bold', color: '#4caf50' }}>Server Version: {serverVersion}</span>
+        <h2 className="no-margin">Admin Panel</h2>
+        <div className="margin-left-auto">
+          <span className="server-version-text">Server Version: {serverVersion}</span>
           <button 
             onClick={handleManualVersionCheck} 
             disabled={versionCheckLoading}
-            style={{ 
-              padding: '6px 12px', 
-              fontSize: '0.9em',
-              backgroundColor: versionCheckLoading ? '#ccc' : '#2196f3',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: versionCheckLoading ? 'not-allowed' : 'pointer'
-            }}
+            className="version-check-button"
           >
             {versionCheckLoading ? 'Checking...' : 'Check for Updates'}
           </button>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: '2em', marginBottom: '1em' }}>
+      <div className="flex-gap-2em">
         <div>
           <strong>Pending Approvals:</strong> {pending.length}
         </div>
@@ -322,33 +310,26 @@ function Admin({ setShowPage }) {
         </div>
         <div>
           <strong>Recent Activity:</strong>
-          <ul style={{ margin: 0, paddingLeft: 16 }}>
+          <ul className="admin-list">
             {recentActivity.length === 0 ? <li>No recent activity.</li> : recentActivity.map((a, i) => (
-              <li key={i}>{a.action} <span style={{ fontSize: '0.9em', color: '#666' }}>({new Date(a.timestamp).toLocaleString()})</span></li>
+              <li key={i}>{a.action} <span className="small-gray-text">({new Date(a.timestamp).toLocaleString()})</span></li>
             ))}
           </ul>
         </div>
       </div>
       {error && <div className="error">{error}</div>}
       {versionCheckResult && (
-        <div style={{ 
-          padding: '1em', 
-          marginBottom: '1em', 
-          borderRadius: '8px',
-          backgroundColor: versionCheckResult.updateAvailable ? '#fff3cd' : '#d4edda',
-          border: `1px solid ${versionCheckResult.updateAvailable ? '#ffeaa7' : '#c3e6cb'}`,
-          color: versionCheckResult.updateAvailable ? '#856404' : '#155724'
-        }}>
-          <h4 style={{ margin: '0 0 0.5em 0' }}>
+        <div className={`version-result-box ${versionCheckResult.updateAvailable ? 'version-result-update-available' : 'version-result-up-to-date'}`}>
+          <h4 className="margin-half-em">
             {versionCheckResult.updateAvailable ? '🚀 Update Available!' : '✅ Up to Date'}
           </h4>
           <div><strong>Current Version:</strong> {versionCheckResult.localVersion}</div>
           {versionCheckResult.remoteVersion && (
             <div><strong>Latest Version:</strong> {versionCheckResult.remoteVersion}</div>
           )}
-          <div style={{ marginTop: '0.5em' }}>{versionCheckResult.message}</div>
+          <div className="margin-top-half-em">{versionCheckResult.message}</div>
           {versionCheckResult.updateAvailable && (
-            <div style={{ marginTop: '0.5em', fontSize: '0.9em' }}>
+            <div className="margin-top-half-em small-text">
               Check your notifications for update details, or use the automatic update system below.
             </div>
           )}

@@ -27,11 +27,10 @@ export default function GotifyConfig({ setShowPage }) {
 
   const saveConfig = async () => {
     const jwt = localStorage.getItem('token');
-    console.log('GotifyConfig: JWT token being sent:', jwt);
     try {
+      // eslint-disable-next-line no-unused-vars
       const res = await axios.post('/api/gotify/config', { server, token, types }, { headers: { Authorization: jwt ? `Bearer ${jwt}` : '' } });
       setMessage('Gotify settings saved!');
-      console.log('Gotify save response:', res.data);
     } catch (err) {
       setMessage('Failed to save Gotify settings.');
       // Error logging handled by error boundaries

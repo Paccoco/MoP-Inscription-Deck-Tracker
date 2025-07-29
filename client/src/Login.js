@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { createApiUrl } from './apiConfig';
 
 function Login({ onLogin }) {
   const [form, setForm] = useState({ username: '', password: '' });
@@ -14,7 +15,7 @@ function Login({ onLogin }) {
     e.preventDefault();
     setError('');
     try {
-      const res = await axios.post('/api/login', form);
+      const res = await axios.post(createApiUrl('/api/auth/login'), form);
       localStorage.setItem('token', res.data.token);
       const decoded = jwtDecode(res.data.token);
       onLogin({

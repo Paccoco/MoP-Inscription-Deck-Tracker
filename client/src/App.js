@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import './App.css';
 import Register from './Register';
@@ -35,7 +35,10 @@ function App() {
   const [form, setForm] = useState({ card_name: '', deck: '' });
   const [auth, setAuth] = useState(initialAuth);
   const [showPage, setShowPage] = useState(token ? 'main' : 'login');
+  // Note: completedDecks and deckRequests will be used in future features
+  // eslint-disable-next-line no-unused-vars
   const [completedDecks, setCompletedDecks] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [deckRequests, setDeckRequests] = useState([]);
   const [requestForm, setRequestForm] = useState({ deck: '' });
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -44,24 +47,8 @@ function App() {
   const [announcement, setAnnouncement] = useState(null);
   const [showAnnouncement, setShowAnnouncement] = useState(false);
 
-  // All useEffect hooks at the top level
-  useEffect(() => {
-    fetchCards();
-    fetchAnnouncements(); // Add this line to fetch announcements
-  }, []);
-  useEffect(() => {
-    console.log('useEffect [auth.loggedIn, showPage] triggered', auth.loggedIn, showPage);
-    if (auth.loggedIn) {
-      fetchCompletedDecks();
-      fetchDeckRequests();
-      fetchAnnouncements(); // Add this line to fetch announcements when user logs in
-    }
-  }, [auth.loggedIn, showPage]);
-  useEffect(() => { if (localStorage.getItem('showOnboarding') !== 'false') { setShowOnboarding(true); } }, []);
-  useEffect(() => { if (!token) setShowPage('main'); }, [token]);
-
-  // Function definitions
-  const fetchCards = async () => {
+  // Function definitions with useCallback optimization
+  const fetchCards = useCallback(async () => {
     try {
       const res = await axios.get('/api/cards');
       setCards(res.data);
@@ -69,8 +56,9 @@ function App() {
     } catch (err) {
       setErrorMsg('Error fetching cards');
     }
-  };
-  const fetchCompletedDecks = async () => {
+  }, []);
+
+  const fetchCompletedDecks = useCallback(async () => {
     try {
       const res = await axios.get('/api/completed-decks', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -81,13 +69,13 @@ function App() {
       setCompletedDecks([]);
       setErrorMsg('Error fetching completed decks');
     }
-  };
-  const fetchDeckRequests = async () => {
+  }, []);
+
+  const fetchDeckRequests = useCallback(async () => {
     try {
       const res = await axios.get('/api/deck-requests', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      console.log('fetchDeckRequests response:', res);
       setDeckRequests(res.data);
       setErrorMsg('');
     } catch (err) {
@@ -95,16 +83,14 @@ function App() {
       setDeckRequests([]);
       setErrorMsg('Error fetching deck requests');
     }
-  };
+  }, []);
   
   // Add fetchAnnouncements function
-  const fetchAnnouncements = async () => {
-    // Debug logging removed for production
+  const fetchAnnouncements = useCallback(async () => {
     try {
       const res = await axios.get('/api/announcement', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      console.log('Fetched announcements:', res.data);
       
       if (res.data && res.data.length > 0) {
         // Check for active announcements that haven't expired
@@ -113,32 +99,21 @@ function App() {
           a.active && (!a.expiry || new Date(a.expiry) > now)
         );
         
-        console.log('Active announcements after filtering:', activeAnnouncements);
-        
         if (activeAnnouncements.length > 0) {
           // Check if the user has already dismissed this announcement
           const dismissedAnnouncements = JSON.parse(localStorage.getItem('dismissedAnnouncements') || '[]');
-          console.log('Dismissed announcements from localStorage:', dismissedAnnouncements);
           
           // Find announcements that haven't been dismissed
           const unreadAnnouncements = activeAnnouncements.filter(a => 
             !dismissedAnnouncements.includes(a.id)
           );
           
-          console.log('Unread announcements after filtering dismissed:', unreadAnnouncements);
-          
           if (unreadAnnouncements.length > 0) {
             // The links should already be parsed by the server
             const announcement = unreadAnnouncements[0];
-            console.log('Setting announcement:', announcement);
             setAnnouncement(announcement);
-            // Debug logging removed for production
             setShowAnnouncement(true);
-          } else {
-            // Debug logging removed for production
           }
-        } else {
-          // Debug logging removed for production
         }
       } else {
         // Debug logging removed for production
@@ -146,12 +121,13 @@ function App() {
     } catch (err) {
       // Error logging handled by error boundaries
     }
-  };
+  }, []);
   
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-  const handleSubmit = async (e) => {
+  }, [form]);
+
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     if (!form.card_name) return;
     // Infer deck from card name
@@ -162,7 +138,7 @@ function App() {
       return;
     }
     try {
-      await axios.post('/api/cards', { card_name: form.card_name, deck }, {
+      await axios.post('/api/cards', { card_name: form.card_name }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setForm({ card_name: '', deck: '' });
@@ -171,8 +147,9 @@ function App() {
     } catch (err) {
       setErrorMsg('Error adding card');
     }
-  };
-  const handleDelete = async (id) => {
+  }, [form, fetchCards]);
+
+  const handleDelete = useCallback(async (id) => {
     try {
       await axios.delete(`/api/cards/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -182,38 +159,64 @@ function App() {
     } catch (err) {
       setErrorMsg('Error deleting card');
     }
-  };
-  const handleLogout = () => {
+  }, [fetchCards]);
+
+  const handleLogout = useCallback(() => {
     localStorage.removeItem('token');
     setAuth({ loggedIn: false, isAdmin: false, username: '' });
     setShowPage('main');
-  };
-  const handleCloseOnboarding = () => {
+  }, []);
+
+  const handleCloseOnboarding = useCallback(() => {
     setShowOnboarding(false);
     localStorage.setItem('showOnboarding', 'false');
-  };
+  }, []);
   // Utility functions
-  function getDeckStatus(cards) {
-    const deckStatus = {};
+  // Memoized expensive computations
+  const deckStatus = useMemo(() => {
+    const status = {};
     DECK_NAMES.forEach(deck => {
       const deckCards = CARD_NAMES.filter(name => name.includes(deck.split(' ')[0]));
       const ownedCards = cards.filter(card => card.deck === deck).map(card => card.card_name);
       // Get unique card names to avoid counting duplicates
       const uniqueOwnedCards = [...new Set(ownedCards)];
       const missing = deckCards.filter(name => !uniqueOwnedCards.includes(name));
-      deckStatus[deck] = {
+      status[deck] = {
         complete: missing.length === 0,
         missing,
         owned: uniqueOwnedCards.length
       };
     });
-    return deckStatus;
-  }
-  
-  const deckStatus = getDeckStatus(cards);
+    return status;
+  }, [cards]);
+
   // Note: deckCardCounts available if needed for future features
   // const deckCardCounts = getDeckCardCounts(cards);
-  const username = profile?.username || auth.username || '';
+  const username = useMemo(() => profile?.username || auth.username || '', [profile, auth.username]);
+
+  // useEffect hooks (must be after function definitions)
+  useEffect(() => {
+    fetchCards();
+    fetchAnnouncements();
+  }, [fetchCards, fetchAnnouncements]);
+  
+  useEffect(() => {
+    if (auth.loggedIn) {
+      fetchCompletedDecks();
+      fetchDeckRequests();
+      fetchAnnouncements();
+    }
+  }, [auth.loggedIn, showPage, fetchCompletedDecks, fetchDeckRequests, fetchAnnouncements]);
+  
+  useEffect(() => { 
+    if (localStorage.getItem('showOnboarding') !== 'false') { 
+      setShowOnboarding(true); 
+    } 
+  }, []);
+  
+  useEffect(() => { 
+    if (!token) setShowPage('main'); 
+  }, [token]);
 
   // Custom hook (must be called at top level)
   const fetchProfile = async () => {
@@ -240,11 +243,11 @@ function App() {
       setShowPage('main');
     }} />;
     return (
-      <div style={{ maxWidth: 400, margin: 'auto', padding: 40, textAlign: 'center' }}>
+      <div className="auth-welcome-container">
         <h1>Mist of Pandaria Card Tracker</h1>
-        <p style={{ marginBottom: 32 }}>Welcome! Please log in or register to access the card tracker.</p>
-        <button style={{ margin: '8px' }} onClick={() => setShowPage('login')}>Login</button>
-        <button style={{ margin: '8px' }} onClick={() => setShowPage('register')}>Register</button>
+        <p className="margin-bottom-32">Welcome! Please log in or register to access the card tracker.</p>
+        <button className="margin-8" onClick={() => setShowPage('login')}>Login</button>
+        <button className="margin-8" onClick={() => setShowPage('register')}>Register</button>
       </div>
     );
   }
@@ -282,19 +285,19 @@ function App() {
       )}
       {showPage === 'admin' && (auth.isAdmin ? <Admin setShowPage={setShowPage} /> : <div>Admin access only.</div>)}
       {showPage === 'mycards' && (
-        <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
+        <div className="form-container">
           <h1>My Cards</h1>
-          <nav style={{ marginBottom: 16 }}>
+          <nav className="margin-bottom-16">
             <button onClick={() => setShowPage('main')}>Home</button>
             <button onClick={() => setShowPage('allcards')}>All Cards</button>
             <button onClick={handleLogout}>Logout</button>
           </nav>
           
           {/* Card Addition Form */}
-          <div style={{ marginBottom: 24, padding: 16, borderRadius: 8, backgroundColor: '#23272f', boxShadow: '0 2px 8px #0006' }}>
+          <div className="card-form-container">
             <h2>Add a Card</h2>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <form onSubmit={handleSubmit} className="flex-column-gap">
+              <div className="flex-column-small-gap">
                 <label htmlFor="card_name">Card Name:</label>
                 <select
                   id="card_name"
@@ -302,31 +305,27 @@ function App() {
                   value={form.card_name}
                   onChange={handleChange}
                   required
-                  style={{ padding: '8px 12px', borderRadius: 4, border: '1px solid #444', background: '#191c24', color: 'white' }}
+                  className="card-select"
                 >
                   <option value="">-- Select a Card --</option>
                   {CARD_NAMES.map(cardName => (
                     <option key={cardName} value={cardName}>{cardName}</option>
                   ))}
                 </select>
-                <small style={{ color: '#aaa' }}>The deck will be automatically determined from the selected card</small>
+                <small className="small-light-text">The deck will be automatically determined from the selected card</small>
               </div>
               <button 
                 type="submit" 
+                className="submit-button"
                 style={{ 
-                  padding: '10px', 
                   backgroundColor: '#145c2c', 
-                  color: 'white', 
-                  border: 'none', 
-                  borderRadius: 4, 
-                  cursor: 'pointer',
                   marginTop: 8
                 }}
               >
                 Add Card
               </button>
             </form>
-            {errorMsg && <div style={{ color: '#ff6b6b', marginTop: 12 }}>{errorMsg}</div>}
+            {errorMsg && <div className="error-text">{errorMsg}</div>}
           </div>
           
           <h2>My Cards</h2>
@@ -353,9 +352,9 @@ function App() {
         </div>
       )}
       {showPage === 'allcards' && (
-        <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
+        <div className="form-container">
           <h1>All Cards</h1>
-          <nav style={{ marginBottom: 16 }}>
+          <nav className="margin-bottom-16">
             <button onClick={() => setShowPage('main')}>Home</button>
             <button onClick={() => setShowPage('mycards')}>My Cards</button>
             <button onClick={handleLogout}>Logout</button>
@@ -382,9 +381,9 @@ function App() {
       )}
       {showPage === 'completeddecks' && <CompletedDecks setShowPage={setShowPage} />}
       {showPage === 'requestdeck' && (
-        <div style={{ maxWidth: 500, margin: 'auto', padding: 20 }}>
+        <div className="narrow-container">
           <h1>Request a Deck</h1>
-          <nav style={{ marginBottom: 16 }}>
+          <nav className="margin-bottom-16">
             <button onClick={() => setShowPage('main')}>Home</button>
             <button onClick={() => setShowPage('deckrequests')}>Deck Requests</button>
             <button onClick={handleLogout}>Logout</button>
@@ -422,14 +421,14 @@ function App() {
             </select>
             {/* Tiger Deck trinket selection */}
             {requestForm.deck === 'Tiger Deck' && (
-              <div style={{ marginTop: 12 }}>
+              <div className="margin-top-12">
                 <label htmlFor="trinket">Select Trinket:</label>
                 <select
                   name="trinket"
                   value={requestForm.trinket || ''}
                   onChange={e => setRequestForm({ ...requestForm, trinket: e.target.value })}
                   required
-                  style={{ marginLeft: 8 }}
+                  className="margin-left-8"
                 >
                   <option value="">Choose...</option>
                   <option value="Relic of Xuen (79328)">Relic of Xuen (79328) - Agility</option>
@@ -437,11 +436,11 @@ function App() {
                 </select>
               </div>
             )}
-            <button type="submit" style={{ marginTop: 16 }}>Request Deck</button>
+            <button type="submit" className="margin-top-16">Request Deck</button>
           </form>
           {errorMsg && (
-            <div className="error" style={{ marginTop: 12, fontWeight: 'bold', fontSize: '1.1em' }}>
-              <span role="img" aria-label="error" style={{ marginRight: 6 }}>❌</span>
+            <div className="error error-bold">
+              <span role="img" aria-label="error" className="margin-left-8">❌</span>
               {errorMsg}
             </div>
           )}

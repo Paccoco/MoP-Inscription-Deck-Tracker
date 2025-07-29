@@ -504,107 +504,287 @@ body.classic { background: #2c2c2c; color: #fff; }
   margin-bottom: 12px;
 }
 
-/* Media queries for mobile responsiveness */
-@media (max-width: 768px) {
-  .link-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .action-buttons {
-    flex-direction: column-reverse;
-  }
-  
-  .action-buttons button {
-    width: 100%;
-  }
-}
+/* Performance optimization: CSS classes to replace inline styles */
 
-/* Announcement Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+/* Layout utilities */
+.flex-center-header {
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
+  margin-bottom: 1em;
+  gap: 1em;
 }
 
-.modal-content {
-  background: #23272f;
-  padding: 24px 32px;
-  border-radius: 12px;
+.flex-gap-2em {
+  display: flex;
+  gap: 2em;
+  margin-bottom: 1em;
+}
+
+.flex-column-gap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flex-column-small-gap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.margin-left-auto {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+/* Container layouts */
+.auth-welcome-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 40px;
+  text-align: center;
+}
+
+.form-container {
   max-width: 600px;
-  width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  color: #e0e0e0;
+  margin: auto;
+  padding: 20px;
 }
 
-.modal-content h2 {
-  color: #3ad13a;
-  margin-top: 0;
+.narrow-container {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card-form-container {
+  margin-bottom: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #23272f;
+  box-shadow: 0 2px 8px #0006;
+}
+
+/* Text and spacing utilities */
+.no-margin {
+  margin: 0;
+}
+
+.margin-bottom-16 {
   margin-bottom: 16px;
-  font-size: 1.6em;
 }
 
-.announcement-message {
-  margin-bottom: 16px;
-  line-height: 1.5;
-  white-space: pre-wrap;
+.margin-bottom-32 {
+  margin-bottom: 32px;
 }
 
-.announcement-links {
-  margin-bottom: 16px;
+.margin-top-12 {
+  margin-top: 12px;
 }
 
-.announcement-link {
-  display: block;
-  margin-bottom: 8px;
-  color: #3ad13a;
-  text-decoration: none;
+.margin-top-16 {
+  margin-top: 16px;
 }
 
-.announcement-link:hover {
-  text-decoration: underline;
+.margin-8 {
+  margin: 8px;
 }
 
-.announcement-expiry {
+.margin-left-8 {
+  margin-left: 8px;
+}
+
+.padding-left-16 {
+  padding-left: 16px;
+}
+
+.margin-half-em {
+  margin: 0 0 0.5em 0;
+}
+
+.margin-top-half-em {
+  margin-top: 0.5em;
+}
+
+/* Text styles */
+.server-version-text {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.small-gray-text {
   font-size: 0.9em;
-  color: #888;
+  color: #666;
 }
 
-.announcement-dismiss-button {
-  margin-top: 24px;
+.small-light-text {
+  color: #aaa;
+}
+
+.error-text {
+  color: #ff6b6b;
+  margin-top: 12px;
+}
+
+.error-bold {
+  margin-top: 12px;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.small-text {
+  font-size: 0.9em;
+}
+
+/* Form controls */
+.card-select {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #191c24;
+  color: white;
+}
+
+.submit-button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
   background: #3ad13a;
   color: #181a20;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit-button:hover {
+  background: #2e9c2e;
+}
+
+/* Admin panel specific */
+.admin-list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.admin-version-box {
+  background: #f8f8f8;
+  border: 1px solid #ddd;
+  padding: 0.5em;
+  border-radius: 4px;
+  font-family: monospace;
+  margin-top: 0.5em;
+}
+
+/* Notification filters */
+.notification-filters {
+  margin-bottom: 16px;
+}
+
+.filter-select {
+  margin-right: 8px;
+}
+
+.delete-all-button {
+  margin-left: 8px;
+  background: #c00;
+  color: #fff;
+}
+
+.notification-actions button {
+  margin-left: 8px;
+}
+
+.mark-read-button {
+  margin-left: 8px;
+}
+
+.delete-button {
+  background: #c00;
+  color: #fff;
+}
+
+.notification-list-footer {
+  margin-top: 16px;
+}
+
+.version-check-button {
+  padding: 6px 12px;
+  font-size: 0.9em;
+  color: white;
   border: none;
   border-radius: 4px;
-  padding: 8px 16px;
+}
+
+.version-check-button:not(:disabled) {
+  background-color: #2196f3;
   cursor: pointer;
-  font-weight: bold;
 }
 
-/* Table improvements */
-table {
-  width: 100%;
-  background: #23272f;
+.version-check-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.version-result-box {
+  padding: 1em;
+  margin-bottom: 1em;
   border-radius: 8px;
-  box-shadow: 0 2px 8px #0003;
-  border-collapse: separate;
-  border-spacing: 0;
-  margin-bottom: 24px;
+  border: 1px solid;
 }
 
-th, td {
+.version-result-update-available {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.version-result-up-to-date {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+/* Error Boundary Styles */
+.error-boundary {
+  padding: 20px;
+  margin: 20px;
+  border: 2px solid #dc3545;
+  border-radius: 8px;
+  background-color: #f8d7da;
+  color: #721c24;
+  text-align: center;
+}
+
+.error-boundary h2 {
+  color: #721c24;
+  margin-bottom: 16px;
+}
+
+.error-boundary details {
+  margin: 16px 0;
   padding: 12px;
-  border-bottom: 1px solid #444;
+  background-color: #f5c6cb;
+  border-radius: 4px;
+  text-align: left;
+  font-family: monospace;
+  font-size: 12px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-th {
-  background: #181a20;
-  color: #3ad13a;
+.error-boundary button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+.error-boundary button:hover {
+  background-color: #c82333;
 }

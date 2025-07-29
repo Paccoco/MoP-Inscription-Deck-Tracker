@@ -234,7 +234,7 @@ cp ~/mop-tracker-migration-*/.env.backup /home/paccoco/MoP-Inscription-Deck-Trac
 
 # 4. Restart old system
 cd /home/paccoco/MoP-Inscription-Deck-Tracker
-pm2 start server-auth.js --name mop-card-tracker
+pm2 start server.js --name mop-card-tracker
 
 # 5. Verify rollback success
 pm2 logs mop-card-tracker --lines 20
@@ -419,7 +419,7 @@ PRAGMA foreign_keys=ON;
 module.exports = {
   apps: [{
     name: 'mop-card-tracker-v2',
-    script: 'server-auth.js',
+    script: 'server.js',
     instances: 1,
     autorestart: true,
     watch: false,

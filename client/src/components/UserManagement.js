@@ -1,6 +1,6 @@
 import React from 'react';
 
-function UserManagement({ users, pending, error, approveUser, handleRemoveUser }) {
+const UserManagement = React.memo(function UserManagement({ users, pending, error, approveUser, handleRemoveUser }) {
   return (
     <div className="table-card">
       {error && <div className="error">{error}</div>}
@@ -40,6 +40,6 @@ function UserManagement({ users, pending, error, approveUser, handleRemoveUser }
       </table>
     </div>
   );
-}
+});
 
 export default UserManagement;

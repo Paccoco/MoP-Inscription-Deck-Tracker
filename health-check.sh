@@ -51,7 +51,7 @@ else
     echo "🔍 Additional Diagnostics:"
     
     # Check if the process exists but isn't responding
-    if pgrep -f "node.*server-auth.js" >/dev/null; then
+    if pgrep -f "node.*server.js" >/dev/null; then
         echo "✅ Node process is running"
     else
         echo "❌ Node process not found"

@@ -8,6 +8,8 @@
 const { Pool, Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
+const log = require('../src/utils/logger');
 
 // Database configuration
 const dbConfig = {
@@ -36,32 +38,32 @@ const pool = new Pool(dbConfig);
 
 // Pool event handlers
 pool.on('connect', (client) => {
-    console.log('📊 PostgreSQL client connected to database');
+    log.database('PostgreSQL client connected to database');
 });
 
 pool.on('error', (err, client) => {
-    console.error('🚨 Unexpected error on idle PostgreSQL client:', err);
+    log.error('Unexpected error on idle PostgreSQL client', err);
     process.exit(1);
 });
 
 pool.on('acquire', (client) => {
-    console.log('🔗 PostgreSQL client acquired from pool');
+    log.database('PostgreSQL client acquired from pool');
 });
 
 pool.on('release', (client) => {
-    console.log('↩️ PostgreSQL client released back to pool');
+    log.database('PostgreSQL client released back to pool');
 });
 
 /**
  * Initialize database with schema and default data
  */
 async function initializeDatabase() {
-    console.log('🚀 Initializing PostgreSQL database...');
+    log.database('Initializing PostgreSQL database...');
     
     try {
         // Test connection
         const client = await pool.connect();
-        console.log('✅ PostgreSQL connection successful');
+        log.database('PostgreSQL connection successful');
         
         // Check if tables exist
         const tableCheck = await client.query(`
@@ -74,28 +76,28 @@ async function initializeDatabase() {
         const tableCount = parseInt(tableCheck.rows[0].table_count);
         
         if (tableCount === 0) {
-            console.log('📋 Creating database schema...');
+            log.database('Creating database schema...');
             
             // Read and execute schema file
             const schemaPath = path.join(__dirname, 'postgresql-schema.sql');
             const schemaSql = fs.readFileSync(schemaPath, 'utf8');
             
             await client.query(schemaSql);
-            console.log('✅ Database schema created successfully');
+            log.database('Database schema created successfully');
             
             // Create default admin user in development
             if (process.env.NODE_ENV !== 'production') {
                 await createDefaultUsers(client);
             }
         } else {
-            console.log('✅ Database schema already exists');
+            log.database('Database schema already exists');
         }
         
         client.release();
-        console.log('🎉 Database initialization completed');
+        log.database('Database initialization completed');
         
     } catch (error) {
-        console.error('❌ Database initialization failed:', error);
+        log.error('Database initialization failed', error);
         throw error;
     }
 }
@@ -104,7 +106,7 @@ async function initializeDatabase() {
  * Create default users for development
  */
 async function createDefaultUsers(client) {
-    console.log('👤 Creating default development users...');
+    log.database('Creating default development users...');
     
     const bcrypt = require('bcrypt');
     const saltRounds = 12;
@@ -126,10 +128,10 @@ async function createDefaultUsers(client) {
             ON CONFLICT (username) DO NOTHING
         `, ['testuser', userPassword, 'user@test.com', 'user', true]);
         
-        console.log('✅ Default users created (testadmin/testadmin123, testuser/testuser123)');
+        log.database('Default users created (testadmin/testadmin123, testuser/testuser123)');
         
     } catch (error) {
-        console.error('❌ Failed to create default users:', error);
+        log.error('Failed to create default users', error);
         // Don't throw - this is not critical
     }
 }
@@ -143,13 +145,13 @@ async function testConnection() {
         const result = await client.query('SELECT NOW() as current_time, version() as pg_version');
         client.release();
         
-        console.log('✅ PostgreSQL connection test successful');
-        console.log(`📅 Server time: ${result.rows[0].current_time}`);
-        console.log(`🐘 PostgreSQL version: ${result.rows[0].pg_version.split(' ')[0]} ${result.rows[0].pg_version.split(' ')[1]}`);
+        log.database('PostgreSQL connection test successful');
+        log.info(`Server time: ${result.rows[0].current_time}`);
+        log.info(`PostgreSQL version: ${result.rows[0].pg_version.split(' ')[0]} ${result.rows[0].pg_version.split(' ')[1]}`);
         
         return true;
     } catch (error) {
-        console.error('❌ PostgreSQL connection test failed:', error);
+        log.error('PostgreSQL connection test failed', error);
         return false;
     }
 }
@@ -229,7 +231,7 @@ async function getStats() {
  */
 async function cleanup() {
     try {
-        console.log('🧹 Running database cleanup...');
+        log.database('Running database cleanup...');
         
         // Cleanup expired notifications
         const notificationResult = await query('SELECT cleanup_expired_notifications()');
@@ -239,7 +241,7 @@ async function cleanup() {
         const sessionResult = await query('SELECT cleanup_expired_sessions()');
         const deletedSessions = sessionResult.rows[0].cleanup_expired_sessions;
         
-        console.log(`✅ Cleanup completed: ${deletedNotifications} notifications, ${deletedSessions} sessions removed`);
+        log.database(`Cleanup completed: ${deletedNotifications} notifications, ${deletedSessions} sessions removed`);
         
         return {
             notifications: deletedNotifications,
@@ -255,9 +257,9 @@ async function cleanup() {
  * Graceful shutdown
  */
 async function close() {
-    console.log('🛑 Closing PostgreSQL connection pool...');
+    log.database('Closing PostgreSQL connection pool...');
     await pool.end();
-    console.log('✅ PostgreSQL connection pool closed');
+    log.database('PostgreSQL connection pool closed');
 }
 
 // Graceful shutdown handlers

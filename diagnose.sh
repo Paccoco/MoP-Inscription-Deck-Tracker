@@ -23,7 +23,7 @@ fi
 if [ -f "server.js" ]; then
     echo "  ✅ server.js found"
 else
-    echo "  ❌ server-auth.js not found"
+    echo "  ❌ server.js not found"
 fi
 
 if [ -d "client" ]; then

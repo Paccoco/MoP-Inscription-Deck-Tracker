@@ -106,6 +106,14 @@ app.get('*', (req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  log.info(`MoP Card Tracker Server v2.0.0-alpha running on port ${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    log.info(`MoP Card Tracker Server v2.0.0-alpha running on port ${PORT}`);
+    log.info(`Server accessible at:`);
+    log.info(`  Local:   http://localhost:${PORT}`);
+    log.info(`  Network: http://0.0.0.0:${PORT}`);
+  });
+}
+
+// Export app for testing
+module.exports = app;

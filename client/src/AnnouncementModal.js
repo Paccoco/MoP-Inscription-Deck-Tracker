@@ -2,17 +2,12 @@ import React from 'react';
 import './Notifications.css';
 
 function AnnouncementModal({ announcement, onClose }) {
-  // Log the announcement data for debugging
-  console.log('AnnouncementModal received:', announcement, typeof announcement);
-  
   // Only show if announcement exists and is active
   if (!announcement) {
-    // Debug logging removed for production
     return null;
   }
   
   if (!announcement.active) {
-    console.log('Announcement is not active:', announcement);
     return null;
   }
   
@@ -22,7 +17,6 @@ function AnnouncementModal({ announcement, onClose }) {
   if (typeof links === 'string') {
     try {
       links = JSON.parse(links);
-      console.log('Parsed links in modal:', links);
     } catch (e) {
       // Error logging handled by error boundaries
       links = [];
@@ -35,14 +29,11 @@ function AnnouncementModal({ announcement, onClose }) {
     if (!dismissedAnnouncements.includes(announcement.id)) {
       dismissedAnnouncements.push(announcement.id);
       localStorage.setItem('dismissedAnnouncements', JSON.stringify(dismissedAnnouncements));
-      console.log(`Announcement ${announcement.id} marked as dismissed in localStorage`);
     }
     
     // Close the modal
     onClose();
   };
-  
-  console.log('Rendering announcement modal with data:', announcement);
   
   return (
     <div className="modal-overlay">

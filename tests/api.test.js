@@ -1,6 +1,6 @@
 // Basic Express API endpoint tests using supertest and jest
 const request = require('supertest');
-const app = require('../server-auth');
+const app = require('../server');
 
 describe('API Endpoints', () => {
   it('GET /api/cards should return cards', async () => {
